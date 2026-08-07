@@ -645,3 +645,112 @@ CodeRoast is not just a fun project. It is evidence of an undergraduate research
 **Repository:** github.com/gyr0byte/coderoast  
 **Deployment:** coderoast.streamlit.app  
 **Status:** Building
+
+
+# Important To Do — Keep Everything on D Drive
+ 
+Setup checklist for CodeRoast so the venv, pip cache, and HuggingFace model
+weights all live on D drive instead of filling up C drive.
+ 
+---
+ 
+## 1. Create the venv on D drive
+ 
+```powershell
+cd D:\coderoast
+python -m venv venv
+venv\Scripts\activate
+```
+ 
+---
+ 
+## 2. Redirect pip's cache to D drive
+ 
+Set this once, permanently, so every future `pip install` uses D drive:
+ 
+```powershell
+pip config set global.cache-dir D:\pip_cache
+```
+ 
+(Alternative — one-off per install instead of permanent):
+```powershell
+pip install torch --index-url https://download.pytorch.org/whl/cpu --cache-dir D:\pip_cache
+```
+ 
+---
+ 
+## 3. Install CPU-only torch (avoid GPU/CUDA bloat)
+ 
+```powershell
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+pip install transformers streamlit
+```
+ 
+> ⚠️ Do NOT run plain `pip install torch` on Windows — it pulls the GPU/CUDA
+> version by default (~2–2.5 GB). The command above installs the CPU-only
+> build (~250 MB).
+ 
+---
+ 
+## 4. Redirect HuggingFace model cache to project folder (Option A)
+ 
+Create a `config.py` file in the project root (`D:\coderoast\config.py`):
+ 
+```python
+# config.py — must be imported BEFORE transformers/torch anywhere in the app
+import os
+from pathlib import Path
+ 
+PROJECT_ROOT = Path(__file__).parent
+os.environ["HF_HOME"] = str(PROJECT_ROOT / "models_cache")
+```
+ 
+Then, at the very top of `app.py` (before any `transformers`/`torch` import):
+ 
+```python
+import config  # sets HF_HOME first
+ 
+from transformers import AutoModel, AutoTokenizer
+```
+ 
+This makes all downloaded model weights land in:
+```
+D:\coderoast\models_cache\
+```
+ 
+---
+ 
+## 5. Add the cache folder to `.gitignore`
+ 
+Open `.gitignore` and add:
+ 
+```
+models_cache/
+venv/
+```
+ 
+This stops multi-hundred-MB model files (and the venv itself) from being
+committed to GitHub.
+ 
+---
+ 
+## 6. Quick verification checklist
+ 
+- [ ] `venv` folder exists inside `D:\coderoast\`
+- [ ] `pip config list` shows `global.cache-dir = D:\pip_cache`
+- [ ] `torch.__version__` does NOT show `+cu###` (confirms CPU-only build)
+- [ ] After first model download, check `D:\coderoast\models_cache\hub\` has
+      the model files (not `C:\Users\<You>\.cache\huggingface`)
+- [ ] `models_cache/` and `venv/` appear in `.gitignore`
+---
+ 
+## Expected disk usage after setup (all on D drive)
+ 
+| Item | Approx. Size |
+|---|---|
+| venv (torch CPU + transformers + deps) | ~300–400 MB |
+| Small NLP model (e.g. DistilBERT-sized) | ~250–450 MB |
+| pip cache | varies, safe to delete anytime |
+| **Total** | **~600 MB – 1 GB** |
+ 
+C drive stays untouched by any of this once steps 1–4 are done.
