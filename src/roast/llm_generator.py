@@ -1,23 +1,34 @@
 """
 CodeRoast — Dynamic LLM Roast Generator
-Uses Hugging Face Serverless InferenceClient (Qwen2.5-Coder-32B-Instruct Cloud GPUs).
+Supports Hugging Face Serverless Inference (32B, 7B, 1.5B, 0.5B Qwen models)
+and local Ollama fallback for 100% free, offline AI code roasts.
 """
 
 import os
+import json
+import urllib.request
 from typing import Optional
 from huggingface_hub import InferenceClient
 import config  # noqa: F401 — Sets HF_HOME first
 
-MODEL_NAME = "Qwen/Qwen2.5-Coder-32B-Instruct"
+# Prioritized list of Qwen models (from largest/best down to lightweight/free-tier friendly)
+MODEL_CANDIDATES = [
+    "Qwen/Qwen2.5-Coder-32B-Instruct",
+    "Qwen/Qwen2.5-Coder-7B-Instruct",
+    "Qwen/Qwen2.5-7B-Instruct",
+    "Qwen/Qwen2.5-Coder-1.5B-Instruct",
+    "Qwen/Qwen2.5-1.5B-Instruct",
+    "Qwen/Qwen2.5-0.5B-Instruct",
+]
 
 
 class LLMRoastGenerator:
     """
-    Generates dynamic, AI-powered code roasts using Hugging Face Serverless API
-    (Sub-2 second response via Cloud GPUs, 0 MB local RAM used).
+    Generates dynamic, AI-powered code roasts using Qwen models.
+    Supports Hugging Face Cloud GPUs and local Ollama.
     """
 
-    def __init__(self, model_name: str = MODEL_NAME):
+    def __init__(self, model_name: str = MODEL_CANDIDATES[0]):
         self.model_name = model_name
         self._is_loaded = True
 
@@ -40,11 +51,11 @@ class LLMRoastGenerator:
         severity: int = 2
     ) -> Optional[str]:
         """
-        Generates a dynamic roast text response using Qwen2.5-Coder on HF Cloud GPU.
+        Generates a dynamic roast text response using Qwen AI.
         """
         token = self._get_hf_token()
-        
-        # 1. Direct Severity Mapping for the System Instructions
+
+        # 1. Direct Severity Mapping for System Instructions
         if severity == 1:
             tone_instructions = (
                 "Role: Playful, mildly sarcastic peer reviewer. "
@@ -119,41 +130,46 @@ class LLMRoastGenerator:
             f"Code Snippet:\n{code[:800]}"
         )
 
-        # Build messages payload with few-shot context
+        # ── Step A: Check for Local Ollama Instance ─────────────────────────
+        try:
+            req = urllib.request.Request(
+                "http://localhost:11434/api/generate",
+                data=json.dumps({
+                    "model": "qwen2.5-coder:1.5b",
+                    "prompt": f"{system_prompt}\n\n{user_content}",
+                    "stream": False
+                }).encode("utf-8"),
+                headers={"Content-Type": "application/json"}
+            )
+            with urllib.request.urlopen(req, timeout=3) as resp:
+                if resp.status == 200:
+                    res_data = json.loads(resp.read().decode("utf-8"))
+                    if "response" in res_data and res_data["response"]:
+                        return res_data["response"].strip()
+        except Exception:
+            pass  # Ollama not running locally, proceed to HF cloud
+
+        # ── Step B: Iterate through Hugging Face Qwen Models ────────────────
         messages = [{"role": "system", "content": system_prompt}]
         messages.extend(few_shot_examples)
         messages.append({"role": "user", "content": user_content})
 
-        # Primary Hugging Face Serverless GPU model: Qwen2.5-Coder-32B-Instruct
-        try:
-            client = InferenceClient(token=token if token else None)
-            response = client.chat_completion(
-                messages=messages,
-                model=self.model_name,
-                max_tokens=120,
-                temperature=0.85
-            )
-            if response and response.choices and len(response.choices) > 0:
-                text = response.choices[0].message.content
-                if text:
-                    return text.strip()
-        except Exception as e:
-            print(f"[WARNING] Primary Qwen AI roast generation failed: {e}")
+        client = InferenceClient(token=token if token else None)
 
-        # Secondary Hugging Face Serverless GPU model: Qwen2.5-72B-Instruct
-        try:
-            client = InferenceClient(token=token if token else None)
-            response = client.chat_completion(
-                messages=messages,
-                model="Qwen/Qwen2.5-72B-Instruct",
-                max_tokens=120,
-                temperature=0.85
-            )
-            if response and response.choices and len(response.choices) > 0:
-                text = response.choices[0].message.content
-                if text:
-                    return text.strip()
-        except Exception as e:
-            print(f"[WARNING] Secondary Qwen AI roast generation failed: {e}")
+        for model in MODEL_CANDIDATES:
+            try:
+                response = client.chat_completion(
+                    messages=messages,
+                    model=model,
+                    max_tokens=120,
+                    temperature=0.85
+                )
+                if response and response.choices and len(response.choices) > 0:
+                    text = response.choices[0].message.content
+                    if text:
+                        return text.strip()
+            except Exception as e:
+                print(f"[WARNING] Qwen AI model ({model}) failed: {e}")
+                continue
 
         return None
