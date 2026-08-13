@@ -8,7 +8,8 @@ import requests
 from typing import Optional
 import config  # noqa: F401 — Sets HF_HOME first
 
-MODEL_NAME = "Qwen/Qwen2.5-Coder-7B-Instruct"
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+MODEL_NAME = "Qwen/Qwen2.5-Coder-32B-Instruct"
 
 
 class LLMRoastGenerator:
@@ -45,14 +46,14 @@ class LLMRoastGenerator:
         # Endpoint 1: Hugging Face Router API (OpenAI compatible)
         api_url = "https://router.huggingface.co/hf-inference/v1/chat/completions"
         payload = {
-            "model": self.model_name,
+            "model": "Qwen/Qwen2.5-Coder-32B-Instruct",
             "messages": messages,
             "max_tokens": 120,
             "temperature": 0.85,
         }
 
         try:
-            res = requests.post(api_url, headers=headers, json=payload, timeout=5)
+            res = requests.post(api_url, headers=headers, json=payload, timeout=8)
             if res.status_code == 200:
                 data = res.json()
                 if "choices" in data and len(data["choices"]) > 0:
@@ -65,7 +66,7 @@ class LLMRoastGenerator:
             print(f"[WARNING] HF Router API call failed: {e}")
 
         # Endpoint 2: Direct Hugging Face Inference API
-        direct_url = f"https://api-inference.huggingface.co/models/{self.model_name}"
+        direct_url = "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-Coder-32B-Instruct"
         prompt_text = f"System: {messages[0]['content']}\nUser: {messages[1]['content']}\nAssistant:"
         direct_payload = {
             "inputs": prompt_text,
@@ -73,7 +74,7 @@ class LLMRoastGenerator:
         }
 
         try:
-            res = requests.post(direct_url, headers=headers, json=direct_payload, timeout=5)
+            res = requests.post(direct_url, headers=headers, json=direct_payload, timeout=8)
             if res.status_code == 200:
                 data = res.json()
                 if isinstance(data, list) and len(data) > 0:
@@ -103,17 +104,17 @@ class LLMRoastGenerator:
 
         try:
             print(f"[INFO] Loading local Qwen LLM model ({local_model_name}) on {self.device}...")
+            if self.device.type == "cuda":
+                torch.cuda.empty_cache()
+
             self.tokenizer = AutoTokenizer.from_pretrained(local_model_name, trust_remote_code=True)
-            torch_dtype = torch.float16 if self.device.type == "cuda" else torch.bfloat16
             self.local_model = AutoModelForCausalLM.from_pretrained(
                 local_model_name,
-                torch_dtype=torch_dtype,
+                torch_dtype=torch.float16 if self.device.type == "cuda" else torch.bfloat16,
                 low_cpu_mem_usage=True,
-                device_map="auto" if self.device.type == "cuda" else None,
                 trust_remote_code=True
-            )
-            if self.device.type != "cuda":
-                self.local_model = self.local_model.to(self.device)
+            ).to(self.device)
+
             return True
         except Exception as e:
             print(f"[WARNING] Failed to load local LLM model: {e}")
