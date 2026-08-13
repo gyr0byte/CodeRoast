@@ -170,25 +170,28 @@ st.markdown(
 
 roast_generator = RoastGenerator()
 
-# Try to load trained ML models (optional — app works without them)
-classifier = None
-codebert_scorer = None
+# ─── Lazy Model Loaders ───────────────────────────────────────────────────────
 
-try:
-    from src.ml.classifier import CodeQualityClassifier
-    clf = CodeQualityClassifier()
-    clf.load_model()
-    classifier = clf
-except Exception:
-    pass  # Models not trained yet — fall back to metric-based quality estimation
+@st.cache_resource
+def get_classifier():
+    try:
+        from src.ml.classifier import CodeQualityClassifier
+        clf = CodeQualityClassifier()
+        clf.load_model()
+        return clf
+    except Exception:
+        return None
 
-try:
-    from src.ml.codebert_model import CodeBERTScorer, SAVED_MODEL_DIR
-    codebert_scorer = CodeBERTScorer(model_dir=SAVED_MODEL_DIR)
-    if not codebert_scorer._is_loaded:
-        codebert_scorer = None
-except Exception:
-    pass
+@st.cache_resource
+def get_codebert_scorer():
+    try:
+        from src.ml.codebert_model import CodeBERTScorer, SAVED_MODEL_DIR
+        scorer = CodeBERTScorer(model_dir=SAVED_MODEL_DIR)
+        if scorer._is_loaded:
+            return scorer
+    except Exception:
+        return None
+    return None
 
 # ─── Layout ──────────────────────────────────────────────────────────────────
 
@@ -246,6 +249,9 @@ with col2:
             scores = calculate_scores(metrics)
 
             # ── Determine quality level & severity score ──────────────────
+            codebert_scorer = get_codebert_scorer()
+            classifier = get_classifier()
+
             if codebert_scorer is not None:
                 quality_level, cb_severity = codebert_scorer.predict_quality_and_severity(code_input)
                 model_used_label = "🤗 Hugging Face CodeBERT (microsoft/codebert-base)"
