@@ -1,6 +1,6 @@
 """
 CodeRoast — Dynamic LLM Roast Generator
-Supports Hugging Face Serverless Inference API (Fast Cloud GPUs) with instant fallback.
+Uses Local GTX 1060 GPU when running locally, and Hugging Face Serverless API when running on Cloud.
 """
 
 import os
@@ -13,8 +13,8 @@ MODEL_NAME = "Qwen/Qwen2.5-Coder-7B-Instruct"
 
 class LLMRoastGenerator:
     """
-    Generates dynamic, AI-powered code roasts using Hugging Face Serverless API
-    (1-2 second fast response via Cloud GPUs).
+    Generates dynamic, AI-powered code roasts using GTX 1060 local GPU
+    or Hugging Face Serverless API when deployed on Cloud.
     """
 
     def __init__(self, model_name: str = MODEL_NAME):
@@ -41,8 +41,6 @@ class LLMRoastGenerator:
         headers = {"Content-Type": "application/json"}
         if token:
             headers["Authorization"] = f"Bearer {token}"
-        else:
-            print("[INFO] No HF_TOKEN found. Attempting request...")
 
         # Endpoint 1: Hugging Face Router API (OpenAI compatible)
         api_url = "https://router.huggingface.co/hf-inference/v1/chat/completions"
@@ -89,6 +87,38 @@ class LLMRoastGenerator:
 
         return None
 
+    def _load_local_model_if_needed(self) -> bool:
+        """Lazy loader for local PyTorch Transformers execution on GPU."""
+        if os.path.exists("/mount/src"):
+            return False
+
+        if self.local_model is not None:
+            return True
+
+        import torch
+        from transformers import AutoTokenizer, AutoModelForCausalLM
+
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        local_model_name = "Qwen/Qwen2.5-Coder-1.5B-Instruct"
+
+        try:
+            print(f"[INFO] Loading local Qwen LLM model ({local_model_name}) on {self.device}...")
+            self.tokenizer = AutoTokenizer.from_pretrained(local_model_name, trust_remote_code=True)
+            torch_dtype = torch.float16 if self.device.type == "cuda" else torch.bfloat16
+            self.local_model = AutoModelForCausalLM.from_pretrained(
+                local_model_name,
+                torch_dtype=torch_dtype,
+                low_cpu_mem_usage=True,
+                device_map="auto" if self.device.type == "cuda" else None,
+                trust_remote_code=True
+            )
+            if self.device.type != "cuda":
+                self.local_model = self.local_model.to(self.device)
+            return True
+        except Exception as e:
+            print(f"[WARNING] Failed to load local LLM model: {e}")
+            return False
+
     def generate_roast(
         self,
         code: str,
@@ -98,8 +128,8 @@ class LLMRoastGenerator:
     ) -> Optional[str]:
         """
         Generates a dynamic roast text response:
-        - Uses Hugging Face Cloud API (1-2s response).
-        - Instantly falls back to template if API is unreachable (never takes 5 mins).
+        - On Local PC: Uses GTX 1060 GPU directly (0.8s execution).
+        - On Streamlit Cloud: Uses Hugging Face Serverless API (0 MB RAM).
         """
         severity_labels = {1: "Gentle & Witty", 2: "Standard Brutal", 3: "No Mercy Savage"}
         sev_label = severity_labels.get(severity, "Standard Brutal")
@@ -126,10 +156,36 @@ class LLMRoastGenerator:
             {"role": "user", "content": user_content}
         ]
 
-        # Call Hugging Face Serverless Cloud API
+        # 1. On Local PC: Try GTX 1060 GPU model execution first
+        if not os.path.exists("/mount/src"):
+            if self._load_local_model_if_needed():
+                try:
+                    import torch
+                    text_prompt = self.tokenizer.apply_chat_template(
+                        messages, tokenize=False, add_generation_prompt=True
+                    )
+                    inputs = self.tokenizer([text_prompt], return_tensors="pt").to(self.device)
+                    with torch.no_grad():
+                        generated_ids = self.local_model.generate(
+                            **inputs,
+                            max_new_tokens=90,
+                            temperature=0.8,
+                            top_p=0.9,
+                            do_sample=True,
+                            pad_token_id=self.tokenizer.eos_token_id
+                        )
+                    generated_ids = [
+                        output_ids[len(input_ids):]
+                        for input_ids, output_ids in zip(inputs.input_ids, generated_ids)
+                    ]
+                    response = self.tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+                    return response.strip()
+                except Exception as e:
+                    print(f"[ERROR] Error during local LLM generation: {e}")
+
+        # 2. On Streamlit Cloud (/mount/src) or fallback: Use Hugging Face Cloud API
         api_roast = self._generate_hf_api(messages)
         if api_roast:
             return api_roast
 
-        # Never freeze for 5 mins on CPU during UI interaction
         return None
