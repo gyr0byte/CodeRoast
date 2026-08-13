@@ -1,6 +1,6 @@
 """
 CodeRoast — Roast Templates
-All roast templates organized by category.
+Organized by metric categories with unhinged, brutal, and hilarious developer roasts.
 
 Each category maps to a list of template strings.
 Templates use {placeholder} syntax for dynamic values from metrics.
@@ -31,6 +31,11 @@ ROAST_TEMPLATES = {
         "This is less of a function and more of a choose-your-own-adventure book where every ending is a stack overflow.",
         "If I print this control flow graph, it looks like a Jackson Pollock painting. But less valuable.",
         "Your code complexity is higher than my electric bill during a GPU training run.",
+        "This cyclomatic complexity score of {score} is classified as an official biohazard by the CDC.",
+        "A complexity of {score}? This isn't control flow, it's a labyrinth designed to torture junior developers.",
+        "Your function has {count} execution branches. Even a multiverse calculator couldn't predict where this ends.",
+        "I showed this complexity score to a quantum computer and it asked for a refund.",
+        "This control flow graph has more loops than a roller coaster and half as many safety features.",
     ],
 
     # ── Bad Naming ───────────────────────────────────────────────────────
@@ -45,6 +50,11 @@ ROAST_TEMPLATES = {
         "Naming things is hard, but naming a list of users `stuff` is just giving up on life.",
         "A variable named `temp2_final_v3`? I see you follow the Photoshop file naming convention.",
         "Your function names are longer than the code inside them. Let's find a middle ground.",
+        "Variable named '{name}'? Did your cat walk across your mechanical keyboard while you were getting coffee?",
+        "'{name}'? I've seen cryptograms from WWII with clearer meaning.",
+        "Naming a variable '{name}' is proof that you treat software engineering as an unhinged hobby.",
+        "I asked 10 senior engineers what '{name}' means. All 10 quit their jobs on the spot.",
+        "Using variable names like '{name}' is a cry for help. Do you need us to send someone?",
     ],
 
     # ── No Comments ──────────────────────────────────────────────────────
@@ -58,6 +68,10 @@ ROAST_TEMPLATES = {
         "I see you didn't write comments because 'the code is the documentation.' Bold assumption.",
         "No comments? I guess you want to keep the mystery alive. Spoiler alert: the ending is terrible.",
         "Leaving no comments is a great way to ensure nobody takes over your code. Ever.",
+        "Zero comments. You write code like you're leaving cryptic clues for a detective solving your murder.",
+        "No comments? I guess you're relying on divine inspiration for whoever maintains this next week.",
+        "This code is so undocumented, even the author wouldn't understand it after a 15-minute lunch break.",
+        "Leaving zero comments is a bold way to guarantee you never get promoted out of maintenance hell.",
     ],
 
     # ── Functions Too Long ───────────────────────────────────────────────
@@ -71,6 +85,11 @@ ROAST_TEMPLATES = {
         "This function spans {lines} lines. It has its own timezone at the bottom.",
         "At {lines} lines, this function is longer than the user agreement nobody reads.",
         "This code block is so long it violates the Geneva Convention on readability.",
+        "At {lines} lines, this function is longer than the optical cable connecting North America to Europe.",
+        "{lines} lines in one function? This isn't a function, it's a monolithic monument to poor life decisions.",
+        "This {lines}-line monstrosity needs its own postal code and dedicated power grid.",
+        "I've scrolled past fewer lines reading the Terms of Service for entire operating systems.",
+        "{lines} lines long. Even Linus Torvalds would need a therapy session after looking at this.",
     ],
 
     # ── Deep Nesting ─────────────────────────────────────────────────────
@@ -82,6 +101,11 @@ ROAST_TEMPLATES = {
         "Arrow code detected. Your code points to the right like it is trying to escape the file.",
         "Indentation level: {depth}. Are you trying to write code or build a staircase to heaven?",
         "At {depth} nested blocks, your code has more layers than an onion. And it's making me cry.",
+        "Nesting depth: {depth}. Christopher Nolan wants to buy the movie rights to this indentation structure.",
+        "At {depth} nested loops, your code has officially reached the Earth's mantle.",
+        "Your code is indented so far to the right, it's currently rendering on your neighbor's monitor.",
+        "Nesting depth {depth}? If I indent this any further, it's going to overflow into another dimension.",
+        "I needed a GPS navigation system just to find the closing bracket of line {depth}.",
     ],
 
     # ── Duplicate Code ───────────────────────────────────────────────────
@@ -93,6 +117,10 @@ ROAST_TEMPLATES = {
         "I see you believe in the ancient art of copy-paste engineering. Bold strategy.",
         "Duplicate blocks detected. Copy-pasting isn't reuse, it's just spreading the infection.",
         "I found identical code blocks. Ctrl+C and Ctrl+V are not architectural tools.",
+        "Duplicate code detected. Copy-pasting the same bug 5 times doesn't make it a feature.",
+        "Copy-paste level: Master. Software architecture level: Kindergarten dropout.",
+        "You duplicated this block so many times I thought my screen had screen-burn.",
+        "Ctrl+C and Ctrl+V are working overtime while your brain is taking a nap.",
     ],
 
     # ── Too Few Functions ────────────────────────────────────────────────
@@ -103,6 +131,9 @@ ROAST_TEMPLATES = {
         "You wrote {lines} lines with {count} function(s). That ratio concerns me deeply.",
         "One giant function to rule them all. OOP developers are crying somewhere.",
         "You put all your eggs in one monolithic basket. Hope you like omelets.",
+        "You put {lines} lines into {count} function. This is a monolithic wall of doom.",
+        "One single function for the entire program? Did functions do something personal to hurt you?",
+        "A single function running everything. Clean Code principles just fainted in the back row.",
     ],
 
     # ── Praise (for genuinely good code) ─────────────────────────────────
@@ -129,6 +160,11 @@ ROAST_TEMPLATES = {
         "I've seen worse code, but usually in museum exhibits of what not to do.",
         "This looks like code written by a committee that couldn't agree on anything.",
         "Your code is the software equivalent of 'it works on my machine'.",
+        "If bad code were electricity, your script could power Tokyo for a month.",
+        "This code is so chaotic, even ChatGPT would pretend it lost connection rather than review it.",
+        "On a scale of 1 to 10, this code is a 911 emergency.",
+        "I've analyzed thousands of repositories. This one is going directly into my hall of fame for software disasters.",
+        "Looking at this code made my GPU cooling fans spin up out of sheer stress.",
     ],
 
     # ── Syntax Error ─────────────────────────────────────────────────────
@@ -160,13 +196,17 @@ SEVERITY_MODIFIERS = {
         "Seriously, refactor this before anyone else sees it.",
         "My disappointment is immeasurable, and my day is ruined.",
     ],
-    3: [  # No Mercy
+    3: [  # No Mercy / Unhinged
         "Delete this. Start over. Consider a career change.",
         "This code is a crime against computing.",
         "I showed this to other AIs. They are still laughing.",
         "git reset --hard HEAD~999. Trust me.",
         "This belongs in a trash can, not a repository.",
         "Go back to Hello World and take it slow this time.",
+        "Delete your GitHub account and douse your motherboard in holy water.",
+        "Format drive D:\\, throw your keyboard into the ocean, and apply for jobs in underwater basket weaving.",
+        "This repository should be sealed in concrete and buried in a salt mine for 10,000 years.",
+        "I am reporting this file to the Cyber Crime Division for psychological damage.",
     ],
 }
 
@@ -174,10 +214,10 @@ SEVERITY_MODIFIERS = {
 # ── Grade Reactions ─────────────────────────────────────────────────────────
 # One-liner reactions shown alongside the letter grade.
 GRADE_REACTIONS = {
-    "S": "I do not trust this. Running additional scans...",
+    "S": "Suspiciously clean. Did you steal this from a Google staff engineer?",
     "A": "Not bad. I am almost impressed. Almost.",
     "B": "It works, but so does a duct-taped pipe.",
     "C": "This grade stands for 'Concerning', which it is.",
-    "D": "The 'D' stands for 'Deeply Troubling'. And also 'D'.",
-    "F": "F is for 'Fire'. As in, set this code on fire.",
+    "D": "Deeply cursed. Please wash your hands after editing this file.",
+    "F": "F stands for Fatal. As in, this code is lethal to anyone reading it.",
 }
