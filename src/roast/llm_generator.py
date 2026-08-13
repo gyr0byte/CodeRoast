@@ -8,7 +8,7 @@ import requests
 from typing import Optional
 import config  # noqa: F401 — Sets HF_HOME first
 
-MODEL_NAME = "Qwen/Qwen2.5-Coder-32B-Instruct"
+MODEL_NAME = "Qwen/Qwen2.5-Coder-7B-Instruct"
 
 
 class LLMRoastGenerator:
@@ -48,7 +48,7 @@ class LLMRoastGenerator:
         payload = {
             "model": self.model_name,
             "messages": messages,
-            "max_tokens": 120,
+            "max_tokens": 90,
             "temperature": 0.85,
             "top_p": 0.9,
         }
