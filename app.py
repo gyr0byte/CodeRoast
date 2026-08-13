@@ -83,8 +83,6 @@ st.markdown("""
 
     /* Roast box */
     .roast-box {
-        background: linear-gradient(135deg, #2d1b1b 0%, #1a1a2e 100%);
-        border-left: 4px solid #ff4b4b;
         border-radius: 8px;
         padding: 20px;
         margin: 15px 0;
@@ -197,7 +195,17 @@ def get_codebert_scorer():
 
 # ─── Layout ──────────────────────────────────────────────────────────────────
 
+# Create side-by-side columns for input and roast
 col1, col2 = st.columns([1, 1], gap="large")
+
+# Variables to store results
+metrics = None
+scores = None
+roast_text = ""
+grade_reaction = ""
+model_used_label = ""
+quality_level = 1
+has_results = False
 
 with col1:
     st.markdown("### 📝 Paste Your Code")
@@ -241,8 +249,11 @@ with col1:
             use_container_width=True,
         )
 
-with col2:
-    if roast_button and code_input:
+# Execute analysis if the roast button is clicked
+if roast_button:
+    if not code_input:
+        st.warning("Paste some code first. I need something to roast. 🔥")
+    else:
         # 1. AST Static Analysis & Machine Learning Quality Scoring
         with st.spinner("📊 Analyzing AST Code Metrics & Quality..."):
             lang_key = language.lower()
@@ -297,9 +308,69 @@ with col2:
             )
 
         grade_reaction = roast_generator.get_grade_reaction(scores["grade"])
+        has_results = True
 
-        # ── Display Results ──────────────────────────────────────────────
+        # Store in session state for persistence across potential UI refreshes
+        st.session_state["metrics"] = metrics
+        st.session_state["scores"] = scores
+        st.session_state["roast_text"] = roast_text
+        st.session_state["grade_reaction"] = grade_reaction
+        st.session_state["model_used_label"] = model_used_label
+        st.session_state["has_results"] = True
 
+# Retrieve from session state if present
+if "has_results" in st.session_state and st.session_state["has_results"]:
+    metrics = st.session_state["metrics"]
+    scores = st.session_state["scores"]
+    roast_text = st.session_state["roast_text"]
+    grade_reaction = st.session_state["grade_reaction"]
+    model_used_label = st.session_state["model_used_label"]
+    has_results = True
+
+# Render Column 2 (The Roast)
+with col2:
+    if has_results:
+        # Determine background color style
+        if roast_text.startswith("🤖") or "Qwen" in roast_text or "[Qwen" in roast_text:
+            # Qwen roast: Distinct purple gradient
+            roast_style = "background: linear-gradient(135deg, #4c1d95 0%, #1e1b4b 100%); border-left: 5px solid #a78bfa; box-shadow: 0 4px 20px rgba(167, 139, 250, 0.15);"
+            clean_roast_text = roast_text.replace("🤖 [Qwen2.5-Coder AI Roast]: ", "").replace("🤖 AI Roast: ", "").replace("🤖 ", "")
+        else:
+            # Template roast: Distinct yellow/amber gradient
+            roast_style = "background: linear-gradient(135deg, #78350f 0%, #1c1917 100%); border-left: 5px solid #fbbf24; box-shadow: 0 4px 20px rgba(251, 191, 36, 0.15);"
+            clean_roast_text = roast_text
+
+        st.markdown(f"""
+        <div class="roast-box" style="{roast_style}">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <span>🔥 <strong>CodeRoast Says:</strong></span>
+            </div>
+            {clean_roast_text}
+            <br><br>
+            <em style="color: #888;">— {grade_reaction}</em>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div style="text-align: center; padding: 80px 20px; color: #555;">
+            <div style="font-size: 4rem;">🔥</div>
+            <p style="font-size: 1.2rem; margin-top: 10px;">
+                Paste your code and hit <strong>Roast My Code</strong>
+            </p>
+            <p style="font-size: 0.9rem; color: #444;">
+                Supports Python, Java, and JavaScript
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+# Render Scoring System below the pasting code and roasting fields
+if has_results:
+    st.markdown("---")
+    st.markdown("### 📊 Code Quality Scorecard")
+    
+    score_col1, score_col2 = st.columns([1, 1], gap="large")
+
+    with score_col1:
         # Grade Card
         grade_letter = scores["grade"].split(" ")[0]
         grade_desc = " ".join(scores["grade"].split(" ")[1:])
@@ -317,6 +388,30 @@ with col2:
         </div>
         """, unsafe_allow_html=True)
 
+        # Score Bars
+        def score_bar(label: str, value: float):
+            color = (
+                "#4ade80" if value >= 75 else
+                "#facc15" if value >= 50 else
+                "#fb923c" if value >= 30 else
+                "#ef4444"
+            )
+            st.markdown(f"""
+            <div class="score-row">
+                <span class="score-label">{label}</span>
+                <div class="score-bar-bg">
+                    <div class="score-bar-fill" style="width: {value}%; background: {color};"></div>
+                </div>
+                <span class="score-value">{value}</span>
+            </div>
+            """, unsafe_allow_html=True)
+
+        score_bar("Readability", scores["readability"])
+        score_bar("Efficiency", scores["efficiency"])
+        score_bar("Structure", scores["structure"])
+        score_bar("Creativity", scores["creativity"])
+
+    with score_col2:
         # Radar Chart
         fig = go.Figure(data=go.Scatterpolar(
             r=[
@@ -357,85 +452,22 @@ with col2:
         )
         st.plotly_chart(fig, use_container_width=True)
 
-        # Score Bars
-        def score_bar(label: str, value: float):
-            color = (
-                "#4ade80" if value >= 75 else
-                "#facc15" if value >= 50 else
-                "#fb923c" if value >= 30 else
-                "#ef4444"
-            )
-            st.markdown(f"""
-            <div class="score-row">
-                <span class="score-label">{label}</span>
-                <div class="score-bar-bg">
-                    <div class="score-bar-fill" style="width: {value}%; background: {color};"></div>
-                </div>
-                <span class="score-value">{value}</span>
-            </div>
-            """, unsafe_allow_html=True)
-
-        score_bar("Readability", scores["readability"])
-        score_bar("Efficiency", scores["efficiency"])
-        score_bar("Structure", scores["structure"])
-        score_bar("Creativity", scores["creativity"])
-
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        # Determine roast source badge (Qwen AI vs Rule-Based Template)
-        if roast_text.startswith("🤖") or "Qwen" in roast_text or "[Qwen" in roast_text:
-            roast_source_badge = '<span style="background: rgba(168, 85, 247, 0.2); color: #c084fc; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; border: 1px solid rgba(168, 85, 247, 0.4);">🤖 Qwen2.5-Coder AI</span>'
-            clean_roast_text = roast_text.replace("🤖 [Qwen2.5-Coder AI Roast]: ", "").replace("🤖 AI Roast: ", "").replace("🤖 ", "")
-        else:
-            roast_source_badge = '<span style="background: rgba(234, 179, 8, 0.2); color: #fde047; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; border: 1px solid rgba(234, 179, 8, 0.4);">⚡ Rule-Based Template Engine</span>'
-            clean_roast_text = roast_text
-
-        # The Roast
-        st.markdown(f"""
-        <div class="roast-box">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-                <span>🔥 <strong>CodeRoast Says:</strong></span>
-                {roast_source_badge}
-            </div>
-            {clean_roast_text}
-            <br><br>
-            <em style="color: #888;">— {grade_reaction}</em>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Raw Metrics (expandable)
-        with st.expander("📊 Raw Metrics"):
-            metric_cols = st.columns(4)
-            metric_items = [
-                ("Lines of Code", metrics["lines_of_code"]),
-                ("Functions", metrics["function_count"]),
-                ("Avg Func Length", f"{metrics['avg_function_length']}"),
-                ("Complexity", f"{metrics['cyclomatic_complexity']}"),
-                ("Naming Score", f"{metrics['naming_score']}"),
-                ("Comment Ratio", f"{metrics['comment_ratio']:.1%}"),
-                ("Nesting Depth", metrics["nesting_depth"]),
-                ("Duplication", f"{metrics['duplicate_code_score']}"),
-            ]
-            for i, (name, val) in enumerate(metric_items):
-                with metric_cols[i % 4]:
-                    st.metric(label=name, value=val)
-
-    elif roast_button and not code_input:
-        st.warning("Paste some code first. I need something to roast. 🔥")
-
-    else:
-        # Empty state
-        st.markdown("""
-        <div style="text-align: center; padding: 80px 20px; color: #555;">
-            <div style="font-size: 4rem;">🔥</div>
-            <p style="font-size: 1.2rem; margin-top: 10px;">
-                Paste your code and hit <strong>Roast My Code</strong>
-            </p>
-            <p style="font-size: 0.9rem; color: #444;">
-                Supports Python, Java, and JavaScript
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+    # Raw Metrics (expandable)
+    with st.expander("📊 Raw Metrics"):
+        metric_cols = st.columns(4)
+        metric_items = [
+            ("Lines of Code", metrics["lines_of_code"]),
+            ("Functions", metrics["function_count"]),
+            ("Avg Func Length", f"{metrics['avg_function_length']}"),
+            ("Complexity", f"{metrics['cyclomatic_complexity']}"),
+            ("Naming Score", f"{metrics['naming_score']}"),
+            ("Comment Ratio", f"{metrics['comment_ratio']:.1%}"),
+            ("Nesting Depth", metrics["nesting_depth"]),
+            ("Duplication", f"{metrics['duplicate_code_score']}"),
+        ]
+        for i, (name, val) in enumerate(metric_items):
+            with metric_cols[i % 4]:
+                st.metric(label=name, value=val)
 
 # ─── Footer ──────────────────────────────────────────────────────────────────
 
