@@ -383,9 +383,9 @@ with col2:
         st.markdown("<br>", unsafe_allow_html=True)
 
         # Determine roast source badge (Qwen AI vs Rule-Based Template)
-        if "Qwen" in roast_text or "[Qwen" in roast_text:
+        if roast_text.startswith("🤖") or "Qwen" in roast_text or "[Qwen" in roast_text:
             roast_source_badge = '<span style="background: rgba(168, 85, 247, 0.2); color: #c084fc; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; border: 1px solid rgba(168, 85, 247, 0.4);">🤖 Qwen2.5-Coder AI</span>'
-            clean_roast_text = roast_text.replace("🤖 [Qwen2.5-Coder AI Roast]: ", "").replace("🤖 AI Roast: ", "")
+            clean_roast_text = roast_text.replace("🤖 [Qwen2.5-Coder AI Roast]: ", "").replace("🤖 AI Roast: ", "").replace("🤖 ", "")
         else:
             roast_source_badge = '<span style="background: rgba(234, 179, 8, 0.2); color: #fde047; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; border: 1px solid rgba(234, 179, 8, 0.4);">⚡ Rule-Based Template Engine</span>'
             clean_roast_text = roast_text
