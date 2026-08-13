@@ -25,12 +25,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 import config
 from src.analyzer.code_analyzer import CodeAnalyzer
 from src.ml.classifier import CodeQualityClassifier
-from src.ml.lstm_model import (
-    CodeTokenizer,
-    build_roast_severity_model,
-    train_severity_model,
-    save_severity_model,
-)
+from src.ml.lstm_model import CodeTokenizer, LSTMSeverityModel
 
 
 def load_dataset(filepath: str = None) -> pd.DataFrame:
