@@ -172,6 +172,8 @@ roast_generator = RoastGenerator()
 
 # Try to load trained ML models (optional — app works without them)
 classifier = None
+codebert_scorer = None
+
 try:
     from src.ml.classifier import CodeQualityClassifier
     clf = CodeQualityClassifier()
@@ -179,6 +181,14 @@ try:
     classifier = clf
 except Exception:
     pass  # Models not trained yet — fall back to metric-based quality estimation
+
+try:
+    from src.ml.codebert_model import CodeBERTScorer, SAVED_MODEL_DIR
+    codebert_scorer = CodeBERTScorer(model_dir=SAVED_MODEL_DIR)
+    if not codebert_scorer._is_loaded:
+        codebert_scorer = None
+except Exception:
+    pass
 
 # ─── Layout ──────────────────────────────────────────────────────────────────
 
@@ -229,11 +239,15 @@ with col2:
             metrics = analyzer.get_metrics()
             scores = calculate_scores(metrics)
 
-            # ── Determine quality level ──────────────────────────────────
-            if classifier is not None:
+            # ── Determine quality level & severity score ──────────────────
+            if codebert_scorer is not None:
+                quality_level, cb_severity = codebert_scorer.predict_quality_and_severity(code_input)
+                model_used_label = "🤗 Hugging Face CodeBERT (microsoft/codebert-base)"
+            elif classifier is not None:
                 quality_level, confidence = classifier.predict_quality(
                     code_input, metrics
                 )
+                model_used_label = "🌲 Random Forest Quality Classifier"
             else:
                 # Fallback: estimate quality from overall score
                 overall = scores["overall"]
@@ -245,7 +259,7 @@ with col2:
                     quality_level = 2
                 else:
                     quality_level = 3
-                confidence = 0.0  # No ML model
+                model_used_label = "📊 Rule-Based Static Analysis (Fallback)"
 
             # ── Generate roast ───────────────────────────────────────────
             roast_text = roast_generator.generate_roast(
@@ -265,6 +279,9 @@ with col2:
             <div class="grade-label">{grade_desc}</div>
             <div style="color: #666; font-size: 0.85rem; margin-top: 8px;">
                 Overall Score: {scores['overall']}/100
+            </div>
+            <div style="color: #4ade80; font-size: 0.8rem; margin-top: 6px; font-weight: 500;">
+                {model_used_label}
             </div>
         </div>
         """, unsafe_allow_html=True)
