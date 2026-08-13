@@ -1,56 +1,177 @@
 # CodeRoast 🔥 — AI That Brutally Reviews Your Code
 
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Framework](https://img.shields.io/badge/Streamlit-1.42.0-FF4B4B.svg)](https://streamlit.io/)
+[![Deep Learning](https://img.shields.io/badge/PyTorch-Sequence%20LSTM-EE4C2C.svg)](https://pytorch.org/)
+[![Transformers](https://img.shields.io/badge/Hugging%20Face-CodeBERT%20%26%20Qwen2.5--Coder-yellow.svg)](https://huggingface.co/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 > *"Your code has been reviewed. The results are not pretty."*
 
-**CodeRoast** is an NLP + Deep Learning powered application that analyzes code quality and delivers brutally honest — and hilariously savage — feedback in the style of a senior developer who has seen too much bad code and has zero patience left.
+**CodeRoast** is an end-to-end Machine Learning, NLP, and Deep Learning powered application that performs real-time static code quality analysis and generates brutally honest — and hilariously savage — code roasts.
 
-It combines real static code analysis with NLP-driven natural language generation to produce feedback that is simultaneously technically accurate and entertainingly brutal.
+It combines real static analysis metrics (lines of code, cyclomatic complexity, nesting depth, duplication, naming scores) with machine learning classification models and open-source Large Language Models (LLMs) to deliver feedback that is both technically spot-on and entertainingly savage.
 
-## Features
+---
 
-- **Language Support**: Paste any Python, Java, or JavaScript code snippet.
-- **Real-time static analysis**: Measures complexity, line length, naming conventions, and duplication.
-- **NLP-generated roasts**: Brutal feedback using a fine-tuned language model and dynamic templates.
-- **4-dimension scoring**: Readability, Efficiency, Structure, and Creativity.
-- **Severity levels**: Adjust the roast intensity from Gentle Nudge to Full Destruction.
+## 🚀 Key Features
 
-## Tech Stack
+- **🌐 Multi-Language Analysis:** Supports **Python**, **Java**, and **JavaScript** code snippets.
+- **📊 Real-time Static AST Analysis:** Calculates Cyclomatic Complexity, Nesting Depth, Line Counts, Comment Ratios, Naming Conventions, and Code Duplication scores.
+- **🌲 TF-IDF + Random Forest Classifier:** Predicts code quality tiers (*Pristine, Acceptable, Questionable, Disaster*) based on NLP code tokenization.
+- **⚡ PyTorch Sequence LSTM:** Custom PyTorch model trained to score code severity on a 0–10 continuous scale.
+- **🤗 Hugging Face CodeBERT (`microsoft/codebert-base`):** Pre-trained transformer sequence classifier providing deep semantic understanding of code structure.
+- **🤖 Dynamic AI LLM Roast Generation (`Qwen2.5-Coder-1.5B`):** Generates unique, dynamic AI roasts on-the-fly using a local open-source LLM, with graceful fallback to template roasts.
+- **🎨 Interactive Streamlit Interface:** Features visual grade cards (*S to F*), Plotly sub-metric radar & bar charts, and adjustable roast severity sliders.
 
-- **Core**: Python 3.10+
-- **Static Analysis**: `ast`, `radon`, `pylint`, `pyflakes`, `tokenize`
-- **NLP Layer**: `nltk`, `textblob`, `scikit-learn`, `transformers` (HuggingFace)
-- **Deep Learning**: `tensorflow`, `keras`, `numpy`
-- **Frontend & Visualizations**: `streamlit`, `plotly`, `streamlit-ace`
+---
 
-## Setup Instructions
+## 🏗️ System Architecture
 
-This project is configured to download models to a local `models_cache` directory to conserve system drive space.
+```
+                               ┌──────────────────────────┐
+                               │     User Code Input      │
+                               │  (Python / JS / Java)    │
+                               └────────────┬─────────────┘
+                                            │
+                                            ▼
+                               ┌──────────────────────────┐
+                               │  Static Analysis Engine  │
+                               │ (AST, CC, LOC, Naming)   │
+                               └────────────┬─────────────┘
+                                            │
+           ┌────────────────────────────────┼────────────────────────────────┐
+           │                                │                                │
+           ▼                                ▼                                ▼
+┌─────────────────────┐        ┌─────────────────────────┐        ┌─────────────────────┐
+│  TF-IDF + Random    │        │  PyTorch Sequence LSTM  │        │ 🤗 CodeBERT Model   │
+│  Forest Classifier  │        │   Severity Scorer       │        │  (Sequence Classifier)│
+└──────────┬──────────┘        └────────────┬────────────┘        └──────────┬──────────┘
+           │                                │                                │
+           └────────────────────────────────┼────────────────────────────────┘
+                                            │
+                                            ▼
+                               ┌──────────────────────────┐
+                               │ Dynamic AI Roast Engine  │
+                               │ (Qwen2.5-Coder / Temp)   │
+                               └────────────┬─────────────┘
+                                            │
+                                            ▼
+                               ┌──────────────────────────┐
+                               │   Streamlit Web App UI   │
+                               └──────────────────────────┘
+```
 
-### 1. Create Virtual Environment
+---
+
+## 📂 Project Structure
+
+```text
+CodeRoast/
+├── app.py                      # Main Streamlit Dashboard Application
+├── config.py                   # Global configuration & HF cache isolation
+├── requirements.txt            # Project dependencies
+├── CodeRoast_Project_Plan.md   # Project Specification & Architecture Plan
+├── data/
+│   ├── scrape_github.py        # GitHub API repository scraper
+│   ├── preprocess_dataset.py   # Dataset feature extractor & cleaning
+│   ├── raw/
+│   │   └── scraped_code.csv    # Raw GitHub code snippets
+│   └── processed/
+│       └── code_samples.csv    # Tokenized dataset with quality labels
+├── models/
+│   ├── classifier.pkl          # Trained Random Forest classifier
+│   ├── lstm_severity.pt        # Trained PyTorch LSTM severity model
+│   └── tokenizer.pkl           # Code vocabulary tokenizer
+├── notebooks/
+│   ├── 1_eda_code_dataset.ipynb   # Exploratory Data Analysis & Visualizations
+│   ├── 2_nlp_classifier.ipynb     # TF-IDF + Classifier Training & Metrics
+│   └── 3_lstm_severity.ipynb      # PyTorch LSTM & CodeBERT Model Evaluation
+└── src/
+    ├── analyzer/
+    │   ├── code_analyzer.py    # Multi-language static analyzer
+    │   └── metrics.py          # Cyclomatic & structural metrics
+    ├── ml/
+    │   ├── classifier.py       # Random Forest quality classifier
+    │   ├── lstm_model.py       # PyTorch LSTM architecture
+    │   ├── codebert_model.py   # Hugging Face CodeBERT wrapper
+    │   └── train.py            # Training pipeline orchestrator
+    ├── roast/
+    │   ├── generator.py        # Hybrid Roast Generator
+    │   ├── llm_generator.py    # Local Qwen2.5-Coder LLM generator
+    │   └── templates.py        # Curated template roasts
+    └── scoring/
+        └── scorer.py           # Multi-dimensional scoring engine
+```
+
+---
+
+## 🛠️ Installation & Setup
+
+### 1. Clone Repository & Create Virtual Environment
 ```powershell
+git clone https://github.com/gyr0byte/CodeRoast.git
+cd CodeRoast
+
 python -m venv venv
 venv\Scripts\activate
 ```
 
 ### 2. Install Dependencies
-To avoid filling up your C drive with CUDA/GPU bloat, it's recommended to install the CPU-only version of PyTorch on Windows:
 ```powershell
+# Install PyTorch
 pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+# Install remaining dependencies
 pip install -r requirements.txt
 ```
-*(Make sure `streamlit`, `transformers`, etc., are in your `requirements.txt`)*
 
-### 3. Run the App
+> **Note on Model Cache Isolation:** `config.py` isolates Hugging Face model weights (`microsoft/codebert-base`, `Qwen/Qwen2.5-Coder-1.5B-Instruct`) to `D:\CodeRoast\models_cache\` to preserve C: drive space.
+
+---
+
+## 💻 Running the Application
+
+Launch the Streamlit web dashboard:
 ```powershell
 streamlit run app.py
 ```
 
-## Project Architecture
-CodeRoast uses a multi-layered analysis pipeline:
-1. **Static Analysis Layer**: Extracts objective metrics via Python AST.
-2. **NLP Classification Layer**: Categorizes code quality using TF-IDF and Random Forest.
-3. **Deep Learning Severity Scorer**: Uses an LSTM-based model to detect specific patterns that deserve roasting.
-4. **Roast Generator**: Combines metrics and severity scores to generate dynamic, template-based roasting.
+Open your browser to `http://localhost:8501`.
 
 ---
-*Built by gyr0byte — Not a person, a process. Always building, never stopping.* 🔥
+
+## 📓 Portfolio & Jupyter Notebooks
+
+This repository includes 3 fully documented Jupyter notebooks ready for portfolio inspection:
+
+1. **`notebooks/1_eda_code_dataset.ipynb`** — Exploratory Data Analysis of scraped GitHub code samples.
+2. **`notebooks/2_nlp_classifier.ipynb`** — Feature engineering, TF-IDF vectorization, and Random Forest classifier training.
+3. **`notebooks/3_lstm_severity.ipynb`** — Sequence modeling with PyTorch LSTM and Hugging Face CodeBERT.
+
+---
+
+## ⚙️ ML Pipeline Orchestration
+
+To re-train the models from scratch on new code snippets:
+
+```powershell
+# 1. Scrape GitHub Repositories (Set GITHUB_TOKEN environment variable optionally)
+python -m data.scrape_github
+
+# 2. Preprocess & Extract Features
+python -m data.preprocess_dataset
+
+# 3. Train Classifier & PyTorch LSTM Models
+python -m src.ml.train
+```
+
+---
+
+## 📜 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+*Built by **gyr0byte** — Not a person, a process. Always building, never stopping.* 🔥

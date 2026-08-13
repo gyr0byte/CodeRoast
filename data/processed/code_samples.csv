@@ -1,0 +1,4586 @@
+code,language,quality_label,severity_score,repo_stars
+"def _sync_upload_vision_to_gallery(file_info: Dict[str, Any], owner: Optional[str], text: str) -> None:
+    file_hash = (file_info or {}).get(""hash"")
+    if not file_hash or not text:
+        return
+    try:
+        from core.database import GalleryImage, SessionLocal
+        db = SessionLocal()
+        try:
+            q = db.query(GalleryImage).filter(
+                GalleryImage.file_hash == file_hash,
+                GalleryImage.is_active == True,  # noqa: E712
+            )
+            if owner:
+                q = q.filter(GalleryImage.owner == owner)
+            img = q.first()
+            if not img:
+                return
+            img.caption = text.strip()
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+    except Exception as e:
+        logger.warning(""Failed to sync upload vision text to gallery: %s"", e)",python,0,0.07,85267
+"def follow_him(s, target):
+    print('>> ******\n>> He followed ...')
+    resp = s.get(GITHUB_API_PROXY + '/users/%s/following' % target)
+    following_list = [following['url'].split('/')[-1] for following in resp.json()]
+    for user in following_list:
+        if USERNAME:
+            s.put(GITHUB_API_PROXY + '/user/following/%s' % user)
+        print(user)
+    if USERNAME:
+        print('>> following done\n')",python,2,0.96,4
+" divisores
+        for(int x = 1; x < a; x++){
+            if((a%x)==0){
+                suma = suma + x;
+            }
+        }",java,3,0.72,4
+"    private static boolean estaEnArray(int[] array, int num){
+        boolean existe = false;
+        for(int n : array){
+            if(n==num){
+                existe = true;
+            }
+        }
+        return existe;
+    }",java,2,0.87,4
+"def apt_install(*packages):
+    """"""Install packages with apt.
+
+    Parameters
+    ----------
+    *packages : Iterable[str]
+        The packages to install.
+    """"""
+    sudo('apt install -y %s' % ' '.join(packages))",python,3,0.72,4
+"var navigation = function() {
+    this.controller = function() {
+        this.logout = function() {
+            session.setKey(null);
+            session.setName(null);
+            m.route(""/login"")
+        }
+    }
+    this.view = function(ctrl) {
+        return [
+            m.if(session.key,[
+                m(""div[class='column column-50'][id='navbar']"",[
+                    m(""a"", {href: '/todo',  text:""Todos"", config: m.route}),
+                    m(""a"", {href: '/scaffold',  text:""Admin"", config: m.route}),
+                    m(""a"", {href: '/logout', onclick: ctrl.logout, text:""Log Out"", config: m.route})
+                ]),
+                m(""div[class='column column-50']"", m(""h6"", ""Welcome back "" + session.name))
+            ])
+        ];
+
+    }
+}",javascript,3,0.67,4
+"def extractMelody(audioSamples, wSize, hSize):
+    fs = 44100
+    vTol = 1.4
+
+
+    # extract f0 using ESSENTIA
+    input = essentia.array(audioSamples)
+    pitchTracker = PredominantPitchMelodia(frameSize = wSize, hopSize = hSize, sampleRate = fs,
+        voicingTolerance = vTol, voiceVibrato = False, filterIterations=10,
+        peakDistributionThreshold=0.9, guessUnvoiced=True)
+
+#     pitchTracker = PredominantMelody(frameSize = wSize, hopSize = hSize, sampleRate = fs,
+#         voicingTolerance = vTol, voiceVibrato = False, filterIterations=10,
+#         peakDistributionThreshold=0.9, guessUnvoiced=True)
+
+    f0, pitchConf = pitchTracker(input)
+
+    timestamps = getTimeStamps(audioSamples, f0)
+
+
+    f0 = mir_eval.multipitch.frequencies_to_midi(f0)
+    return timestamps, np.array(f0)",python,2,0.73,4
+"function getSources(type) {
+  return _.compact(_.concat(
+    _.get(sources, type),
+    getIgnores(type)
+  ))
+}",javascript,2,0.76,4
+"def api_only():
+    from fastapi import FastAPI
+    from modules.shared_cmd_options import cmd_opts
+
+    initialize.initialize()
+
+    app = FastAPI()
+    initialize_util.setup_middleware(app)
+    api = create_api(app)
+
+    from modules import script_callbacks
+    script_callbacks.before_ui_callback()
+    script_callbacks.app_started_callback(None, app)
+
+    print(f""Startup time: {startup_timer.summary()}."")
+    api.launch(
+        server_name=initialize_util.gradio_server_name(),
+        port=cmd_opts.port if cmd_opts.port else 7861,
+        root_path=f""/{cmd_opts.subpath}"" if cmd_opts.subpath else """"
+    )",python,0,0.02,164507
+"var validateUser = function(){
+	var uname = document.getElementById('uname');
+	if(uname.value == undefined || uname.value == null || uname.value == """")
+	{
+		uname.style.borderColor=""red"";
+	}
+	else
+	{
+		uname.style.borderColor=""green"";
+	}
+
+
+}",javascript,2,0.74,4
+"def text_iterator(max_chars=1_000_000_000, doc_cap=10_000):
+    """"""Yield documents from training split (all shards except pinned val shard).""""""
+    parquet_paths = [p for p in list_parquet_files() if not p.endswith(VAL_FILENAME)]
+    nchars = 0
+    for filepath in parquet_paths:
+        pf = pq.ParquetFile(filepath)
+        for rg_idx in range(pf.num_row_groups):
+            rg = pf.read_row_group(rg_idx)
+            for text in rg.column(""text"").to_pylist():
+                doc = text[:doc_cap] if len(text) > doc_cap else text
+                nchars += len(doc)
+                yield doc
+                if nchars >= max_chars:
+                    return",python,0,0.26,93757
+"def eval_all(iKala_URI, filenames_selected=None):
+    wavfiles_URI = iKala_URI + '/Wavfile/'
+    _filenames = getWavFiles(filenames_selected, wavfiles_URI)
+
+    NSDR_total = 0
+    SIR_total = 0
+    SAR_total = 0
+
+    for filename in _filenames:
+        filename = basename(filename)
+        [NSDR, SIR, SAR ] = eval_svs_main_(filename)
+        NSDR_total += NSDR
+        SIR_total += SIR
+        SAR_total += SAR",python,3,0.92,4
+"    def run(self):
+        if SUPPORTED_PYTHON_VERSIONS[0] > PYTHON_MINOR_VERSION:
+            print(
+                f""Table updated only when running 3.{SUPPORTED_PYTHON_VERSIONS[0]}.x, detected version is {sys.version}.""
+            )
+            return
+
+        entries = ""\n"".join([f'    ""{k}"": ""{v}"",' for k, v in deps.items()])
+        content = [
+            ""# THIS FILE HAS BEEN AUTOGENERATED. To update:"",
+            ""# 1. modify the `_deps` dict in setup.py"",
+            ""# 2. run `make fix-repo``"",
+            ""deps = {"",
+            entries,
+            ""}"",
+            """",
+        ]
+        target = ""src/transformers/dependency_versions_table.py""
+        with open(target, ""w"", encoding=""utf-8"", newline=""\n"") as f:
+            f.write(""\n"".join(content))",python,1,0.04,164028
+"function standardizedHttpError (error) {
+  const resp = error.response || {}
+  const { status, text } = resp
+  throw standardizedError('http', { status, message: text || 'server internal error' })
+}",javascript,3,0.51,4
+"def decode(img):
+    if not img:
+        return None
+    qr = qrtools.QR()
+    if qr.decode(img):
+        return qr.data
+    else:
+        raise ValueError(""Failed to decode data from '%s'"" % img)",python,2,0.53,4
+"def read_star():
+    db = sqlite3.connect(get_project_settings()['DATABASE_POSITION'])
+    db.row_factory = dict_factory
+    cursor = db.cursor()
+    cursor.execute('select * from pixiv_item where star is not null ORDER BY -star')
+    global star_array, unstar
+    star_array = cursor.fetchall()",python,3,0.94,4
+"function handleError (err) {
+    if (err) {
+        if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+            connect();
+        } else {
+            console.error(err.stack || err);
+        }
+    }
+}",javascript,3,0.82,4
+"def format_token_count_compact(*args, **kwargs):
+    value = int(args[0] if args else kwargs.get(""value"", 0))
+    abs_value = abs(value)
+    if abs_value < 1_000:
+        return str(value)
+
+    sign = ""-"" if value < 0 else """"
+    units = ((1_000_000_000, ""B""), (1_000_000, ""M""), (1_000, ""K""))
+    for threshold, suffix in units:
+        if abs_value >= threshold:
+            scaled = abs_value / threshold
+            if scaled < 10:
+                text = f""{scaled:.2f}""
+            elif scaled < 100:
+                text = f""{scaled:.1f}""
+            else:
+                text = f""{scaled:.0f}""
+            if ""."" in text:
+                text = text.rstrip(""0"").rstrip(""."")
+            return f""{sign}{text}{suffix}""
+
+    return f""{value:,}""",python,0,0.21,229692
+"def show_message(subj, body, icon='audio-speakers', timeout=3000,
+                 dump_id_file='/tmp/pymocp.id'):
+    wn = None
+    try:
+        wn = pickle.load(open(dump_id_file, ""rb""))
+    except:
+        wn = notify2.Notification('')
+
+    wn.set_timeout(timeout)
+    wn.update(subj, body, icon)
+    wn.show()
+    pickle.dump(wn, open(dump_id_file, ""wb""))",python,3,0.8,4
+"def test_llm_job_payload_model():
+    """"""Test that LlmJobPayload includes webhook_config field""""""
+    print(""="" * 60)
+    print(""TEST 1: LlmJobPayload Model"")
+    print(""="" * 60)
+
+    try:
+        from job import LlmJobPayload
+        from schemas import WebhookConfig
+        from pydantic import ValidationError
+
+        # Test with webhook_config
+        payload_dict = {
+            ""url"": ""https://example.com"",
+            ""q"": ""Extract main content"",
+            ""schema"": None,
+            ""cache"": False,
+            ""provider"": None,
+            ""webhook_config"": {
+                ""webhook_url"": ""https://myapp.com/webhook"",
+                ""webhook_data_in_payload"": True,
+                ""webhook_headers"": {""X-Secret"": ""token""}
+            }
+        }
+
+        payload = LlmJobPayload(**payload_dict)
+
+        print(f""✅ LlmJobPayload accepts webhook_config"")
+        print(f""   - URL: {payload.url}"")
+        print(f""   - Query: {payload.q}"")
+        print(f""   - Webhook URL: {payload.webhook_config.webhook_url}"")
+        print(f""   - Data in payload: {payload.webhook_config.webhook_data_in_payload}"")
+
+        # Test without webhook_config (should be optional)
+        minimal_payload = {
+            ""url"": ""https://example.com"",
+            ""q"": ""Extract content""
+        }
+
+        payload2 = LlmJobPayload(**minimal_payload)
+        assert payload2.webhook_config is None, ""webhook_config should be optional""
+        print(f""✅ LlmJobPayload works without webhook_config (optional)"")
+
+        return True
+    except Exception as e:
+        print(f""❌ Failed: {e}"")
+        import traceback
+        traceback.print_exc()
+        return False",python,1,0.1,77961
+"    def construct(self):
+        grid = Tex(R""\pi"").get_grid(10, 10, height=4)
+        self.add(grid)
+
+        # You can animate the application of mobject methods with the
+        # "".animate"" syntax:
+        self.play(grid.animate.shift(LEFT))
+
+        # Both of those will interpolate between the mobject's initial
+        # state and whatever happens when you apply that method.
+        # For this example, calling grid.shift(LEFT) would shift the
+        # grid one unit to the left, but both of the previous calls to
+        # ""self.play"" animate that motion.
+
+        # The same applies for any method, including those setting colors.
+        self.play(grid.animate.set_color(YELLOW))
+        self.wait()
+        self.play(grid.animate.set_submobject_colors_by_gradient(BLUE, GREEN))
+        self.wait()
+        self.play(grid.animate.set_height(TAU - MED_SMALL_BUFF))
+        self.wait()
+
+        # The method Mobject.apply_complex_function lets you apply arbitrary
+        # complex functions, treating the points defining the mobject as
+        # complex numbers.
+        self.play(grid.animate.apply_complex_function(np.exp), run_time=5)
+        self.wait()
+
+        # Even more generally, you could apply Mobject.apply_function,
+        # which takes in functions form R^3 to R^3
+        self.play(
+            grid.animate.apply_function(
+                lambda p: [
+                    p[0] + 0.5 * math.sin(p[1]),
+                    p[1] + 0.5 * math.sin(p[0]),
+                    p[2]
+                ]
+            ),
+            run_time=5,
+        )
+        self.wait()",python,1,0.04,90614
+"function render(options, callback) {
+  var sync = true;
+
+  debug('render ""%s""', this.path);
+
+  // render, normalizing sync callbacks
+  this.engine(this.path, options, function onRender() {
+    if (!sync) {
+      return callback.apply(this, arguments);
+    }
+
+    // copy arguments
+    var args = new Array(arguments.length);
+    var cntx = this;
+
+    for (var i = 0; i < arguments.length; i++) {
+      args[i] = arguments[i];
+    }
+
+    // force callback to be async
+    return process.nextTick(function renderTick() {
+      return callback.apply(cntx, args);
+    });
+  });
+
+  sync = false;
+}",javascript,1,0.26,69353
+"def _non_negative_float(value: str) -> float:
+    parsed = float(value)
+    if not math.isfinite(parsed) or parsed < 0:
+        raise argparse.ArgumentTypeError(f""value must be a finite number >= 0, got {value!r}"")
+    return parsed",python,0,0.2,102853
+"def main():
+    api = clockwork.API(open(""/var/ass/api.key"", 'r').readline())
+    parser = argparse.ArgumentParser()
+    parser.add_argument(""message"", help=""the message body to be sent via text"")
+    parser.add_argument(""sender"", help=""The name or number the message should be sent from"")
+
+    args = parser.parse_args()
+
+    #Check the balance and check how many more messages we can send to all contacts
+    balance = account.check_balance(api)
+    print(""$"" + balance)
+    msgs = account.messages_left(api)
+    print(""msgs remaining before top up "" + str(msgs))
+
+    sms.send(api, args.sender, args.message)",python,3,0.61,4
+"    private static String uneConjuntos(String uno, String dos){
+        String resultado = """";
+        if(uno.length()>=dos.length()){
+            for(int x = 0; x < uno.length(); x++) {
+                String letra = """" + uno.charAt(x);
+                if (dos.contains(letra)) {
+                    resultado = resultado + letra;
+                }
+            }
+        } else {
+            for(int x = 0; x < dos.length(); x++) {
+                String letra = """" + dos.charAt(x);
+                if (uno.contains(letra)) {
+                    resultado = resultado + letra;
+                }
+            }
+        }
+        return resultado;
+    }",java,2,0.86,4
+"function inspectorOpen(port, host, wait) {
+  if (isEnabled()) {
+    throw new ERR_INSPECTOR_ALREADY_ACTIVATED();
+  }
+  // inspectorOpen() currently does not typecheck its arguments and adding
+  // such checks would be a potentially breaking change. However, the native
+  // open() function requires the port to fit into a 16-bit unsigned integer,
+  // causing an integer overflow otherwise, so we at least need to prevent that.
+  if (isUint32(port)) {
+    validateInt32(port, 'port', 0, 65535);
+  }
+  if (host && !isLoopback(host)) {
+    process.emitWarning(
+      'Binding the inspector to a public IP with an open port is insecure, ' +
+        'as it allows external hosts to connect to the inspector ' +
+        'and perform a remote code execution attack. ' +
+        'Documentation can be found at ' +
+      'https://nodejs.org/api/cli.html#--inspecthostport',
+      'SecurityWarning',
+    );
+  }
+
+  open(port, host);
+  if (wait)
+    waitForDebugger();
+
+  return { __proto__: null, [SymbolDispose]() { _debugEnd(); } };
+}",javascript,0,0.15,118912
+"function createInputPseudo( type ) {
+	return function( elem ) {
+		return nodeName( elem, ""input"" ) && elem.type === type;
+	};
+}",javascript,1,0.16,59785
+"function _forkChild(fd, serializationMode) {
+  // set process.send()
+  const p = new Pipe(PipeConstants.IPC);
+  p.open(fd);
+  p.unref();
+  const control = setupChannel(process, p, serializationMode);
+  process.on('newListener', function onNewListener(name) {
+    if (name === 'message' || name === 'disconnect') control.refCounted();
+  });
+  process.on('removeListener', function onRemoveListener(name) {
+    if (name === 'message' || name === 'disconnect') control.unrefCounted();
+  });
+}",javascript,0,0.19,118912
+"def set_config(HOST,slot,pon,onu,httpport):
+	if httpport == """":
+		httpport = HTTPDEFAULT
+	print ('===========================================')
+	print (' Configurando a ONU com os parametros: ')
+	print('OLT = '+HOST)
+	print('OLT SLOT = '+slot)
+	print(""PONTA PON = ""+pon)
+	print('ONU ID = '+onu)
+	print('PORTA HTTP = '+httpport)
+
+	child = pexpect.spawn ('telnet '+HOST) #option needs to be a list
+	#child.timeout = 150
+	#child.logfile = sys.stdout #display progress on screen
+	time.sleep(2)
+
+	child.expect ('Login:')
+	child.sendline (USER)
+
+	child.expect('Password:')
+	child.sendline (PASSWORD)
+	time.sleep(1)
+
+	child.sendline ('enable')
+	time.sleep(1)
+
+	child.expect('Password:')
+	time.sleep(1)
+	child.sendline (ENPASSWORD)
+
+	time.sleep(1)
+	child.expect('Admin# ')
+	time.sleep(1)
+	child.sendline ('cd gponon \r')
+	time.sleep(1)
+	child.expect('gpononu# ')
+	time.sleep(1)
+	child.sendline ('set onu_local_manage_config slot '+slot+' link '+pon+' onu '+onu+' config_enable_switch enable console_switch enable telnet_switch enable web_switch enable web_port '+httpport+' web_ani_switch enable tel_ani_switch enable \r')
+	time.sleep(1)
+	child.expect('gpononu# ')
+	time.sleep(1)
+	child.sendline ('cd .. \r')
+	time.sleep(1)
+	child.expect('Admin# ')
+	time.sleep(1)
+	child.sendline ('exit \r')
+	time.sleep(1)
+	child.expect('>')
+	child.sendline ('exit \r')
+	print ('-------------------------------------------')
+	print ('Configuracao da ONU finalizada com sucesso..')
+	return 0",python,2,0.96,4
+"    def run(self):
+        spawn(
+            [sys.executable, 'devscripts/make_lazy_extractors.py', 'youtube_dl/extractor/lazy_extractors.py'],
+            dry_run=self.dry_run,
+        )",python,0,0.03,140949
+"    def parse_args():
+        def escape_str(s):
+            return html.escape(s)
+        parser = argparse.ArgumentParser()
+        parser.add_argument('-a', '--artist', type=escape_str)
+        parser.add_argument('-s', '--song', type=escape_str)
+        parser.add_argument('-r', '--album', type=escape_str)
+        parser.add_argument('-f', '--file', type=escape_str, required=True)
+        parser.add_argument('-i', '--icon', type=escape_str, default='audio-x-generic')
+        parser.add_argument('-t', '--timeout', type=int, default=5000)
+        return parser, parser.parse_args()",python,3,0.98,4
+"var replaceLink = function(){
+        xDebug.call(this, arguments.callee.name, arguments);
+
+        this.options.config.list =
+        $.map(this.options.config.list, function(item){
+            if (!item.value){
+                item.value = ""javascript:void(0)"";
+            }
+            return item;
+        })
+    }",javascript,3,0.98,4
+"def tags_to_boolean_features(object_tags, all_known_tags):
+    # Not scalable, but making hash tables for ~100 tags is an overkill
+    features = np.array( [0] * len(all_known_tags) )
+    for tag in object_tags:
+        try:
+            features[all_known_tags.index(tag)] = 1
+        except IndexError:
+            pass
+    return features",python,2,0.97,4
+"def _is_private_ip_literal(host: str) -> bool:
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    return any(ip in network for network in _PRIVATE_NETWORKS)",python,0,0.18,85267
+"def rainbow():
+    while True:
+        h = time.time() * 50
+        for channel in range(4):
+            for pixel in range(16):
+                hue = (h + (channel * 64) + (pixel * 4)) % 360
+                r, g, b = [int(c * 255) for c in hsv_to_rgb(hue/360.0, 1.0, 1.0)]
+                mote.set_pixel(channel + 1, pixel, r, g, b)
+        mote.show()
+        if btn1 != 'r':
+            mote.clear()
+            mote.show()
+            break
+        time.sleep(0.01)",python,3,0.88,4
+"function generateConfig(name) {
+  var compress = name.indexOf('min') > -1;
+  var config = {
+    entry: './index.js',
+    output: {
+      path: __dirname + '/dist/',
+      filename: name + '.js',
+      sourceMapFilename: name + '.map',
+      library: 'axios',
+      libraryTarget: 'umd',
+      globalObject: 'this',
+    },
+    node: false,
+    devtool: 'source-map',
+    mode: compress ? 'production' : 'development',
+  };
+  return config;
+}",javascript,1,0.06,109231
+"var logger = function(params){
+  this.config = params || {
+      enabled: true
+    };
+}",javascript,3,0.73,4
+"def main():
+    if args.dump_sysinfo:
+        filename = launch_utils.dump_sysinfo()
+
+        print(f""Sysinfo saved as {filename}. Exiting..."")
+
+        exit(0)
+
+    launch_utils.startup_timer.record(""initial startup"")
+
+    with launch_utils.startup_timer.subcategory(""prepare environment""):
+        if not args.skip_prepare_environment:
+            prepare_environment()
+
+    if args.test_server:
+        configure_for_tests()
+
+    start()",python,0,0.19,164507
+"def _paragraph_count(value: str) -> int:
+    parsed = int(value)
+    if parsed < 1 or parsed > 10:
+        raise argparse.ArgumentTypeError(
+            f""paragraph-number must be between 1 and 10, got {parsed}""
+        )
+    return parsed",python,1,0.02,102853
+"def get_args(cls, dist, header=None):
+    """"""
+    Yield write_script() argument tuples for a distribution's
+    console_scripts and gui_scripts entry points.
+    """"""
+    if header is None:
+        header = cls.get_header()
+    spec = str(dist.as_requirement())
+    for type_ in 'console', 'gui':
+        group = type_ + '_scripts'
+        for name, ep in dist.get_entry_map(group).items():
+            # ensure_safe_name
+            if re.search(r'[\\/]', name):
+                raise ValueError(""Path separators not allowed in script names"")
+            script_text = TEMPLATE.format(
+                          ep.module_name, ep.attrs[0], '.'.join(ep.attrs),
+                          spec, group, name)
+            args = cls._get_script_args(type_, name, header, script_text)
+            for res in args:
+                yield res",python,1,0.2,97643
+"function retryKVOperation(operation, operationName, maxRetries = 3) {
+  let lastError
+  let retries = maxRetries
+
+  while (retries > 0) {
+    try {
+      return await operation()
+    } catch (err) {
+      lastError = err
+      retries--
+      if (retries > 0) {
+        const delay = (maxRetries - retries + 1) * 5 // 5s, 10s, 15s backoff
+        console.log(
+          `KV ${operationName} failed, retrying in ${delay}s. Error:`,
+          err.message
+        )
+        await new Promise((resolve) => setTimeout(resolve, delay * 1000))
+      }
+    }
+  }
+
+  throw new Error(
+    `Failed to ${operationName} after ${maxRetries} retries: ${lastError?.message}`
+  )
+}",javascript,1,0.03,141750
+"    def get_raw_status(self):
+        """"""Get the dbus properties of timedate1
+        """"""
+        try:
+            properties = self._interface.GetAll('org.freedesktop.timedate1')
+        except dbus.exceptions.DBusException as err:
+            raise err
+        return properties",python,2,0.67,4
+"def apply_rotary_emb(x, cos, sin):
+    assert x.ndim == 4
+    d = x.shape[3] // 2
+    x1, x2 = x[..., :d], x[..., d:]
+    y1 = x1 * cos + x2 * sin
+    y2 = x1 * (-sin) + x2 * cos
+    return torch.cat([y1, y2], 3)",python,0,0.09,93757
+"function addKoHooks() {
+		ko.bindingHandlers.react = {
+			init: function() {
+				return { controlsDescendantBindings: true };
+			},
+			update: function(el, valueAccessor, allBindings) {
+				var Component = ko.unwrap(valueAccessor());
+				var props = ko.toJS(allBindings.get('props'));
+				props.onChange = function(newValue) {
+					if (props.value && ko.isObservable(props.value)) {
+						props.value(newValue);
+					}
+				};
+				ReactDOM.render(React.createElement(Component, props), el);
+			}
+		};
+	}",javascript,2,0.75,4
+"def _positive_int(value: str) -> int:
+    parsed = int(value)
+    if parsed < 1:
+        raise argparse.ArgumentTypeError(f""value must be >= 1, got {parsed}"")
+    return parsed",python,0,0.1,102853
+"def deep_q_learning(sess,
+                    env,
+                    q_estimator,
+                    target_estimator,
+                    state_processor,
+                    saver,
+                    num_episodes,
+                    replay_memory_size=10000,
+                    replay_memory_init_size=1000,
+                    update_target_estimator_every=500,
+                    discount_factor=0.99,
+                    batch_size=16):
+
+    Transition = namedtuple(""Transition"", [""state"", ""action"", ""reward"", ""next_state"", ""done""])
+    replay_memory = []
+    total_t = sess.run(tf.contrib.framework.get_global_step())
+
+    for i_episode in range(num_episodes):
+
+        state = env.reset()
+        state = state_processor.process(sess, state)
+        state = np.stack([state] * 4, axis=2)
+        loss = None
+        total_reward = 0
+        actions_tracker = [0, 1, 2, 3]
+        agent_index = np.random.randint(NUM_HEADS)
+
+        for t in itertools.count():
+
+            if total_t % update_target_estimator_every == 0:
+                copy_model_parameters(sess, q_estimator, target_estimator)
+                print(""\nCopied model parameters to target network."")
+                saver.save(sess, 'docs/dqn-doom-basic', global_step=total_t)
+
+            action = q_estimator.greedy_action(sess, state, agent_index)
+            actions_tracker.append(action)
+            next_state, reward, done, _ = env.step(VALID_ACTIONS[action])
+            next_state = state_processor.process(sess, next_state)
+            next_state = np.append(state[:,:,1:], np.expand_dims(next_state, 2), axis=2)
+
+            if len(replay_memory) == replay_memory_size:
+                replay_memory.pop(0)
+
+            replay_memory.append(Transition(state, action, reward, next_state, done))
+            total_reward += reward
+
+            if total_t > replay_memory_init_size:
+                for agent_train in range(NUM_HEADS):
+                    samples = random.sample(replay_memory, batch_size)
+                    states_batch, action_batch, reward_batch, next_states_batch, done_batch = map(np.array, zip(*samples))
+
+                    q_values_next = q_estimator.predict(sess, next_states_batch, agent_train)
+                    best_actions = np.argmax(q_values_next, axis=1)
+
+                    q_values_next_target = target_estimator.predict(sess, next_states_batch, agent_train)
+                    targets_batch = reward_batch + np.invert(done_batch).astype(np.float32) * \
+                        discount_factor * q_values_next_target[np.arange(batch_size), best_actions]
+
+                    states_batch = np.array(states_batch)
+                    loss = q_estimator.update(sess, states_batch, action_batch, targets_batch, agent_train)
+
+            state = next_state
+            total_t += 1
+
+            if done:
+                print(""Step {} ({}) @ Episode {}/{}, loss: {}"".format(
+                    t, total_t, i_episode + 1, num_episodes, loss), end="", "")
+                print('reward %f, steps %d' % (total_reward, t), end="", "")
+                counts_action = np.bincount(actions_tracker) - 1
+                print('noop %d, shoot %d, right %d, left %d' % \
+                    (counts_action[0], counts_action[1], counts_action[2], counts_action[3]))
+                break",python,3,0.5,4
+"function startsWith(l) {
+  if ((l.length >= 1) && (typeof l === ""string"")) {
+    l = l.toLowerCase().trim();
+
+    const results = [];
+    // @todo: use forEach or for...in
+    for (let i = 0; i <= babyNames.length; i++) {
+      if (babyNames[i].startsWith(l)) {
+        results.push(babyNames[i]);
+      };
+    };
+
+  } else {
+    return `Error parsing ${l}!`;
+  }
+}",javascript,2,0.56,4
+"def set_hermes_home_override(path: str | Path | None) -> Token:
+    """"""Set a context-local Hermes home override and return its reset token.
+
+    This is for in-process, per-task scoping.  It deliberately does not mutate
+    ``os.environ`` because that is shared by every thread in the process.
+    """"""
+    value: str | object = _UNSET if path is None else str(path)
+    return _HERMES_HOME_OVERRIDE.set(value)",python,1,0.05,229692
+"function getrouter() {
+      if (router === null) {
+        router = new Router({
+          caseSensitive: this.enabled('case sensitive routing'),
+          strict: this.enabled('strict routing')
+        });
+      }
+
+      return router;
+    }",javascript,1,0.08,69353
+"var login = function() {
+    var msg = m.prop(""Welcome, please log in below."");
+
+    var vm = {
+        username : m.prop(""""),
+        password : m.prop("""")
+    };
+
+    this.vm = vm;
+    this.msg = msg;
+
+    this.controller = function() {
+        this.login = function() {
+            return xhr.post(""!user-auth"",vm).then(function(json) {
+                if (json.session) {
+                    session.setKey(json.session);
+                    session.setName(vm.username());
+                    m.route(""/todo"");
+                }
+                else {
+                    msg(""invalid username / password"");
+                    //console.log(msg());
+                }
+            });
+        };
+    };
+
+    this.view = function(c) {
+        return [
+            m(""div"", msg()),
+            m(""label"", ""username""),
+            m(""input[type='text']"", { onchange: m.withAttr(""value"", vm.username) }),
+            m(""label"", ""password""),
+            m(""input[type='password']"", { onchange: m.withAttr(""value"", vm.password) }),
+            m(""button"", { onclick: c.login }, ""Log In"")
+        ];
+    };
+}",javascript,2,0.53,4
+"def _record_fallback_event(repo_id):
+    """"""Append `repo_id` to this process's fallback-event file (xdist-safe, best-effort).""""""
+    if not _ci_fallback_events_dir:
+        return
+    worker = os.environ.get(""PYTEST_XDIST_WORKER"", ""main"")
+    try:
+        with open(os.path.join(_ci_fallback_events_dir, f""{worker}-{os.getpid()}.log""), ""a"", encoding=""utf-8"") as fh:
+            fh.write(f""{repo_id}\n"")
+    except OSError:
+        pass",python,1,0.1,164028
+"var ScaffoldList = function() {
+     var vm = new function() {
+         this.list =  m.prop([]);
+     };
+
+    this.controller = function() {
+        new CrudController(""scaffold-entities"", vm).call(this);
+    };
+
+    this.view = function(c) {
+        return c.mount([
+            m(""h1"", ""Entities""),
+            m(""ol"",[
+                vm.list().map(function(entity) {
+                    return m(""li"", [
+                        m(""a"", { href: ""/scaffold/"" + entity, text: entity, config: m.route })
+                    ]);
+                })
+             ])
+        ]);
+    };
+}",javascript,3,0.59,4
+"function cloneCopyEvent( src, dest ) {
+	var type, i, l,
+		events = dataPriv.get( src, ""events"" );
+
+	if ( dest.nodeType !== 1 ) {
+		return;
+	}
+
+	// 1. Copy private data: events, handlers, etc.
+	if ( events ) {
+		dataPriv.remove( dest, ""handle events"" );
+		for ( type in events ) {
+			for ( i = 0, l = events[ type ].length; i < l; i++ ) {
+				jQuery.event.add( dest, type, events[ type ][ i ] );
+			}
+		}
+	}
+
+	// 2. Copy user data
+	if ( dataUser.hasData( src ) ) {
+		dataUser.set( dest, jQuery.extend( {}, dataUser.get( src ) ) );
+	}
+}",javascript,0,0.2,59785
+"def index():
+    balance = account.check_balance(api)
+    msgs = account.messages_left(api)
+
+    return render_template('send.html', balance=str(balance), messages_left=str(msgs))",python,3,0.54,4
+"async def send_socket_catch_exception(function, message):
+    try:
+        await function(message)
+    except (aiohttp.ClientError, aiohttp.ClientPayloadError, ConnectionResetError, BrokenPipeError, ConnectionError) as err:
+        logging.warning(""send error: {}"".format(err))",python,0,0.29,127142
+"function createApplication() {
+  var app = function(req, res, next) {
+    app.handle(req, res, next);
+  };
+
+  mixin(app, EventEmitter.prototype, false);
+  mixin(app, proto, false);
+
+  // expose the prototype that will get set on requests
+  app.request = Object.create(req, {
+    app: { configurable: true, enumerable: true, writable: true, value: app }
+  })
+
+  // expose the prototype that will get set on responses
+  app.response = Object.create(res, {
+    app: { configurable: true, enumerable: true, writable: true, value: app }
+  })
+
+  app.init();
+  return app;
+}",javascript,0,0.29,69353
+"def test_webhook_service_init():
+    """"""Test WebhookDeliveryService initialization""""""
+    print(""\n"" + ""="" * 60)
+    print(""TEST 2: WebhookDeliveryService Initialization"")
+    print(""="" * 60)
+
+    try:
+        from webhook import WebhookDeliveryService
+
+        # Test with default config
+        config = {
+            ""webhooks"": {
+                ""enabled"": True,
+                ""default_url"": None,
+                ""data_in_payload"": False,
+                ""retry"": {
+                    ""max_attempts"": 5,
+                    ""initial_delay_ms"": 1000,
+                    ""max_delay_ms"": 32000,
+                    ""timeout_ms"": 30000
+                },
+                ""headers"": {
+                    ""User-Agent"": ""Crawl4AI-Webhook/1.0""
+                }
+            }
+        }
+
+        service = WebhookDeliveryService(config)
+
+        print(f""✅ Service initialized successfully"")
+        print(f""   - Max attempts: {service.max_attempts}"")
+        print(f""   - Initial delay: {service.initial_delay}s"")
+        print(f""   - Max delay: {service.max_delay}s"")
+        print(f""   - Timeout: {service.timeout}s"")
+
+        # Verify calculations
+        assert service.max_attempts == 5, ""Max attempts should be 5""
+        assert service.initial_delay == 1.0, ""Initial delay should be 1.0s""
+        assert service.max_delay == 32.0, ""Max delay should be 32.0s""
+        assert service.timeout == 30.0, ""Timeout should be 30.0s""
+
+        print(""✅ All configuration values correct"")
+
+        return True
+    except Exception as e:
+        print(f""❌ Service initialization failed: {e}"")
+        import traceback
+        traceback.print_exc()
+        return False",python,1,0.14,77961
+"def common_ksampler(model, seed, steps, cfg, sampler_name, scheduler, positive, negative, latent, denoise=1.0, disable_noise=False, start_step=None, last_step=None, force_full_denoise=False):
+    latent_image = latent[""samples""]
+    latent_image = comfy.sample.fix_empty_latent_channels(model, latent_image, latent.get(""downscale_ratio_spacial"", None), latent.get(""downscale_ratio_temporal"", None))
+
+    if disable_noise:
+        noise = comfy.sample.prepare_empty_noise(latent_image)
+    else:
+        batch_inds = latent[""batch_index""] if ""batch_index"" in latent else None
+        noise = comfy.sample.prepare_noise(latent_image, seed, batch_inds)
+
+    noise_mask = None
+    if ""noise_mask"" in latent:
+        noise_mask = latent[""noise_mask""]
+
+    callback = latent_preview.prepare_callback(model, steps)
+    disable_pbar = not comfy.utils.PROGRESS_BAR_ENABLED
+    samples = comfy.sample.sample(model, noise, steps, cfg, sampler_name, scheduler, positive, negative, latent_image,
+                                  denoise=denoise, disable_noise=disable_noise, start_step=start_step, last_step=last_step,
+                                  force_full_denoise=force_full_denoise, noise_mask=noise_mask, callback=callback, disable_pbar=disable_pbar, seed=seed)
+    out = latent.copy()
+    out.pop(""downscale_ratio_spacial"", None)
+    out.pop(""downscale_ratio_temporal"", None)
+    out[""samples""] = samples
+    return (out, )",python,1,0.14,127142
+"function checkForUpdates(){
+        $.getJSON( checkUpdateURL, function( data ) {
+            if(data.version > currentVersion) snackbar(""SOCVR Alert [Update] ""+data.version+"" - ""+data.summary+"". Click here to update"", function(){
+                document.location = updateURL;
+                $("".socvr-alert-snackbar"").html(""Click here to reload the page after updating"").off(""click"").on(""click"",function(){
+                    document.location.reload();
+                });
+            });
+            else {
+                if(GM_getValue(""socvr-alert-version"") < currentVersion || GM_getValue(""socvr-alert-version"") === undefined){
+                    dialog(""<p>""+data.summary+""</p><p><b>Changelog</b>:""+listify(data.changes)+""</p>"",""Updated SOCVR-Alert to Ver. ""+data.version);
+                    GM_setValue(""socvr-alert-version"", currentVersion);
+                }
+            }
+        });
+    }",javascript,3,0.7,4
+"def _launch_cwd_for_session(source: str) -> Optional[str]:
+    """"""Working directory to stamp on a new session row, or None.
+
+    Only local CLI sessions get a recorded cwd: the directory the process was
+    launched from is meaningful for ``hermes -c`` / ``--resume`` (relaunch
+    where you left off). Gateway/cron/remote-backend sessions have no stable
+    host cwd to restore, so they record nothing.
+
+    ``TERMINAL_ENV`` is set by the CLI's config bridge (``load_cli_config``);
+    a non-""local"" backend (docker/ssh/modal/...) means the host cwd is
+    irrelevant to the agent's tools, so we skip it there too.
+    """"""
+    if source != ""cli"":
+        return None
+    backend = (os.environ.get(""TERMINAL_ENV"") or ""local"").strip().lower()
+    if backend and backend != ""local"":
+        return None
+    try:
+        return os.getcwd()
+    except OSError:
+        # cwd was unlinked out from under us — nothing meaningful to record.
+        return None",python,1,0.17,229692
+"def dict_factory(cursor, row):
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d",python,2,0.69,4
+"def test_imports():
+    """"""Test that all webhook-related modules can be imported""""""
+    print(""="" * 60)
+    print(""TEST 1: Module Imports"")
+    print(""="" * 60)
+
+    try:
+        from webhook import WebhookDeliveryService
+        print(""✅ webhook.WebhookDeliveryService imported successfully"")
+    except Exception as e:
+        print(f""❌ Failed to import webhook module: {e}"")
+        return False
+
+    try:
+        from schemas import WebhookConfig, WebhookPayload
+        print(""✅ schemas.WebhookConfig imported successfully"")
+        print(""✅ schemas.WebhookPayload imported successfully"")
+    except Exception as e:
+        print(f""❌ Failed to import schemas: {e}"")
+        return False
+
+    return True",python,0,0.1,77961
+"function acceptParams (str) {
+  var length = str.length;
+  var colonIndex = str.indexOf(';');
+  var index = colonIndex === -1 ? length : colonIndex;
+  var ret = { value: str.slice(0, index).trim(), quality: 1, params: {} };
+
+  while (index < length) {
+    var splitIndex = str.indexOf('=', index);
+    if (splitIndex === -1) break;
+
+    var colonIndex = str.indexOf(';', index);
+    var endIndex = colonIndex === -1 ? length : colonIndex;
+
+    if (splitIndex > endIndex) {
+      index = str.lastIndexOf(';', splitIndex - 1) + 1;
+      continue;
+    }
+
+    var key = str.slice(index, splitIndex).trim();
+    var value = str.slice(splitIndex + 1, endIndex).trim();
+
+    if (key === 'q') {
+      ret.quality = parseFloat(value);
+    } else {
+      ret.params[key] = value;
+    }
+
+    index = endIndex + 1;
+  }
+
+  return ret;
+}",javascript,1,0.18,69353
+"function setElementHeight() {
+    try {
+      var height = ctrl.height || panel.height || ctrl.row.height;
+      if (_.isString(height)) {
+        height = parseInt(height.replace('px', ''), 10);
+      }
+
+      height -= 5; // padding
+      height -= panel.title ? 24 : 9; // subtract panel title bar
+
+      elem.css('height', height + 'px');
+
+      return true;
+    } catch(e) { // IE throws errors sometimes
+      return false;
+    }
+  }",javascript,2,0.94,4
+"def get_new_setup_py_lines():
+    global version
+    with open('setup.py', 'r') as sf:
+        current_setup = sf.readlines()
+    for line in current_setup:
+        if line.startswith('VERSION = '):
+            major, minor = re.findall(r""VERSION = '(\d+)\.(\d+)'"", line)[0]
+            version = ""{}.{}"".format(major, int(minor) + 1)
+            yield ""VERSION = '{}'\n"".format(version)
+        else:
+            yield line",python,1,0.08,97643
+"def create_padding_mask(source_seq):
+
+    ## put 1 where padded, elementwise
+    padding_mask = tf.cast(tf.equal(source_seq, 0), dtype=tf.float32)
+    return padding_mask",python,3,0.69,4
+"def plotformat(ax):
+    if ax.get_title().strip() != ""Wind Direction"":
+        majorLocator = MultipleLocator(1)
+        ax.yaxis.set_major_locator(majorLocator)
+        ax.minorticks_on()
+        ax.grid(""on"", which='minor', ls='-', alpha=0.2)
+    ax.xaxis.set_major_locator(dates.HourLocator(interval=2))
+    ax.xaxis.set_major_formatter(dates.DateFormatter('%H:%M'))
+    ax.grid(""on"", which='major', ls='-', alpha=0.4)
+    labels = ax.get_xticklabels()
+    plt.setp(labels, rotation=0)",python,3,0.93,4
+"function row(result, baseSha, headSha) {
+  const diffViewUrl = `https://react-builds.vercel.app/commits/${headSha}/files/${result.path}?compare=${baseSha}`;
+  const rowArr = [
+    `| [${result.path}](${diffViewUrl})`,
+    `**${change(result.change)}**`,
+    `${kbs(result.baseSize)}`,
+    `${kbs(result.headSize)}`,
+    `${change(result.changeGzip)}`,
+    `${kbs(result.baseSizeGzip)}`,
+    `${kbs(result.headSizeGzip)}`,
+  ];
+  return rowArr.join(' | ');
+}",javascript,1,0.12,247209
+"function createDisabledPseudo( disabled ) {
+
+	// Known :disabled false positives: fieldset[disabled] > legend:nth-of-type(n+2) :can-disable
+	return function( elem ) {
+
+		// Only certain elements can match :enabled or :disabled
+		// https://html.spec.whatwg.org/multipage/scripting.html#selector-enabled
+		// https://html.spec.whatwg.org/multipage/scripting.html#selector-disabled
+		if ( ""form"" in elem ) {
+
+			// Check for inherited disabledness on relevant non-disabled elements:
+			// * listed form-associated elements in a disabled fieldset
+			//   https://html.spec.whatwg.org/multipage/forms.html#category-listed
+			//   https://html.spec.whatwg.org/multipage/forms.html#concept-fe-disabled
+			// * option elements in a disabled optgroup
+			//   https://html.spec.whatwg.org/multipage/forms.html#concept-option-disabled
+			// All such elements have a ""form"" property.
+			if ( elem.parentNode && elem.disabled === false ) {
+
+				// Option elements defer to a parent optgroup if present
+				if ( ""label"" in elem ) {
+					if ( ""label"" in elem.parentNode ) {
+						return elem.parentNode.disabled === disabled;
+					} else {
+						return elem.disabled === disabled;
+					}
+				}
+
+				// Support: IE 6 - 11+
+				// Use the isDisabled shortcut property to check for disabled fieldset ancestors
+				return elem.isDisabled === disabled ||
+
+					// Where there is no isDisabled, check manually
+					elem.isDisabled !== !disabled &&
+						inDisabledFieldset( elem ) === disabled;
+			}
+
+			return elem.disabled === disabled;
+
+		// Try to winnow out elements that can't be disabled before trusting the disabled property.
+		// Some victims get caught in our net (label, legend, menu, track), but it shouldn't
+		// even exist on them, let alone have a boolean value.
+		} else if ( ""label"" in elem ) {
+			return elem.disabled === disabled;
+		}
+
+		// Remaining elements are neither :enabled nor :disabled
+		return false;
+	};
+}",javascript,1,0.23,59785
+"function writeHeapSnapshot(filename, options) {
+  if (filename !== undefined) {
+    filename = getValidatedPath(filename);
+  }
+  const optionArray = getHeapSnapshotOptions(options);
+  return triggerHeapSnapshot(filename, optionArray);
+}",javascript,1,0.21,118912
+"function randomAmount(number) {
+  if (typeof number === ""number"" && (number > 0)) {
+    const list = [];
+
+    for (let i = 0; i <= number; i++) {
+      list.push(singleRandom())
+    };
+
+    return list;
+  } else {
+    return `Error parsing ${number}!`;
+  }
+}",javascript,2,0.62,4
+"def list_availability_zone_names():
+    response = ec2client.describe_availability_zones()
+    zones = []
+    for zone in response['AvailabilityZones']:
+        zones.append(zone['ZoneName'])
+    return zones",python,2,0.84,4
+"function createButtonPseudo( type ) {
+	return function( elem ) {
+		return ( nodeName( elem, ""input"" ) || nodeName( elem, ""button"" ) ) &&
+			elem.type === type;
+	};
+}",javascript,1,0.13,59785
+"def add_apt(*paths):
+    """"""Add apt PPAs.
+
+    Parameters
+    ----------
+    *paths : Iterable[str]
+        The PPA paths without the prefixing ``ppa:``.
+    """"""
+    for path in paths:
+        sudo('add-apt-repository -ry ppa:%s' % path)
+        sudo('add-apt-repository -y ppa:%s' % path)
+    sudo('apt update')",python,2,0.8,4
+"    def get_base_parser(self):
+        """"""
+        Get a base parser including some global arguments.
+        """"""
+        parser = QRCodeShellParser(prog = 'qrcode',
+                description='A python app for creating and decoding QR Codes',
+                epilog='See ""qrcode help COMMAND"" for help on a specific comand.',
+                add_help = False
+        )
+        parser.add_argument(
+                '-h', '--help',
+                action='store_true',
+                help=argparse.SUPPRESS,
+        )
+        parser.add_argument(
+                '-v', '--version',
+                action='version',
+                version='0.1',
+        )
+        return parser",python,2,0.82,4
+"def main(argv):
+    parser = argparse.ArgumentParser(
+        description=""Strip torch lib requirements to use installed version.""
+    )
+    parser.add_argument(
+        ""--prefix"",
+        action=""store_true"",
+        help=""Strip prefix matches only (default: False)"",
+    )
+    args = parser.parse_args(argv)
+
+    for file in (
+        *glob.glob(""requirements/**/*.txt"", recursive=True),
+        *glob.glob(""requirements/**/*.in"", recursive=True),
+        *glob.glob(""pyproject.toml""),
+    ):
+        with open(file) as f:
+            lines = f.readlines()
+        if ""torch"" in """".join(lines).lower():
+            with open(file, ""w"") as f:
+                for line in lines:
+                    if (
+                        args.prefix
+                        and not line.lower().strip().startswith(TORCH_LIB_PREFIXES)
+                        or not args.prefix
+                        and ""torch"" not in line.lower()
+                    ):
+                        f.write(line)
+                    else:
+                        print(f"">>> removed from {file}:"", line.strip())",python,1,0.05,88924
+"function normalizeExecArgs(command, options, callback) {
+  validateString(command, 'command');
+  validateArgumentNullCheck(command, 'command');
+
+  if (typeof options === 'function') {
+    callback = options;
+    options = undefined;
+  }
+
+  // Make a shallow copy so we don't clobber the user's options object.
+  options = { __proto__: null, ...options };
+  options.shell = typeof options.shell === 'string' ? options.shell : true;
+
+  return {
+    file: command,
+    options: options,
+    callback: callback,
+  };
+}",javascript,1,0.12,118912
+"def layer_norm(x):
+    eps = 1e-6
+    size = 512
+    # create two learnable parameters to calibrate normalisation
+    alpha = np.ones(size)
+    bias  = np.zeros(size)
+    mean, var = tf.nn.moments(x, axes=[0, 1, 2])
+    standard_dev = tf.sqrt(var)
+    norm = alpha * (x - mean) / (standard_dev + eps) + bias
+    return norm",python,2,0.71,4
+"def should_bundle_tcmalloc() -> bool:
+    import platform
+
+    return (
+        VLLM_TARGET_DEVICE == ""cpu""
+        and sys.platform.startswith(""linux"")
+        and platform.machine() in (""aarch64"", ""x86_64"", ""s390x"")
+    )",python,1,0.12,88924
+"def get_timezone() -> Optional[ZoneInfo]:
+    """"""Return the user's configured ZoneInfo, or None (meaning server-local).
+
+    Resolved once and cached. Call ``reset_cache()`` after config changes.
+    """"""
+    global _cached_tz, _cached_tz_name, _cache_resolved
+    if not _cache_resolved:
+        _cached_tz_name = _resolve_timezone_name()
+        _cached_tz = _get_zoneinfo(_cached_tz_name)
+        _cache_resolved = True
+    return _cached_tz",python,0,0.03,229692
+"const onError = function(error) {
+  notifier.notify({
+    'title': 'Error',
+    'message': 'Compilation failure.'
+  })
+
+  console.log(error)
+  this.emit('end')
+}",javascript,3,0.64,4
+"def test_handle_llm_request_signature():
+    """"""Test that handle_llm_request accepts webhook_config parameter""""""
+    print(""\n"" + ""="" * 60)
+    print(""TEST 2: handle_llm_request Function Signature"")
+    print(""="" * 60)
+
+    try:
+        from api import handle_llm_request
+        import inspect
+
+        sig = inspect.signature(handle_llm_request)
+        params = list(sig.parameters.keys())
+
+        print(f""Function parameters: {params}"")
+
+        if 'webhook_config' in params:
+            print(f""✅ handle_llm_request has webhook_config parameter"")
+
+            # Check that it's optional with default None
+            webhook_param = sig.parameters['webhook_config']
+            if webhook_param.default is None or webhook_param.default == inspect.Parameter.empty:
+                print(f""✅ webhook_config is optional (default: {webhook_param.default})"")
+            else:
+                print(f""⚠️  webhook_config default is: {webhook_param.default}"")
+
+            return True
+        else:
+            print(f""❌ handle_llm_request missing webhook_config parameter"")
+            return False
+
+    except Exception as e:
+        print(f""❌ Failed: {e}"")
+        import traceback
+        traceback.print_exc()
+        return False",python,1,0.26,77961
+"function maybeLogSummary() {
+  if (process.env.CI && errorsPerTests.size > 0) {
+    const sha = getHeadSha()
+    const [owner, repo] = (process.env.GITHUB_REPOSITORY ?? '').split('/')
+
+    const suites = [...errorsPerTests.keys()].sort().map((test) => {
+      const { output, failedCases } = errorsPerTests.get(test)
+      return {
+        testPath: test,
+        mode: process.env.NEXT_TEST_MODE,
+        isTurbopack: !!process.env.IS_TURBOPACK_TEST,
+        isRspack: !!process.env.NEXT_RSPACK,
+        isExperimental: process.env.__NEXT_CACHE_COMPONENTS === 'true',
+        isPPR: process.env.__NEXT_EXPERIMENTAL_PPR === 'true',
+        failedCases,
+        resultMessage: ['```', output.replace(ANSI_RE, ''), '```'].join('\n'),
+      }
+    })
+
+    let summary = buildTestReport({
+      owner,
+      repo,
+      sha,
+      suites,
+    })
+
+    if (Buffer.byteLength(summary, 'utf8') > MAX_SUMMARY_BYTES) {
+      const truncated = Buffer.from(summary, 'utf8')
+        .subarray(
+          0,
+          MAX_SUMMARY_BYTES - Buffer.byteLength(SUMMARY_TRUNCATION_NOTICE)
+        )
+        .toString('utf8')
+        // A multi-byte character cut at the boundary decodes to U+FFFD.
+        .replace(/�$/, '')
+      summary = truncated + SUMMARY_TRUNCATION_NOTICE
+    }
+
+    await core.summary.addRaw(summary).write()
+  }
+}",javascript,1,0.01,141750
+"def menu():
+	print ('-------------------------------------------')
+	print (' Fiberhome - Habilitar gerencia web na ONU ')
+	print ('-------------------------------------------')
+	HOST = raw_input(""IP da olt: "")
+	slot = raw_input(""Numero do slot da placa PON: "")
+	pon = raw_input(""Numero da porta PON: "")
+	onu = raw_input(""ID da ONU: "")
+	httpport = raw_input('Porta http (padrao porta '+HTTPDEFAULT+'): ')
+	set_config(HOST,slot,pon,onu,httpport)
+	return 0",python,2,0.6,4
+"def validation_exception_handler(request: Request, e: RequestValidationError):
+    return JSONResponse(
+        status_code=400,
+        content=utils.get_response(
+            status=400, data=e.errors(), message=""field required""
+        ),
+    )",python,1,0.02,102853
+"    private static boolean buscaAnagrama(String palabra, String cadena) {
+        boolean esAnagrama = false;
+        int contiene = 0;
+        if(palabra.length()==cadena.length()) {
+            for(int x = 0; x < cadena.length(); x++){
+                String letra = """" + palabra.charAt(x);
+                if(cadena.contains(letra)){
+                    contiene++;
+                }
+            }
+        }
+        if(contiene==palabra.length()) {
+            esAnagrama = true;
+        }
+        return esAnagrama;
+    }",java,3,0.98,4
+"def plot_value_function(V, title=""Value Function""):
+    """"""
+    Plots the value function as a surface plot.
+    """"""
+    min_x = min(k[0] for k in V.keys())
+    max_x = max(k[0] for k in V.keys())
+    min_y = min(k[1] for k in V.keys())
+    max_y = max(k[1] for k in V.keys())
+
+    x_range = np.arange(min_x, max_x + 1)
+    y_range = np.arange(min_y, max_y + 1)
+    X, Y = np.meshgrid(x_range, y_range)
+
+    # Find value for all (x, y) coordinates
+    Z_noace = np.apply_along_axis(lambda _: V[(_[0], _[1], False)], 2, np.dstack([X, Y]))
+    Z_ace = np.apply_along_axis(lambda _: V[(_[0], _[1], True)], 2, np.dstack([X, Y]))
+
+    def plot_surface(X, Y, Z, title):
+        fig = plt.figure(figsize=(20, 10))
+        ax = fig.add_subplot(111, projection='3d')
+        surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1,
+                               cmap=matplotlib.cm.coolwarm, vmin=-1.0, vmax=1.0)
+        ax.set_xlabel('Player Sum')
+        ax.set_ylabel('Dealer Showing')
+        ax.set_zlabel('Value')
+        ax.set_title(title)
+        ax.view_init(ax.elev, -120)
+        fig.colorbar(surf)
+        plt.show()
+
+    plot_surface(X, Y, Z_noace, ""{} (No Usable Ace)"".format(title))
+    plot_surface(X, Y, Z_ace, ""{} (Usable Ace)"".format(title))",python,2,0.99,4
+"def get_missing_precompiled_rust_extension_modules() -> list[str]:
+    present = {
+        path.name.split(""."", 1)[0] for path in get_precompiled_rust_extension_paths()
+    }
+    return [
+        module_name
+        for module_name in rust_build.rust_py_extension_module_names()
+        if module_name not in present
+    ]",python,0,0.21,88924
+"def _find_next_video_url(c):
+    """"""Try different ways to determine the url of the next video.""""""
+    try:
+        next_video_url = sorted(Counter(
+            a.get_property('href')
+            for a in c.find_elements_by_tag_name('a')
+            if a.get_property('href').find('/watch?') >= 0
+        ).items(), key=lambda k: k[1], reverse=True)[0][0]
+    except Exception:
+        pass
+    if next_video_url:
+        return next_video_url
+    next_video_url = browser.find_element_by_class_name('watch-sidebar-body') \
+        .find_element_by_tag_name('a').get_property('href')
+    if next_video_url:
+        return next_video_url",python,3,0.54,4
+"def getWavFiles(filenames_selected, monoURI):
+    _filenames = []
+    if filenames_selected == None:
+        for file in os.listdir(monoURI):
+            if file.endswith("".wav""):
+                _filenames.append(os.path.join(monoURI, file))
+
+    else:
+        for file in filenames_selected:
+            _filenames.append(os.path.join(monoURI, file)) # pre-given set of files
+
+    return _filenames",python,2,0.7,4
+"var bon = function() {
+
+		// 自定义标签(<if></if>, <each></each>)
+		var customTagsReg     	= /(?:<if\s+.*?>(?=[^<>]*<\/?\w)|<\/if>)|<\/?each[^>]*>/g;
+
+		// 获取if标签属性
+		var ifAttributeReg		= /<if\s+(.*)>/g;
+
+		// 获取each标签属性
+		var eachAttributeReg	= /<each\s+([\w.]+)\=['""]?(\w+)['""]?(?:\s+([\w.]+)\=['""]?(\w+)['""]?)*\s*>/g;
+
+		var cache = {};
+		var fieldFn = {};
+
+		var isIE8 = typeof window !== 'undefined' && /msie 8\.0/i.test(window.navigator.userAgent.toLowerCase());
+
+		var symbol = '3F2D04E0-4F8U-11D3-9A0C-0A05E82C33W1';
+
+		function addThisPrefix(exp, data) {	// 全局的表达式前加this
+			return exp.replace(/\b(?:(\w+)([\w.\[\]]*))\b(?!['""])/g, function(x, prefix, other) {
+				return (data[prefix] !== undefined ? 'this.' : '') + prefix + other;
+			});
+		}
+
+		return {
+			render: function(rawHtml, data) {
+				cache[rawHtml] || this.complier(rawHtml, data);
+				return cache[rawHtml].call(data);
+			},
+			complier: function(rawHtml, data) {
+
+				var html = rawHtml.replace(/\s*\n\s*/g, '');//.replace(/'/g, '\\\'');
+
+				//html.split(customTagsReg) 在ie8下会把匹配出来的空字符串给吞掉，故采用此方法兼容
+				var htmlTags 	= isIE8 ? html.replace(customTagsReg, symbol).split(symbol) : html.split(customTagsReg);	// html标签
+				var customTags 	= html.match(customTagsReg);	// 自定义标签（<each><if>）
+
+				var len = Math.max(htmlTags ? htmlTags.length : 0, customTags ? customTags.length : 0);
+
+				var statement = '';
+				for(var i = 0; i < len; i ++) {
+					if(htmlTags && htmlTags[i]) {
+						var hTag = htmlTags[i];
+
+						// 如果大括号的左右标记前带有反斜线, 则忽略此标记
+						// js不支持逆向环视,故改用这种方式
+						hTag = hTag.replace(/([^\\]|^){(.*?[^\\])(?:\:(\w+[^\\]))?}/g, function(x, other, expression, fn) {	// 取冒号前面的表达式（如果有冒号）
+
+							expression = addThisPrefix(expression, data);
+							return [other, ""' + "", (fieldFn[fn] || """"), ""("", expression, "") + '""].join('');
+						});
+						statement += ""compilerTpl += ('"" + hTag + ""'); \n"";
+					}
+					if(customTags && customTags[i]) {
+						var cTag = customTags[i];
+						cTag = cTag.replace(eachAttributeReg, function(x, arr, item, count, index) {
+
+							arr = addThisPrefix(arr, data);
+
+							var id 			= 'v_' + Math.random().toString(36).slice(2, 8);
+							var arrVar 		= id + '_arr';
+							var itemVar		= id + '_' + item + '_it';
+							var indexVar	= index || (id + '_i');
+							return 	'var ' + arrVar + ' = ' + arr + '; \n' +
+									(count === undefined ? '' : '	var ' + count + ' = ' + arrVar + '.length;\n') +
+									'for(var ' + indexVar + ' = 0; ' + indexVar + ' < ' + arrVar + '.length; ' + indexVar + ' ++) {\n' +
+									'	var ' + item + ' = ' + arrVar + '[' + indexVar + '];\n';
+						});
+
+						cTag = cTag.replace(ifAttributeReg, function(x, ifExpression) {
+							ifExpression = addThisPrefix(ifExpression, data);
+							return 'if(' + ifExpression + ') {\n';
+						}).replace(/<\/if>/g, '}\n').replace(/<\/each>/g, '}\n');
+
+						statement += cTag;
+					}
+				}
+
+				var statementHeader = 'var compilerTpl = """";\n';
+				var statementFooter = 'return compilerTpl;\n';
+
+				cache[rawHtml] = new Function(statementHeader + statement + statementFooter);
+				statement = statementHeader = statementFooter = customTags = htmlTags = null;
+			},
+			addFun: function(fns) {
+				for(var fnName in fns) {
+					fieldFn[fnName] = fns[fnName];
+				}
+			}
+		};
+	}",javascript,2,0.56,4
+"def check_case(context):
+	#Armature in pose mode
+	if len(context.selected_objects) == 1 and context.selected_objects[0].type == 'ARMATURE' and context.mode == 'POSE' and len(context.selected_pose_bones) != 0:
+		return True, 'BONES'
+	elif len(context.selected_objects) != 0 and context.mode == 'OBJECT':
+		# Objects
+		types = [obj.type for obj in context.selected_objects]
+		if 'ARMATURE' in types:
+			types.remove('ARMATURE')
+		if len(types) != 0:
+			return True, 'OBJ'
+
+	# poll KO
+	return False, 'DUMMY'",python,2,0.69,4
+"def _reverse_alias_for_display(model_name: str) -> str:
+    """"""Return the shortest configured alias for ``model_name``, or ``model_name``.
+
+    Looks up both ``model_aliases:`` (dict-based, full DirectAlias entries)
+    and ``model.aliases:`` (string-based, set via ``hermes config set``)
+    from config.yaml. Multiple aliases pointing at the same model — the
+    shortest wins, so ``opus47`` beats ``palantir-claude47``.
+    """"""
+    global _REVERSE_ALIAS_CACHE
+    if not model_name:
+        return model_name
+    if _REVERSE_ALIAS_CACHE is None:
+        rmap: dict[str, str] = {}
+        try:
+            from hermes_cli.config import load_config
+            cfg = load_config() or {}
+            ma = cfg.get(""model_aliases"")
+            if isinstance(ma, dict):
+                for alias, entry in ma.items():
+                    if isinstance(entry, dict):
+                        m = str(entry.get(""model"", """") or """").strip()
+                        if m and (m not in rmap or len(alias) < len(rmap[m])):
+                            rmap[m] = alias
+            mdl = cfg.get(""model"", {}) or {}
+            if isinstance(mdl, dict):
+                simple = mdl.get(""aliases"")
+                if isinstance(simple, dict):
+                    for alias, val in simple.items():
+                        if isinstance(val, str) and val.strip():
+                            v = val.strip()
+                            m = v.split(""/"", 1)[1] if ""/"" in v else v
+                            if m and (m not in rmap or len(alias) < len(rmap[m])):
+                                rmap[m] = alias
+        except Exception:
+            pass
+        _REVERSE_ALIAS_CACHE = rmap
+    return _REVERSE_ALIAS_CACHE.get(model_name, model_name)",python,0,0.27,229692
+"function compileQueryParser(val) {
+  var fn;
+
+  if (typeof val === 'function') {
+    return val;
+  }
+
+  switch (val) {
+    case true:
+    case 'simple':
+      fn = querystring.parse;
+      break;
+    case false:
+      break;
+    case 'extended':
+      fn = parseExtendedQueryString;
+      break;
+    default:
+      throw new TypeError('unknown value for query parser function: ' + val);
+  }
+
+  return fn;
+}",javascript,0,0.14,69353
+"def apply_nesterov_momentum(updates, params=None, momentum=0.9):
+    """"""Returns a modified update dictionary including Nesterov momentum
+    Generates update expressions of the form:
+    * ``velocity := momentum * velocity + updates[param] - param``
+    * ``param := param + momentum * velocity + updates[param] - param``
+    Parameters
+    ----------
+    updates : OrderedDict
+        A dictionary mapping parameters to update expressions
+    params : iterable of shared variables, optional
+        The variables to apply momentum to. If omitted, will apply
+        momentum to all `updates.keys()`.
+    momentum : float or symbolic scalar, optional
+        The amount of momentum to apply. Higher momentum results in
+        smoothing over more update steps. Defaults to 0.9.
+    Returns
+    -------
+    OrderedDict
+        A copy of `updates` with momentum updates for all `params`.
+    Notes
+    -----
+    Higher momentum also results in larger update steps. To counter that,
+    you can optionally scale your learning rate by `1 - momentum`.
+    The classic formulation of Nesterov momentum (or Nesterov accelerated
+    gradient) requires the gradient to be evaluated at the predicted next
+    position in parameter space. Here, we use the formulation described at
+    https://github.com/lisa-lab/pylearn2/pull/136#issuecomment-10381617,
+    which allows the gradient to be evaluated at the current parameters.
+    See Also
+    --------
+    nesterov_momentum : Shortcut applying Nesterov momentum to SGD updates
+    """"""
+    if params is None:
+        params = updates.keys()
+    updates = OrderedDict(updates)
+
+    for param in params:
+        value = param.get_value(borrow=True)
+        velocity = theano.shared(np.zeros(value.shape, dtype=value.dtype),
+                                 broadcastable=param.broadcastable)
+        x = momentum * velocity + updates[param] - param
+        updates[velocity] = x
+        updates[param] = momentum * x + updates[param]
+
+    return updates",python,2,0.91,4
+"def getTimeStamps(audioSamples,  feature_series):
+    '''
+    utility
+    '''
+    duration = essentia.standard.Duration()
+    duration_ = duration(audioSamples)
+    timestamps = np.arange(len(feature_series)) / float(len(feature_series)) * duration_
+    timestamps += (float(Parameters.wSize / 2) / Parameters.fs)
+    return timestamps",python,2,0.86,4
+"def restart_nginx():
+    with settings(warn_only=True):
+        sudo('pkill nginx')
+
+    sudo('nginx -c combine/etc/nginx.conf -p `pwd`')",python,2,0.68,4
+"def sample_toolsets_from_distribution(distribution_name: str) -> List[str]:
+    """"""
+    Sample toolsets based on a distribution's probabilities.
+
+    Each toolset in the distribution has a % chance of being included.
+    This allows multiple toolsets to be active simultaneously.
+
+    Args:
+        distribution_name (str): Name of the distribution to sample from
+
+    Returns:
+        List[str]: List of sampled toolset names
+
+    Raises:
+        ValueError: If distribution name is not found
+    """"""
+    dist = get_distribution(distribution_name)
+    if not dist:
+        raise ValueError(f""Unknown distribution: {distribution_name}"")
+
+    # Sample each toolset independently based on its probability
+    selected_toolsets = []
+
+    for toolset_name, probability in dist[""toolsets""].items():
+        # Validate toolset exists
+        if not validate_toolset(toolset_name):
+            print(f""⚠️  Warning: Toolset '{toolset_name}' in distribution '{distribution_name}' is not valid"")
+            continue
+
+        # Roll the dice - if random value is less than probability, include this toolset
+        if random.random() * 100 < probability:
+            selected_toolsets.append(toolset_name)
+
+    # If no toolsets were selected (can happen with low probabilities),
+    # ensure at least one toolset is selected by picking the highest probability one
+    if not selected_toolsets and dist[""toolsets""]:
+        # Find toolset with highest probability
+        highest_prob_toolset = max(dist[""toolsets""].items(), key=lambda x: x[1])[0]
+        if validate_toolset(highest_prob_toolset):
+            selected_toolsets.append(highest_prob_toolset)
+
+    return selected_toolsets",python,1,0.22,229692
+"var getNewID = function(json) {
+            suiteGlobals.lastTodoID = json.nr;
+            suiteGlobals.lastTodoTxt = todoTxt;
+            return json
+        }",javascript,2,0.73,4
+"function serializeObject(obj, maxDepth) {
+  var seen = [];
+
+  // There is no direct way to stringify object until reaching a specific depth
+  // and a very deep object can cause a performance issue, so we copy the object
+  // based on this specific depth and then stringify it.
+  if (isValidObjectMaxDepth(maxDepth)) {
+    // This file is also included in `angular-loader`, so `copy()` might not always be available in
+    // the closure. Therefore, it is lazily retrieved as `angular.copy()` when needed.
+    obj = angular.copy(obj, null, maxDepth);
+  }
+  return JSON.stringify(obj, function(key, val) {
+    val = toJsonReplacer(key, val);
+    if (isObject(val)) {
+
+      if (seen.indexOf(val) >= 0) return '...';
+
+      seen.push(val);
+    }
+    return val;
+  });
+}",javascript,1,0.15,58551
+"def decimalToSex(inp, rd):
+    d = int(inp)
+    inp = inp % 1
+    m = str(int(inp * 60))
+    m = m.zfill(2)
+    s = round(((inp * 60) % 1) * 60, 2)
+    if rd == ""d"":
+        s = str(round(s, 1))
+        s = s.zfill(4)
+        if d > 0:
+            d = ""+"" + str(d)
+    if rd == ""r"":
+        s = str(s).zfill(5)
+    return ""%s:%s:%s"" % (d, m, s)",python,3,0.77,4
+"def python_from_dbus(obj):
+    """"""dbus object to Python object conversion, simplified version from
+    http://www.programcreek.com/python/example/13530/dbus.Boolean
+    """"""
+    if isinstance(obj, dbus.Boolean):
+        python_obj = bool(obj)
+    elif isinstance(object, dbus.String):
+        python_obj = str(obj)
+    elif isinstance(obj, (dbus.Byte,
+                          dbus.Int16,
+                          dbus.Int32,
+                          dbus.Int64,
+                          dbus.UInt16,
+                          dbus.UInt32,
+                          dbus.UInt64)):
+        python_obj = int(obj)
+    elif isinstance(obj, dbus.Double):
+        python_obj = float(obj)
+    else:
+        raise TypeError(""Unhandled %s"" % obj)
+    return python_obj",python,3,0.79,4
+"    def __init__(
+        self,
+        session_manager,
+        memory_manager,
+        chat_processor,
+        research_handler,
+        preset_manager,
+        upload_handler,
+    ):
+        self.session_manager = session_manager
+        self.memory_manager = memory_manager
+        self.chat_processor = chat_processor
+        self.research_handler = research_handler
+        self.preset_manager = preset_manager
+        self.upload_handler = upload_handler",python,0,0.08,85267
+"def is_text_file(filepath):
+    # Check for binary file by scanning for null bytes.
+    try:
+        with open(filepath, 'rb') as f:
+            chunk = f.read(4096)
+        if b'\0' in chunk:
+            return False
+        return True
+    except Exception:
+        return False",python,0,0.24,148633
+"async def _call_teacher(teacher_model_spec: str, prompt: str,
+                        owner: Optional[str] = None) -> Optional[str]:
+    """"""Call the configured teacher endpoint with the escalation prompt.""""""
+    from src.llm_core import llm_call_async
+    from src.ai_interaction import _resolve_model
+    from src.agent_tools.model_interaction_tools import _TEACHER_SYSTEM_PROMPT
+    try:
+        url, model, headers = await asyncio.to_thread(_resolve_model, teacher_model_spec, owner=owner)
+    except Exception as e:
+        logger.warning(f""teacher endpoint not resolvable ({teacher_model_spec!r}): {e}"")
+        return None
+    try:
+        return await llm_call_async(
+            url, model,
+            [
+                {""role"": ""system"", ""content"": _TEACHER_SYSTEM_PROMPT},
+                {""role"": ""user"", ""content"": prompt},
+            ],
+            headers=headers,
+            timeout=120,
+        )
+    except Exception as e:
+        logger.warning(f""teacher call failed: {e}"")
+        return None",python,0,0.23,85267
+"def load_module_from_path(module_name, path):
+    spec = importlib.util.spec_from_file_location(module_name, path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module",python,0,0.21,88924
+"function createConfig() {
+  const jestDefaultConfig = await createJestDefaultConfig()
+  /** @type {import('jest').Config} */
+  const customConfig = {
+    ...jestDefaultConfig,
+    displayName: 'Turbopack',
+    setupFiles: [
+      ...(jestDefaultConfig.setupFiles ?? []),
+      '<rootDir>/jest-setup-files.turbopack.js',
+    ],
+  }
+
+  return customConfig
+}",javascript,0,0.17,141750
+"function arrayAggregator(array, setter, iteratee, accumulator) {
+    var index = -1,
+        length = array == null ? 0 : array.length;
+
+    while (++index < length) {
+      var value = array[index];
+      setter(accumulator, value, iteratee(value), array);
+    }
+    return accumulator;
+  }",javascript,1,0.14,61321
+"def _sanitize_schema_token(value: Any, limit: int = _MCP_TOKEN_MAX) -> str:
+    """"""Make an untrusted JSON-Schema token safe to splice into the prompt.
+
+    Replaces control chars / newlines with a space, collapses whitespace, and
+    length-caps the result, so a weird field name or type cannot inject newlines
+    or run on. Normal short identifiers pass through unchanged.
+    """"""
+    text = re.sub(r""[\x00-\x1f\x7f]+"", "" "", str(value))
+    text = re.sub(r""\s+"", "" "", text).strip()
+    if len(text) > limit:
+        text = text[:limit].rstrip() + ""…""
+    return text",python,1,0.04,85267
+"function startCpuProfile(options) {
+  const {
+    samplingIntervalMicros,
+    maxSamples,
+  } = normalizeCpuProfileOptions(options);
+  const id = _startCpuProfile(samplingIntervalMicros, maxSamples);
+  return new SyncCPUProfileHandle(id);
+}",javascript,1,0.11,118912
+"def apply_patch():
+    # Create a monkey patch for the internal _tkinter module
+    original_init = tkinter.Tk.__init__
+
+    def patched_init(self, *args, **kwargs):
+        # Call the original init
+        original_init(self, *args, **kwargs)
+
+        # Define the missing ::tk::ScreenChanged procedure
+        self.tk.eval(""""""
+        if {[info commands ::tk::ScreenChanged] == """"} {
+            proc ::tk::ScreenChanged {args} {
+                # Do nothing
+                return
+            }
+        }
+        """""")
+
+    # Apply the monkey patch
+    tkinter.Tk.__init__ = patched_init",python,0,0.29,95895
+"def get_member(member_id):
+    db = get_db()
+    member_cur = db.execute('select id, name, email, level from members where id = ?', [member_id])
+    member = member_cur.fetchone()
+
+    return jsonify({'member' : {'id' : member['id'], 'name' : member['name'], 'email' : member['email'], 'level' : member['level']}})",python,2,0.97,4
+"def read_if_exists(path: str) -> str:
+    """"""Read file if it exists, return empty string otherwise.""""""
+    try:
+        with open(path, ""r"", encoding=""utf-8"") as f:
+            return f.read().strip()
+    except Exception:
+        return """"",python,1,0.04,85267
+"function makeToggleButton (selector, ifTrue, ifFalse) {
+  return (isOpen) => div(selector, { attrs: { class: 'button' } },
+    isOpen ? makeInnerButton(ifTrue) : makeInnerButton(ifFalse)
+  )
+}",javascript,2,0.71,4
+"def download_data(num_shards, download_workers=8):
+    """"""Download training shards + pinned validation shard.""""""
+    os.makedirs(DATA_DIR, exist_ok=True)
+    num_train = min(num_shards, MAX_SHARD)
+    ids = list(range(num_train))
+    if VAL_SHARD not in ids:
+        ids.append(VAL_SHARD)
+
+    # Count what's already downloaded
+    existing = sum(1 for i in ids if os.path.exists(os.path.join(DATA_DIR, f""shard_{i:05d}.parquet"")))
+    if existing == len(ids):
+        print(f""Data: all {len(ids)} shards already downloaded at {DATA_DIR}"")
+        return
+
+    needed = len(ids) - existing
+    print(f""Data: downloading {needed} shards ({existing} already exist)..."")
+
+    workers = max(1, min(download_workers, needed))
+    with Pool(processes=workers) as pool:
+        results = pool.map(download_single_shard, ids)
+
+    ok = sum(1 for r in results if r)
+    print(f""Data: {ok}/{len(ids)} shards ready at {DATA_DIR}"")",python,1,0.06,93757
+"function isArrayBufferView(val) {
+  let result;
+  if (typeof ArrayBuffer !== 'undefined' && ArrayBuffer.isView) {
+    result = ArrayBuffer.isView(val);
+  } else {
+    result = val && val.buffer && isArrayBuffer(val.buffer);
+  }
+  return result;
+}",javascript,0,0.24,109231
+"function withPlugins(
+  fn,
+  optionsArgumentIndex = 1, // Usually `options` is the 2nd argument
+) {
+  // Returns Promises to consistent with functions in `index.js`
+  return async (...args) => {
+    const options = args[optionsArgumentIndex] ?? {};
+    const plugins = options.plugins ?? [];
+
+    args[optionsArgumentIndex] = {
+      ...options,
+      plugins: Array.isArray(plugins) ? plugins : Object.values(plugins),
+    };
+
+    return await fn(...args);
+  };
+}",javascript,1,0.14,52196
+"def count_common_tags(input_objects):
+    counter = Counter()
+    for obj in input_objects:
+        for tag in obj:
+            counter[tag] += 1
+    return counter",python,2,0.73,4
+"function fork(modulePath, args = [], options) {
+  modulePath = getValidatedPath(modulePath, 'modulePath');
+
+  // Get options and args arguments.
+  let execArgv;
+
+  if (args == null) {
+    args = [];
+  } else if (typeof args === 'object' && !ArrayIsArray(args)) {
+    options = args;
+    args = [];
+  } else {
+    validateArray(args, 'args');
+  }
+
+  if (options != null) {
+    validateObject(options, 'options');
+  }
+  options = { __proto__: null, ...options, shell: false };
+  options.execPath ||= process.execPath;
+  validateArgumentNullCheck(options.execPath, 'options.execPath');
+
+  // Prepare arguments for fork:
+  execArgv = options.execArgv || process.execArgv;
+  validateArgumentsNullCheck(execArgv, 'options.execArgv');
+
+  if (execArgv === process.execArgv && process._eval != null) {
+    const index = ArrayPrototypeLastIndexOf(execArgv, process._eval);
+    if (index > 0) {
+      // Remove the -e switch to avoid fork bombing ourselves.
+      execArgv = ArrayPrototypeSlice(execArgv);
+      ArrayPrototypeSplice(execArgv, index - 1, 2);
+    }
+  }
+
+  args = [...execArgv, modulePath, ...args];
+
+  if (typeof options.stdio === 'string') {
+    options.stdio = stdioStringToArray(options.stdio, 'ipc');
+  } else if (!ArrayIsArray(options.stdio)) {
+    // Use a separate fd=3 for the IPC channel. Inherit stdin, stdout,
+    // and stderr from the parent if silent isn't set.
+    options.stdio = stdioStringToArray(
+      options.silent ? 'pipe' : 'inherit',
+      'ipc');
+  } else if (!ArrayPrototypeIncludes(options.stdio, 'ipc')) {
+    throw new ERR_CHILD_PROCESS_IPC_REQUIRED('options.stdio');
+  }
+
+  return spawn(options.execPath, args, options);
+}",javascript,1,0.23,118912
+"    public static int devuelveMayor(int[] a){
+        Arrays.sort(a);
+        return a[MAX-1];
+    }",java,3,0.74,4
+"def parse_command_line():
+    parser = argparse.ArgumentParser(
+        description='Follow who he follow, star what he star',
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+    parser.add_argument('-a', '--auth',
+                        metavar='USERNAME',
+                        help='your github account username')
+    parser.add_argument('target',
+                        metavar='TARGET',
+                        help='the target you want to copy')
+
+    args = parser.parse_args()
+
+    password = getpass.getpass('Enter your Github account password: ') if args.auth else None
+    return args.auth, password, args.target",python,3,0.99,4
+"def file_to_data_url(path: str, mime: str) -> str:
+    """"""Convert file to data URL.""""""
+    with open(path, ""rb"") as f:
+        b64 = base64.b64encode(f.read()).decode(""ascii"")
+    return f""data:{mime};base64,{b64}""",python,1,0.1,85267
+"def get_version():
+    command = [""git"", ""describe"", ""--tags""]
+    try:
+        version = subprocess.check_output(command).decode().strip()
+        version_parts = version.split(""-"")
+        if len(version_parts) > 1 and version_parts[0].startswith(""mineru""):
+            return version_parts[1]
+        else:
+            raise ValueError(f""Invalid version tag {version}. Expected format is mineru-<version>-released."")
+    except Exception as e:
+        print(e)
+        return ""0.0.0""",python,0,0.12,77486
+"	def draw(self, context):
+		layout = self.layout
+		row = layout.row()
+		row.prop(self, ""update"", text=""Update KeyingSet if already exists"")
+		row = layout.row()
+		row.prop(self, ""name"")
+		row = layout.row()
+		row.prop(self, ""location"")
+		row.prop(self, ""rotation"")
+		row.prop(self, ""scale"")
+		row = layout.row()
+		if check_case(context)[1] == ""BONES"":
+			row.prop(self, ""bone_custom_props"")
+		else:
+			row.prop(self, ""obj_custom_props"")
+			row = layout.row()
+			row.prop(self, ""data_custom_props"")
+		row = layout.row()
+		row.prop(self, ""only_non_locked"")",python,3,0.83,4
+"def clean_dir(src_dir, directory):
+    if os.path.exists(directory):
+        print(""Cleaning directory: "" + directory + ""\n"")
+        for f in os.listdir(directory):
+            target_file = os.path.join(directory, f)
+            if not os.path.isdir(target_file) and not f.lower().endswith("".py""):
+                os.remove(os.path.join(directory, f))
+        for f in os.listdir(src_dir):
+            src_file = os.path.join(src_dir, f)
+            if not os.path.isdir(src_file) and \
+                    not(f.lower().endswith("".py"") or f.lower().endswith("".pyc"")):
+                copyfile(src_file, os.path.join(directory, f))",python,3,0.95,4
+"function listEvals() {
+  return fs
+    .readdirSync(FIXTURES_DIR, { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .map((d) => d.name)
+}",javascript,1,0.13,141750
+"def star_him(s, target):
+    print('>> ******\n>> He starred ...')
+    resp = s.get(GITHUB_API_PROXY + '/users/%s/starred' % target)
+    starred_list = [repo['full_name'] for repo in resp.json()]
+    for repo in starred_list:
+        if USERNAME:
+            s.put(GITHUB_API_PROXY + '/user/starred/%s' % repo)
+        print(repo)
+    if USERNAME:
+        print('>> starring done\n')",python,2,0.7,4
+"def muon_step_fused(stacked_grads, stacked_params, momentum_buffer, second_momentum_buffer,
+                    momentum_t, lr_t, wd_t, beta2_t, ns_steps, red_dim):
+    # Nesterov momentum
+    momentum = momentum_t.to(stacked_grads.dtype)
+    momentum_buffer.lerp_(stacked_grads, 1 - momentum)
+    g = stacked_grads.lerp_(momentum_buffer, momentum)
+    # Polar express orthogonalization
+    X = g.bfloat16()
+    X = X / (X.norm(dim=(-2, -1), keepdim=True) * 1.02 + 1e-6)
+    if g.size(-2) > g.size(-1):
+        for a, b, c in polar_express_coeffs[:ns_steps]:
+            A = X.mT @ X
+            B = b * A + c * (A @ A)
+            X = a * X + X @ B
+    else:
+        for a, b, c in polar_express_coeffs[:ns_steps]:
+            A = X @ X.mT
+            B = b * A + c * (A @ A)
+            X = a * X + B @ X
+    g = X
+    # NorMuon variance reduction
+    beta2 = beta2_t.to(g.dtype)
+    v_mean = g.float().square().mean(dim=red_dim, keepdim=True)
+    red_dim_size = g.size(red_dim)
+    v_norm_sq = v_mean.sum(dim=(-2, -1), keepdim=True) * red_dim_size
+    v_norm = v_norm_sq.sqrt()
+    second_momentum_buffer.lerp_(v_mean.to(dtype=second_momentum_buffer.dtype), 1 - beta2)
+    step_size = second_momentum_buffer.clamp_min(1e-10).rsqrt()
+    scaled_sq_sum = (v_mean * red_dim_size) * step_size.float().square()
+    v_norm_new = scaled_sq_sum.sum(dim=(-2, -1), keepdim=True).sqrt()
+    final_scale = step_size * (v_norm / v_norm_new.clamp_min(1e-10))
+    g = g * final_scale.to(g.dtype)
+    # Cautious weight decay + parameter update
+    lr = lr_t.to(g.dtype)
+    wd = wd_t.to(g.dtype)
+    mask = (g * stacked_params) >= 0
+    stacked_params.sub_(lr * g + lr * wd * stacked_params * mask)",python,0,0.16,93757
+"var setDefaultConfig = function(server, cb){
+    server.configDefaults.map(function(defaultProp) {
+        server.config[defaultProp.name] = typeof server.config[defaultProp.name] !== 'undefined' ? server.config[defaultProp.name] : defaultProp.defaultVal;
+    });
+    cb(null);
+}",javascript,3,0.8,4
+"def copy_model_parameters(sess, estimator1, estimator2):
+    e1_params = [t for t in tf.trainable_variables() if t.name.startswith(estimator1.scope)]
+    e1_params = sorted(e1_params, key=lambda v: v.name)
+    e2_params = [t for t in tf.trainable_variables() if t.name.startswith(estimator2.scope)]
+    e2_params = sorted(e2_params, key=lambda v: v.name)
+
+    update_ops = []
+    for e1_v, e2_v in zip(e1_params, e2_params):
+        op = e2_v.assign(e1_v)
+        update_ops.append(op)
+
+    sess.run(update_ops)",python,2,0.63,4
+"def _resolve_timezone_name() -> str:
+    """"""Read the configured IANA timezone string (or empty string).
+
+    This does file I/O when falling through to config.yaml, so callers
+    should cache the result rather than calling on every ``now()``.
+    """"""
+    # 1. Environment variable (highest priority — set by Supervisor, etc.)
+    tz_env = os.getenv(""HERMES_TIMEZONE"", """").strip()
+    if tz_env:
+        return tz_env
+
+    # 2. config.yaml ``timezone`` key
+    try:
+        # Prefer the shared cached raw-config reader (mtime/size-keyed cache +
+        # libyaml C loader) — a direct yaml.safe_load of a large config.yaml
+        # costs ~100ms+ and this used to run inside the FIRST system prompt
+        # build, on the time-to-first-token critical path.
+        try:
+            from hermes_cli.config import read_raw_config
+            cfg = read_raw_config() or {}
+        except Exception:
+            import yaml
+            config_path = get_config_path()
+            if config_path.exists():
+                with open(config_path, encoding=""utf-8"") as f:
+                    cfg = yaml.safe_load(f) or {}
+            else:
+                cfg = {}
+        if cfg:
+            # Managed scope: an administrator can pin ``timezone`` too. Overlay
+            # via the shared helper (fail-open) since this reads config.yaml directly.
+            try:
+                from hermes_cli import managed_scope
+                cfg = managed_scope.apply_managed_overlay(cfg)
+            except Exception:
+                pass
+            tz_cfg = cfg.get(""timezone"", """")
+            if isinstance(tz_cfg, str) and tz_cfg.strip():
+                return tz_cfg.strip()
+    except Exception:
+        pass
+
+    return """"",python,0,0.04,229692
+"def record_created_envelop(data):
+    return jsonify({
+        'status' : 'OK',
+        'code' : 200,
+        'message' : 'Resource Successfully created.',
+        'data' : data
+    })",python,3,0.81,4
+"def get_module_name(module_path: str) -> str:
+    """"""
+    Returns the module name based on the given module path.
+    Examples:
+        get_module_name(""C:/Users/username/ComfyUI/custom_nodes/my_custom_node.py"") -> ""my_custom_node""
+        get_module_name(""C:/Users/username/ComfyUI/custom_nodes/my_custom_node"") -> ""my_custom_node""
+        get_module_name(""C:/Users/username/ComfyUI/custom_nodes/my_custom_node/"") -> ""my_custom_node""
+        get_module_name(""C:/Users/username/ComfyUI/custom_nodes/my_custom_node/__init__.py"") -> ""my_custom_node""
+        get_module_name(""C:/Users/username/ComfyUI/custom_nodes/my_custom_node/__init__"") -> ""my_custom_node""
+        get_module_name(""C:/Users/username/ComfyUI/custom_nodes/my_custom_node/__init__/"") -> ""my_custom_node""
+        get_module_name(""C:/Users/username/ComfyUI/custom_nodes/my_custom_node.disabled"") -> ""custom_nodes
+    Args:
+        module_path (str): The path of the module.
+    Returns:
+        str: The module name.
+    """"""
+    base_path = os.path.basename(module_path)
+    if os.path.isfile(module_path):
+        base_path = os.path.splitext(base_path)[0]
+    return base_path",python,1,0.26,127142
+"def main():
+    """"""Open youtube and start dbus listener.""""""
+    global browser
+
+    loop = gobject.MainLoop()
+
+    bus = dbus.SessionBus()
+    bus_name = dbus.service.BusName('org.mpris.MediaPlayer2.youtube', bus=bus)
+
+    MediaPlayer2(bus_name, '/org/mpris/MediaPlayer2', loop)
+
+    browser = webdriver.Firefox()
+    browser.get('https://youtube.com')
+
+    loop.run()",python,3,0.82,4
+"    def __call__(self, bytes_amount):
+        # To simplify we'll assume this is hooked up
+        # to a single filename.
+        with self._lock:
+            self._seen_so_far += bytes_amount
+            sys.stdout.write(
+                ""\r%s --> %s bytes transferred"" % (
+                    self._filename, self._seen_so_far))
+            sys.stdout.flush()",python,2,0.59,4
+"def adamw_step_fused(p, grad, exp_avg, exp_avg_sq, step_t, lr_t, beta1_t, beta2_t, eps_t, wd_t):
+    p.mul_(1 - lr_t * wd_t)
+    exp_avg.lerp_(grad, 1 - beta1_t)
+    exp_avg_sq.lerp_(grad.square(), 1 - beta2_t)
+    bias1 = 1 - beta1_t ** step_t
+    bias2 = 1 - beta2_t ** step_t
+    denom = (exp_avg_sq / bias2).sqrt() + eps_t
+    step_size = lr_t / bias1
+    p.add_(exp_avg / denom, alpha=-step_size)",python,1,0.18,93757
+"def _format_mcp_connection_error(name: str, command: str = """", args: Optional[List[str]] = None, error: Exception = None) -> str:
+    """"""Return a user-actionable MCP connection error message.""""""
+    args = args or []
+    raw_error = str(error) if error else ""Unknown error""
+    command_line = "" "".join([command or """", *args]).strip()
+    lower_command = command_line.lower()
+
+    if ""@playwright/mcp"" in lower_command:
+        return (
+            f""{raw_error}\n\n""
+            ""Browser MCP could not start. On fresh installs, cache the Playwright MCP package once before connecting:\n\n""
+            ""npx -y @playwright/mcp@latest --version\n\n""
+            ""Then restart Odysseus and reconnect the Browser MCP server.""
+        )
+
+    return raw_error",python,0,0.16,85267
+"function routeToRegExp(path, opts) {
+  var keys = [];
+
+  var pattern = path
+    .replace(/([().])/g, '\\$1')
+    .replace(/(\/)?:(\w+)(\*\?|[?*])?/g, function(_, slash, key, option) {
+      var optional = option === '?' || option === '*?';
+      var star = option === '*' || option === '*?';
+      keys.push({name: key, optional: optional});
+      slash = slash || '';
+      return (
+        (optional ? '(?:' + slash : slash + '(?:') +
+        (star ? '(.+?)' : '([^/]+)') +
+        (optional ? '?)?' : ')')
+      );
+    })
+    .replace(/([/$*])/g, '\\$1');
+
+  if (opts.ignoreTrailingSlashes) {
+    pattern = pattern.replace(/\/+$/, '') + '/*';
+  }
+
+  return {
+    keys: keys,
+    regexp: new RegExp(
+      '^' + pattern + '(?:[?#]|$)',
+      opts.caseInsensitiveMatch ? 'i' : ''
+    )
+  };
+}",javascript,0,0.0,58551
+"var server = function(params, basePath){
+    var configDefaults, config, runConfig, state, restifyServer, close, store, allowedMethods;
+
+    configDefaults = [
+        { name:'port', defaultVal: 8080 },
+        { name:'logs', defaultVal: true },
+        { name:'prefix', defaultVal: '' },
+        { name:'path', defaultVal: '' },
+        { name:'routes', defaultVal: [] }
+    ];
+
+    config = params || {};
+    runConfig = {};
+    state = {
+        ready:false
+    };
+    restifyServer = null;
+    close = function(cb) {
+        var handler = closeHandler.bind(this);
+        handler(cb);
+    };
+    store = null;
+    allowedMethods = [
+        'GET',
+        'POST',
+        'PATCH',
+        'OPTIONS',
+        'HEAD',
+        'PUT',
+        'DELETE'
+    ];
+
+    this.basePath = basePath;
+    this.configDefaults = configDefaults;
+    this.config = config;
+    this.state = state;
+    this.restifyServer = restifyServer;
+    this.close = close;
+    this.store = store;
+    this.allowedMethods = allowedMethods;
+}",javascript,3,0.92,4
+"var serializer = function(data) {
+        var globals = {}
+
+        var postData = {}; //JSON.parse(JSON.stringify(data));
+        //move params that start with * to globals
+        Object.keys(data).forEach(function(x) {
+            if (x[0] == '*') {
+                globals[x] = data[x];
+            }
+            else if (!x.endsWith('-gui')) { //gui only
+                postData[x] = data[x];
+            }
+        });
+        var json = JSON.stringify(postData);
+        console.log(json);
+        if (DEBUG) { console.log({session: session.key, json: json }) }
+        var postData = '*Data=' + encodeURIComponent(json);
+        if (session.key) {
+            postData = postData + '&*Session=' + session.key;
+        }
+        Object.keys(globals).forEach(function(x) {
+            postData = postData + '&' + x + '=' + encodeURIComponent(globals[x]);
+        });
+        return postData;
+    }",javascript,2,0.79,4
+"def _is_readonly_fs_error(e):
+    """"""Return True if `e` signals a read-only filesystem (EROFS).
+
+    The plain download path raises `OSError` with `errno == EROFS`. The Xet path
+    (`hf_xet` Rust library) instead raises a bare `RuntimeError` with no `.errno` set,
+    carrying a Rust-rendered message that ends with ``(os error <N>)``. We extract that
+    numeric code and compare it to `errno.EROFS` rather than matching the locale-dependent
+    strerror text, which is far more robust. The cause/context chain is followed so a
+    wrapped error is still recognised.
+    """"""
+    # Follow the cause/context chain so a wrapped error is still recognised.
+    while e is not None:
+        # Standard path: an OSError carrying the EROFS errno.
+        if isinstance(e, OSError) and e.errno == errno.EROFS:
+            return True
+        # hf_xet path: a bare RuntimeError with the raw OS errno rendered as ""(os error N)"".
+        if isinstance(e, RuntimeError) and any(int(c) == errno.EROFS for c in _OS_ERROR_CODE_RE.findall(str(e))):
+            return True
+        e = e.__cause__ or e.__context__
+    return False",python,0,0.1,164028
+"function watch(el, isMsgList){
+        isMsgList = isMsgList || false;
+
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                parseInput(mutation.addedNodes, isMsgList);
+            });
+        });
+
+        observer.observe(el, {childList: true});
+    }",javascript,3,0.93,4
+"function parseKey(key) {
+    if (_.isArray(key)) {
+        key = key.join(':');
+    }
+    if (!_.isString(key)) {
+        throw new TypeError('Argument `key` and `field` must be a pure string or string[].');
+    }
+    return key;
+}",javascript,3,0.88,4
+"    def construct(self):
+        # To run this scene properly, you should have ""Consolas"" font in your computer
+        # for full usage, you can see https://github.com/3b1b/manim/pull/680
+        text = Text(""Here is a text"", font=""Consolas"", font_size=90)
+        difference = Text(
+            """"""
+            The most important difference between Text and TexText is that\n
+            you can change the font more easily, but can't use the LaTeX grammar
+            """""",
+            font=""Arial"", font_size=24,
+            # t2c is a dict that you can choose color for different text
+            t2c={""Text"": BLUE, ""TexText"": BLUE, ""LaTeX"": ORANGE}
+        )
+        VGroup(text, difference).arrange(DOWN, buff=1)
+        self.play(Write(text))
+        self.play(FadeIn(difference, UP))
+        self.wait(3)
+
+        fonts = Text(
+            ""And you can also set the font according to different words"",
+            font=""Arial"",
+            t2f={""font"": ""Consolas"", ""words"": ""Consolas""},
+            t2c={""font"": BLUE, ""words"": GREEN}
+        )
+        fonts.set_width(FRAME_WIDTH - 1)
+        slant = Text(
+            ""And the same as slant and weight"",
+            font=""Consolas"",
+            t2s={""slant"": ITALIC},
+            t2w={""weight"": BOLD},
+            t2c={""slant"": ORANGE, ""weight"": RED}
+        )
+        VGroup(fonts, slant).arrange(DOWN, buff=0.8)
+        self.play(FadeOut(text), FadeOut(difference, shift=DOWN))
+        self.play(Write(fonts))
+        self.wait()
+        self.play(Write(slant))
+        self.wait()",python,0,0.1,90614
+"    public static void main(String[] args) {
+        System.out.println(""Este programa muestra los números que son familia en un intervalo indicado."");
+        Scanner s = new Scanner(System.in);
+        System.out.print(""Por favor, introduzca un número: "");
+        int n = s.nextInt();
+        System.out.print(""Por favor, introduzca otro número: "");
+        int m = s.nextInt();
+        while(m<=n){
+            System.out.println(""El segundo número debe ser mayor al primero."");
+            System.out.print(""Por favor, vuelva a introducir otro número: "");
+            m = s.nextInt();
+        }
+        buscaFamilia(n,m);
+    }",java,2,0.67,4
+"def format_duration_compact(*args, **kwargs):
+    seconds = float(args[0] if args else kwargs.get(""seconds"", 0.0))
+    if seconds < 60:
+        return f""{seconds:.0f}s""
+    minutes = seconds / 60
+    if minutes < 60:
+        return f""{minutes:.0f}m""
+    hours = minutes / 60
+    if hours < 24:
+        remaining_min = int(minutes % 60)
+        return f""{int(hours)}h {remaining_min}m"" if remaining_min else f""{int(hours)}h""
+    days = hours / 24
+    return f""{days:.1f}d""",python,0,0.01,229692
+"def serve_html_with_nonce(request: Request, file_path: str) -> HTMLResponse:
+    """"""Read an app-bundled HTML page and inject the CSP nonce into inline <script> tags.
+
+    Callers pass fixed, server-owned template paths (index/login/backgrounds),
+    never a client-supplied path. So any read failure here — a missing file
+    (broken deployment) or a permission/IO error — is a server fault, not a
+    client ""not found"": map all of them to a logged 500 so a missing core
+    template surfaces in 5xx alerting instead of hiding behind a 404. If a
+    future caller serves a client-influenced path where 404 is correct, branch
+    that at the call site rather than defaulting this shared helper to 404.
+    """"""
+    try:
+        with open(file_path, ""r"", encoding=""utf-8"") as f:
+            html = f.read()
+    except OSError:
+        logger.exception(""Failed to read page %s"", file_path)
+        raise HTTPException(500, ""Internal server error"")
+    nonce = getattr(request.state, ""csp_nonce"", """")
+    html = html.replace(""{{CSP_NONCE}}"", nonce)
+    return HTMLResponse(html)",python,1,0.1,85267
+"def _in_tailscale_range(host: str) -> bool:
+    try:
+        return ipaddress.ip_address(host) in _TAILSCALE_CGNAT
+    except ValueError:
+        return False",python,0,0.02,85267
+"function sanitize(filename) {
+    // clean filename
+    // sanitize(' \t _124/=)(/&%$..jpg') -> '-_124_.jpg'
+    return encodeURIComponent(
+        filename
+            .toLowerCase()
+            .replace(/\s+/g, '-')
+            // https://stackoverflow.com/a/11653019
+            .replace(/\u00fc/g, 'ue')
+            .replace(/\u00e4/g, 'ae')
+            .replace(/\u00f6/g, 'oe')
+            .replace(/\u00df/g, 'ss')
+            .replace(/\.+/g, '.')
+            .replace(/[^0-9A-Z\._-]+/gi, '_')
+    );
+}",javascript,2,0.64,4
+"function init(){
+
+        var setUp = true;
+
+        if (!(""Notification"" in window)) {
+            setUp = false;
+            snackbar(""Your browser sucks. Deal with it."", 5000);
+        }
+        else if (Notification.permission !== 'denied' && Notification.permission !== ""granted"") {
+            Notification.requestPermission(function (permission) {
+                if (permission === ""granted"") {
+                    notify(""Why didn't you allow notifications sooner?"", ""You're welcome"", ""http://i.imgur.com/57QnIx1.jpg"",""https://www.youtube.com/watch?v=dQw4w9WgXcQ"");
+                }
+                else{
+                    snackbar(""Y U NO ALLOW NOTIFICATIONS?!!!"", 5000);
+                    setUp = false;
+                }
+            });
+        }
+
+        $(""<style></style>"").html(styles).appendTo(""body"");
+        $(""body"").append(""<div class='socvr-alert-snackbar'></div>"").append(""<div class='socvr-alert-dialog'><div class='socvr-alert-dialog-back'></div><div class='socvr-alert-dialog-con'></div></div>"");
+
+        $("".socvr-alert-dialog-back"").on(""click"",function(){
+            $(this).siblings().removeClass(""active"").parent().fadeOut(function(){
+                $(this).removeClass(""active"");
+            });
+        });
+
+        checkForUpdates();
+
+        try{
+            if(setUp) watch(chat);
+        } catch(e){
+            snackbar(""[Error] ""+e.name + ': ' + e.message);
+        }
+    }",javascript,2,0.65,4
+"function validateConfig(config, props) {
+    if (!props.every(prop => !!config[prop])) {
+        throw new TypeError('Argument `config` is invalid for missing prop(s).');
+    }
+    if (config.key) {
+        config.key = parseKey(config.key);
+    }
+    if (config.field) {
+        config.field = parseKey(config.field);
+    }
+}",javascript,2,0.92,4
+"var disableNgAnimate = function() {
+      angular.module('disableNgAnimate', []).run(['$animate', function($animate) {
+        $animate.enabled(false);
+      }]);
+    }",javascript,0,0.1,58551
+"function sendQueueMessage(payload, callback) {
+    var SQS = new AWS.SQS();
+
+    var parameters = {
+        MessageBody: JSON.stringify(payload),
+        QueueUrl: sqsQueueUrl
+    };
+
+    SQS.sendMessage(parameters, callback);
+}",javascript,2,0.55,4
+"function manipulationTarget( elem, content ) {
+	if ( nodeName( elem, ""table"" ) &&
+		nodeName( content.nodeType !== 11 ? content : content.firstChild, ""tr"" ) ) {
+
+		return jQuery( elem ).children( ""tbody"" )[ 0 ] || elem;
+	}
+
+	return elem;
+}",javascript,1,0.19,59785
+"function render() {
+    if (!ctrl.data) { return; }
+
+    data = ctrl.data;
+    panel = ctrl.panel;
+
+    if (setElementHeight()) {
+      addSunburst();
+    }
+  }",javascript,3,0.99,4
+"def detect_vocal(audioSamples,  rfc, est_f0):
+
+
+    # 2 vocal variance
+    features_array = extract_features(audioSamples)
+
+    voiced_flag = np.zeros(len(features_array))
+
+#     vocal_var_array_T = features_array.T
+#     imshow(vocal_var_array_T, aspect = 'auto', interpolation='none')
+
+    # prepare array indices
+    resFactor = Parameters.hSize/Parameters.hSizePitch
+    aLen = min([len(features_array)*resFactor, len(est_f0)])
+    features_array = features_array[0:floor(aLen / resFactor)]
+    est_f0 = est_f0[0:aLen]
+
+    for i in range (0,len(features_array)):
+        vv = features_array[i]
+        midIdx = i*resFactor
+        if est_f0[midIdx] > 0: ## estimate only for frames with middle frame from melodias being voiced
+            voiced_flag[i] = rfc.predict(vv.reshape(1,-1))
+            est_f0[midIdx - resFactor/2 -1: midIdx + resFactor/2+1] *= voiced_flag[i] # make range of f0-s zero is not voiced
+
+# smoothing
+#     TODO:
+    return voiced_flag, est_f0",python,3,0.66,4
+"function format(text, options) {
+  const { formatted } = await formatWithCursor(text, {
+    ...options,
+    cursorOffset: -1,
+  });
+  return formatted;
+}",javascript,1,0.1,52196
+"def Rep(name):
+    try:
+        with fileinput.FileInput(name+'.txt', inplace=True, backup='.bak') as file:
+            for line in file:
+                #print(line)
+                print(line.replace('[br]', ' '), end='')
+                #print(line)
+               # print(line.replace('...', ' '), end='')
+               ## print(line.replace('..', ' '), end='')
+                #print(line.replace('.', ' '), end='')
+                #print(line.replace('[', ' '), end='')
+               # print(line.replace(']', ' '), end='')
+
+
+    except FileNotFoundError as e:
+        print(""ERROR: "" + str(e))
+        pass",python,3,0.99,4
+"function initLifecycle(vm) {
+      var hooks = [
+        'init',
+        'mounted',
+        'beforeEach',
+        'afterEach',
+        'doneEach',
+        'ready'
+      ];
+
+      vm._hooks = {};
+      vm._lifecycle = {};
+      hooks.forEach(function (hook) {
+        var arr = (vm._hooks[hook] = []);
+        vm._lifecycle[hook] = function (fn) { return arr.push(fn); };
+      });
+    }",javascript,0,0.16,57529
+"function writeExperiments(evalName) {
+  fs.rmSync(EXPERIMENTS_DIR, { recursive: true, force: true })
+  fs.mkdirSync(EXPERIMENTS_DIR, { recursive: true })
+
+  const evalsField = evalName ? `\n  evals: '${evalName}',` : ''
+  for (const v of VARIANTS) {
+    const body = `import type { ExperimentConfig } from '@vercel/agent-eval'
+${v.imports}
+
+const config: ExperimentConfig = {
+  // Via the Vercel AI Gateway, so the OIDC token from \`vc env pull\` is the only
+  // credential needed (it auths the sandbox, the codegen model, and the judge).
+  agent: 'vercel-ai-gateway/claude-code',
+  model: 'claude-opus-4-8',${evalsField}
+  // Cheap fixed grader for the agentic judge clauses in EVAL.ts files — every
+  // run is graded by the same model regardless of the model under test.
+  judge: { model: 'claude-haiku-4-5' },
+  scripts: ['build'],
+  runs: 1,
+  earlyExit: true,
+  timeout: 720,
+  sandbox: 'auto',
+  setup: async (sandbox) => {
+    ${v.setup}
+  },
+}
+
+export default config
+`
+    fs.writeFileSync(path.join(EXPERIMENTS_DIR, `${v.suffix}.ts`), body)
+  }
+}",javascript,0,0.04,141750
+"def sgd(loss_or_grads, params, learning_rate):
+    """"""Stochastic Gradient Descent (SGD) updates
+    Generates update expressions of the form:
+    * ``param := param - learning_rate * gradient``
+    Parameters
+    ----------
+    loss_or_grads : symbolic expression or list of expressions
+        A scalar loss expression, or a list of gradient expressions
+    params : list of shared variables
+        The variables to generate update expressions for
+    learning_rate : float or symbolic scalar
+        The learning rate controlling the size of update steps
+    Returns
+    -------
+    OrderedDict
+        A dictionary mapping each parameter to its update expression
+    """"""
+    grads = theano.grad(loss_or_grads, params)
+    updates = OrderedDict()
+
+    for param, grad in zip(params, grads):
+        updates[param] = param - learning_rate * grad
+
+    return updates",python,2,0.82,4
+"    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            model_name = func
+            return model_name(*args, **kwargs)
+        return wrapper",python,2,0.65,4
+"def test_process_llm_extraction_signature():
+    """"""Test that process_llm_extraction accepts webhook_config parameter""""""
+    print(""\n"" + ""="" * 60)
+    print(""TEST 3: process_llm_extraction Function Signature"")
+    print(""="" * 60)
+
+    try:
+        from api import process_llm_extraction
+        import inspect
+
+        sig = inspect.signature(process_llm_extraction)
+        params = list(sig.parameters.keys())
+
+        print(f""Function parameters: {params}"")
+
+        if 'webhook_config' in params:
+            print(f""✅ process_llm_extraction has webhook_config parameter"")
+
+            webhook_param = sig.parameters['webhook_config']
+            if webhook_param.default is None or webhook_param.default == inspect.Parameter.empty:
+                print(f""✅ webhook_config is optional (default: {webhook_param.default})"")
+            else:
+                print(f""⚠️  webhook_config default is: {webhook_param.default}"")
+
+            return True
+        else:
+            print(f""❌ process_llm_extraction missing webhook_config parameter"")
+            return False
+
+    except Exception as e:
+        print(f""❌ Failed: {e}"")
+        import traceback
+        traceback.print_exc()
+        return False",python,0,0.22,77961
+"function remove( elem, selector, keepData ) {
+	var node,
+		nodes = selector ? jQuery.filter( selector, elem ) : elem,
+		i = 0;
+
+	for ( ; ( node = nodes[ i ] ) != null; i++ ) {
+		if ( !keepData && node.nodeType === 1 ) {
+			jQuery.cleanData( getAll( node ) );
+		}
+
+		if ( node.parentNode ) {
+			if ( keepData && isAttached( node ) ) {
+				setGlobalEval( getAll( node, ""script"" ) );
+			}
+			node.parentNode.removeChild( node );
+		}
+	}
+
+	return elem;
+}",javascript,1,0.12,59785
+"function packageFind(paths) {
+  if (!paths) return null;
+
+  for (var i = 0; i < paths.length; ++i){
+    var dir = path.dirname(paths[i]);
+    if (fs.existsSync(path.join(dir, 'package.json')))
+      return dir;
+  }
+
+  return null;
+}",javascript,2,0.81,4
+"def capture_thread():
+    while not stop_event.is_set():
+        ret, frame = cap.read()
+        if not ret:
+            break
+        try:
+            capture_queue.put_nowait(frame)
+        except queue.Full:
+            try:
+                capture_queue.get_nowait()
+            except queue.Empty:
+                pass
+            try:
+                capture_queue.put_nowait(frame)
+            except queue.Full:
+                pass",python,0,0.08,95895
+"    def Previous(self):
+        global browser, last_previous
+        print('Received previous signal')
+        now = datetime.now()
+        if now - last_previous < timedelta(seconds=5):
+            browser.back()
+        else:
+            elem = browser.find_element_by_tag_name('video')
+            elem.send_keys('0')
+        last_previous = now",python,3,0.91,4
+"var CrudController = function(entity, vm, options) {
+    return function() {
+        var self = this;
+
+        //only call initial refresh after element has been added to dom to prevent infinite loop
+        this.mount = function(el) {
+            return m(""div"", {
+                id: entity,
+                config: function(el, isInit, context) {
+                    if (!isInit) {
+                        self.refresh();
+                    }
+                }
+            }, el);
+        }
+
+
+
+        this.refresh = function() {
+            if (this.beforeRefresh) { this.beforeRefresh(); }
+            var params = options && options.postParams ? options.postParams : {}
+            return xhr.post(""!"" + entity + ""-list-json"", params).then(xhr.listToProp(vm.list, entity))
+        }
+
+        this.add = function() {
+            if (vm.validate()) {
+                return xhr.post(""!"" + entity + ""-add-json"", vm.row)
+                    .then(function(json) {
+                        vm.clear();
+                        self.refresh();
+                        return json; //return for next in chain
+                    });
+            }
+        };
+        this.update = function(row) {
+            return xhr.post(""!"" + entity +""-update-json"", row).then(self.refresh);
+        }
+        this.del = function(row) {
+            return xhr.post(""!"" + entity +""-del-json"", row).then(self.refresh);
+        };
+
+        //this.refresh();
+    };
+}",javascript,2,0.52,4
+"function query(){
+  var queryparse = this.app.get('query parser fn');
+
+  if (!queryparse) {
+    // parsing is disabled
+    return Object.create(null);
+  }
+
+  var querystring = parse(this).query;
+
+  return queryparse(querystring);
+}",javascript,1,0.23,69353
+"def test_webhook_config_model():
+    """"""Test WebhookConfig Pydantic model""""""
+    print(""\n"" + ""="" * 60)
+    print(""TEST 3: WebhookConfig Model Validation"")
+    print(""="" * 60)
+
+    try:
+        from schemas import WebhookConfig
+        from pydantic import ValidationError
+
+        # Test valid config
+        valid_config = {
+            ""webhook_url"": ""https://example.com/webhook"",
+            ""webhook_data_in_payload"": True,
+            ""webhook_headers"": {""X-Secret"": ""token123""}
+        }
+
+        config = WebhookConfig(**valid_config)
+        print(f""✅ Valid config accepted:"")
+        print(f""   - URL: {config.webhook_url}"")
+        print(f""   - Data in payload: {config.webhook_data_in_payload}"")
+        print(f""   - Headers: {config.webhook_headers}"")
+
+        # Test minimal config
+        minimal_config = {
+            ""webhook_url"": ""https://example.com/webhook""
+        }
+
+        config2 = WebhookConfig(**minimal_config)
+        print(f""✅ Minimal config accepted (defaults applied):"")
+        print(f""   - URL: {config2.webhook_url}"")
+        print(f""   - Data in payload: {config2.webhook_data_in_payload}"")
+        print(f""   - Headers: {config2.webhook_headers}"")
+
+        # Test invalid URL
+        try:
+            invalid_config = {
+                ""webhook_url"": ""not-a-url""
+            }
+            config3 = WebhookConfig(**invalid_config)
+            print(f""❌ Invalid URL should have been rejected"")
+            return False
+        except ValidationError as e:
+            print(f""✅ Invalid URL correctly rejected"")
+
+        return True
+    except Exception as e:
+        print(f""❌ Model validation test failed: {e}"")
+        import traceback
+        traceback.print_exc()
+        return False",python,0,0.06,77961
+"    public static void main(String[] args) {
+        System.out.println(""Este programa determina cuántas palabras de un texto son anagramas de la primer palabra introducida."");
+        Scanner s = new Scanner(System.in);
+        System.out.println(""Por favor, introduzca un texto: "");
+        String primerPalabra = s.next();
+        String palabra = """";
+        int contador = 0;
+        do {
+            palabra = s.next();
+            if (buscaAnagrama(primerPalabra, palabra)) {
+                contador++;
+            }
+        } while (!palabra.equals(""FIN""));
+        System.out.println(""En este texto existen "" + contador + "" palabras que son anagramas de la primer palabra."");
+    }",java,3,0.61,4
+"function createPool() {
+  poolSize = Buffer.poolSize;
+  allocBuffer = createUnsafeAlignedBuffer(poolSize, kPoolAlignment);
+  allocPool = allocBuffer.buffer;
+  poolBase = TypedArrayPrototypeGetByteOffset(allocBuffer);
+  markAsUntransferable(allocPool);
+  poolOffset = 0;
+}",javascript,0,0.19,118912
+"function getHeapSnapshot(options) {
+  const optionArray = getHeapSnapshotOptions(options);
+  const handle = createHeapSnapshotStream(optionArray);
+  assert(handle);
+  return new HeapSnapshotStream(handle);
+}",javascript,1,0.28,118912
+"function employee(first, last, age, eid, epass){
+	this.first = first;
+	this.last  = last;
+	this.age   = age;
+	this.eid   = eid;
+	this.epass = epass;
+}",javascript,3,0.92,4
+"var record_database = function(
+        block_id, msg_sender, msg_value, contract_address, block_hash, log_index,
+        transaction_hash, transaction_index, event_name, description
+){
+
+    var query = 'INSERT INTO contract_event ' +
+        '(`block_id`, `msg_sender`, `msg_value`, `contract_address`, `block_hash`, `log_index`, `transaction_hash`, `transaction_index`, `event_name`, `description`, `datetime`)' +
+        'VALUES (?,?,?,?,?, ?,?,?,?,?, now()); ';
+
+    connection.query(
+        query,
+        [block_id, msg_sender, web3.toBigNumber(msg_value).toNumber(), contract_address, block_hash, log_index, transaction_hash, transaction_index, event_name, description]
+    , function(err, rows, fields) {
+        if (err) throw err;
+    });
+
+}",javascript,2,0.9,4
+"function getHeadSha() {
+  if (process.env.GITHUB_EVENT_PATH) {
+    try {
+      const event = JSON.parse(
+        fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8')
+      )
+      const headSha = event.pull_request?.head?.sha
+      if (headSha) {
+        return headSha
+      }
+    } catch (err) {
+      console.log('Failed to read the head SHA from the event payload', err)
+    }
+  }
+  return process.env.GITHUB_SHA ?? null
+}",javascript,0,0.01,141750
+"    private static int[] leer(Scanner s){
+        int[] array = new int[MAX];
+        for(int x = 0; x < array.length; x++){
+            System.out.print(""Por favor, introduce el "" + (x + 1) + ""º valor del array: "");
+            array[x] = s.nextInt();
+        }
+        return array;
+    }",java,2,0.77,4
+"var validatePass = function(){
+
+	var upass = document.getElementById('upass');
+	if(upass.value == undefined || upass.value == null || upass.value == """")
+	{
+		upass.style.borderColor=""red"";
+	}
+	else
+	{
+		upass.style.borderColor=""green"";
+	}
+}",javascript,2,0.55,4
+"def list_distributions() -> Dict[str, Dict]:
+    """"""
+    List all available distributions.
+
+    Returns:
+        Dict: All distribution definitions
+    """"""
+    return DISTRIBUTIONS.copy()",python,0,0.0,229692
+"def _collect_fallback_events():
+    """"""Aggregate fallback events recorded by every process (controller + xdist workers).""""""
+    events = []
+    if _ci_fallback_events_dir and os.path.isdir(_ci_fallback_events_dir):
+        for name in sorted(os.listdir(_ci_fallback_events_dir)):
+            try:
+                with open(os.path.join(_ci_fallback_events_dir, name), encoding=""utf-8"") as fh:
+                    events.extend(line.strip() for line in fh if line.strip())
+            except OSError:
+                pass
+    return events",python,1,0.23,164028
+"function getContributors(user, repo, maxCount = 1) {
+  const contributors = (
+    await axios.get(
+      `https://api.github.com/repos/${encodeURIComponent(user)}/${encodeURIComponent(repo)}/contributors`,
+      { params: { per_page: maxCount } }
+    )
+  ).data;
+
+  return Promise.all(
+    contributors.map(async (contributor) => {
+      return {
+        ...contributor,
+        ...(
+          await axios.get(`https://api.github.com/users/${encodeURIComponent(contributor.login)}`)
+        ).data,
+      };
+    })
+  );
+}",javascript,0,0.3,109231
+"    def error(self, message):
+        """"""
+        Prints a usage message incorporating the message to stderr and exit.
+        """"""
+        self.print_usage(sys.stderr)
+        choose_from = ' (choose from'
+        progparts = self.prog.partition(' ')
+        self.exit(2, (""error: %(errmsg)s\nTry '%(mainp)s help %(subp)s'""
+                ""for more information.\n"") %
+                {'errmsg': message.split(choose_from)[0],
+                    'mainp': progparts[0],
+                    'subp': progparts[2]})",python,2,0.71,4
+"def sexToDecimal(ang, hparam):
+    anglist = ang.split("":"")
+    for i in range(len(anglist)):
+        anglist[i] = float(anglist[i])
+    decimal = (anglist[1] / 60) + (anglist[2] / 3600)
+    if anglist[0] < 0:
+        ang = anglist[0] - decimal
+    else:
+        ang = anglist[0] + decimal
+    if hparam == True:
+        ang *= 15
+    return ang",python,3,0.97,4
+"function standardizedError (type, options) {
+  const error = new Error(`type: ${type}, message: ${ERROR_TYPES_HANDLERS[type](options)}`)
+  error.type = type
+  error.options = options
+  return error
+}",javascript,3,0.53,4
+"function connect () {
+    connection = mysql.createConnection({
+        host    : options.storageConfig.host,
+        user    : options.storageConfig.user,
+        password: options.storageConfig.password,
+        database: options.storageConfig.database
+    });
+    connection.connect(handleError);
+    connection.on('error', handleError);
+}",javascript,3,0.71,4
+"function showFlaggedDeprecation() {
+  if (bufferWarningAlreadyEmitted ||
+      ++nodeModulesCheckCounter > 10000 ||
+      (!require('internal/options').getOptionValue('--pending-deprecation') &&
+       isInsideNodeModules(3))) {
+    // We don't emit a warning, because we either:
+    // - Already did so, or
+    // - Already checked too many times whether a call is coming
+    //   from node_modules and want to stop slowing down things, or
+    // - We aren't running with `--pending-deprecation` enabled,
+    //   and the code is inside `node_modules`.
+    // - If the topmost non-internal frame is not inside `node_modules`.
+    return;
+  }
+
+  process.emitWarning(bufferWarning, 'DeprecationWarning', 'DEP0005');
+  bufferWarningAlreadyEmitted = true;
+}",javascript,0,0.25,118912
+"function showHide(action, evt){
+            xDebug.call(this, arguments.callee.name, arguments);
+            // if element in the list is clicked (button losses focus)
+            if ($.isPlainObject(evt) &&
+                $(evt.relatedTarget).parent().hasClass(""dropdown-menu-item"")){
+                return;
+            }
+
+            if($.type(action) !== ""string""){
+                action = this.options.$listEl.is("":visible"") ? ""hide"" : ""show"";
+            }
+
+            calculatePosition.call(this);
+
+            if(action === ""show"" && this.container.is(':visible') === false){
+                this.isRendered = false;
+                intervalFlag.call(
+                    this, calculatePosition, ""isRendered"", 500
+                );
+
+                if(this.options.menuWidthAsBtn === ""Y"" && this.isSetMenuItemWidth === false){
+                  this.container.css(""cssText"",""color:transparent !important;"");
+                }
+
+                this.container.slideDown(this.options.slideUpDown);
+                this.container.focus();
+
+                if(this.options.menuWidthAsBtn === ""Y"" && this.isSetMenuItemWidth === false){
+                  intervalFlag.call(
+                    this, menuItemWidth, ""isSetMenuItemWidth"", 500
+                  );
+                }
+                triggerEvent.apply(this, [this.events[0], this]);
+            }else if(action === ""hide"" && this.container.is(':visible') === true){
+                this.container.slideUp(this.options.slideUpDown);
+                triggerEvent.apply(this, [this.events[1], this]);
+            }
+        }",javascript,2,0.91,4
+"def s(name, arr):
+    if not arr:
+        return
+    avg = sum(arr) / len(arr)
+    print(f""  {name:25s}: avg={avg:6.1f}ms  min={min(arr):5.1f}ms  max={max(arr):6.1f}ms  n={len(arr)}"")",python,1,0.27,95895
+"def _normalize_base_for_compare(url: str) -> str:
+    url = (url or """").strip().rstrip(""/"")
+    for suffix in (""/chat/completions"", ""/models"", ""/completions"", ""/v1/messages""):
+        if url.endswith(suffix):
+            url = url[: -len(suffix)].rstrip(""/"")
+    return url",python,0,0.02,85267
+"def deep_q_learning(sess,
+                    env,
+                    q_estimator,
+                    target_estimator,
+                    state_processor,
+                    saver,
+                    num_episodes,
+                    replay_memory_size=10000,
+                    replay_memory_init_size=1000,
+                    update_target_estimator_every=500,
+                    discount_factor=0.99,
+                    batch_size=8):
+
+    Transition = namedtuple(""Transition"", [""state"", ""action"", ""reward"", ""next_state"", ""done""])
+    replay_memory = []
+    total_t = sess.run(tf.contrib.framework.get_global_step())
+
+    for i_episode in range(num_episodes):
+
+        state = env.reset()
+        state = state_processor.process(sess, state)
+        state = np.stack([state] * 4, axis=2)
+        loss = None
+        total_reward = 0
+        actions_tracker = [0, 1, 2, 3]
+        agent_index = np.random.randint(NUM_HEADS)
+
+        for t in itertools.count():
+
+            if total_t % update_target_estimator_every == 0:
+                copy_model_parameters(sess, q_estimator, target_estimator)
+                print(""\nCopied model parameters to target network."")
+                saver.save(sess, 'docs/dqn-doom-basic', global_step=total_t)
+
+            action = q_estimator.greedy_action(sess, state, agent_index)
+            actions_tracker.append(action)
+            next_state, reward, done, _ = env.step(VALID_ACTIONS[action])
+            next_state = state_processor.process(sess, next_state)
+            next_state = np.append(state[:,:,1:], np.expand_dims(next_state, 2), axis=2)
+
+            if len(replay_memory) == replay_memory_size:
+                replay_memory.pop(0)
+
+            replay_memory.append(Transition(state, action, reward, next_state, done))
+            total_reward += reward
+
+            if total_t > replay_memory_init_size:
+                for agent_train in range(NUM_HEADS):
+                    samples = random.sample(replay_memory, batch_size)
+                    states_batch, action_batch, reward_batch, next_states_batch, done_batch = map(np.array, zip(*samples))
+
+                    q_values_next = q_estimator.predict(sess, next_states_batch, agent_train)
+                    best_actions = np.argmax(q_values_next, axis=1)
+
+                    q_values_next_target = np.zeros((batch_size, len(VALID_ACTIONS)))
+                    for agent_ensemble in range(NUM_HEADS):
+                        q_values_next_target += target_estimator.predict(sess, next_states_batch, agent_ensemble)
+                    q_values_next_target /= NUM_HEADS
+
+                    targets_batch = reward_batch + np.invert(done_batch).astype(np.float32) * \
+                        discount_factor * q_values_next_target[np.arange(batch_size), best_actions]
+
+                    states_batch = np.array(states_batch)
+                    loss = q_estimator.update(sess, states_batch, action_batch, targets_batch, agent_train)
+
+            state = next_state
+            total_t += 1
+
+            if done:
+                print(""Step {} ({}) @ Episode {}/{}, loss: {}"".format(
+                    t, total_t, i_episode + 1, num_episodes, loss), end="", "")
+                print('reward %f, steps %d' % (total_reward, t), end="", "")
+                counts_action = np.bincount(actions_tracker) - 1
+                print('noop %d, shoot %d, right %d, left %d' % \
+                    (counts_action[0], counts_action[1], counts_action[2], counts_action[3]))
+                break",python,3,0.67,4
+"def _session_source_for_agent(platform: Optional[str]) -> str:
+    try:
+        from gateway.session_context import get_session_env
+
+        source = get_session_env(""HERMES_SESSION_SOURCE"", """")
+    except Exception:
+        source = os.environ.get(""HERMES_SESSION_SOURCE"", """")
+    source = str(source or """").strip()
+    if source:
+        return source
+    return platform or ""cli""",python,0,0.06,229692
+"def list_all_tags(lists_of_tags):
+    all_known_tags = set()
+    for list_of_tags in lists_of_tags:
+        for tag in list_of_tags:
+            all_known_tags.add(tag)
+    return list(all_known_tags) # so it would be ordered",python,2,0.54,4
+"def validate(validation, data):
+    #get all the keys from data that are to be validated
+    _keys = list(data.keys() & validation.keys())
+
+    for key in _keys:
+        #get the val
+        _val = data[key]
+
+        if validation[key].get('not_null', None) and _val is None:
+            return False, 'Value for key %r cannot be Null/None' %(key)
+
+        if isinstance(_val, int):
+            if validation[key].get('max_val', None) and _val >= validation[key]['max_val']:
+                return False, 'Integer value for %r cannot be greater than  %s' % (key, validation[key]['max_val'])
+
+            if validation[key].get('min_val', None) and _val <= validation[key]['min_val']:
+                return False, 'Integer value for %r cannot be less than %s' %(key, validation[key]['min_val'])
+
+        if validation[key].get('max_len', None) and not len(str(_val)) <= validation[key]['max_len']:
+            return False, 'Value for key %r cannot have length more than %s' % (key, validation[key]['max_len'])
+
+        if validation[key].get('min_len', None) and not len(str(_val)) >= validation[key]['min_len']:
+            return False, 'Value for key %r cannot have length less than %s' % (key, validation[key]['min_len'])
+
+
+
+    return True, None",python,3,0.62,4
+"function currentLocale() {
+    for (const locale of [localStorage.locale, navigator.language, ...navigator.languages]) {
+        // localstorage might not have a value or there might not be a language in `navigator.language`
+        if (!locale) {
+            continue;
+        }
+        if (locale in messages) {
+            return locale;
+        }
+        // If the locale is a 2-letter code, we can try to find a regional variant
+        // e.g. ""fr"" may not be in the messages, but ""fr-FR"" is
+        if (locale.length === 2) {
+            const regionalLocale = `${locale}-${locale.toUpperCase()}`;
+            if (regionalLocale in messages) {
+                return regionalLocale;
+            }
+        } else {
+            // Some locales are further specified such as ""en-US"".
+            // If we only have a generic locale for this, we can use it too
+            const genericLocale = locale.slice(0, 2);
+            if (genericLocale in messages) {
+                return genericLocale;
+            }
+        }
+    }
+    return ""en"";
+}",javascript,1,0.24,90129
+"function range(size, options) {
+  var range = this.get('Range');
+  if (!range) return;
+  return parseRange(size, range, options);
+}",javascript,1,0.27,69353
+"    def validate_and_extract_preset(self, preset_id: Optional[str]) -> tuple:
+        """"""Returns (temperature, max_tokens, preset_system_prompt, character_name).""""""
+        if preset_id and preset_id not in self.preset_manager.presets:
+            raise HTTPException(400, f""Invalid preset_id: {preset_id}"")
+
+        temperature = DEFAULT_TEMPERATURE
+        max_tokens = DEFAULT_MAX_TOKENS
+        preset_system_prompt = None
+        character_name = """"
+
+        if preset_id and preset_id in self.preset_manager.presets:
+            preset = self.preset_manager.presets[preset_id]
+            if preset.get(""enabled"") is False:
+                logger.info(f""Preset {preset_id} is disabled, using defaults"")
+                return temperature, max_tokens, preset_system_prompt, character_name
+            if preset.get(""system_prompt""):
+                preset_system_prompt = preset[""system_prompt""]
+            character_name = preset.get(""character_name"", """")
+            if character_name:
+                name_line = f""Your name is {character_name}.""
+                if preset_system_prompt:
+                    preset_system_prompt = f""{name_line} {preset_system_prompt}""
+                else:
+                    preset_system_prompt = name_line
+            if ""temperature"" in preset:
+                temperature = preset[""temperature""]
+            if ""max_tokens"" in preset:
+                max_tokens = preset[""max_tokens""]
+
+        logger.info(f""Preset {preset_id}: temp={temperature}, max_tokens={max_tokens}"")
+        return temperature, max_tokens, preset_system_prompt, character_name",python,1,0.01,85267
+"def getJo(date):
+    joArr = date.split(""-"")
+    for i in range(len(joArr)):
+        joArr[i] = float(joArr[i])
+    jodate = 367*joArr[0] - int((7*(joArr[0] + int((joArr[1]+9)/12)))/4) + int(275 * joArr[1] / 9) + joArr[2] + 1721013.5
+    return jodate",python,3,0.92,4
+"    def __init__(self):
+        self._bus = dbus.SystemBus()
+        self._proxy = self._bus.get_object('org.freedesktop.timedate1',
+                                           '/org/freedesktop/timedate1')
+        self._interface = dbus.Interface(self._proxy, 'org.freedesktop.DBus.Properties')
+        self.status = self.get_status()",python,3,0.63,4
+"function View(name, options) {
+  var opts = options || {};
+
+  this.defaultEngine = opts.defaultEngine;
+  this.ext = extname(name);
+  this.name = name;
+  this.root = opts.root;
+
+  if (!this.ext && !this.defaultEngine) {
+    throw new Error('No default engine was specified and no extension was provided.');
+  }
+
+  var fileName = name;
+
+  if (!this.ext) {
+    // get extension from default engine name
+    this.ext = this.defaultEngine[0] !== '.'
+      ? '.' + this.defaultEngine
+      : this.defaultEngine;
+
+    fileName += this.ext;
+  }
+
+  if (!opts.engines[this.ext]) {
+    // load engine
+    var mod = this.ext.slice(1)
+    debug('require ""%s""', mod)
+
+    // default engine export
+    var fn = require(mod).__express
+
+    if (typeof fn !== 'function') {
+      throw new Error('Module ""' + mod + '"" does not provide a view engine.')
+    }
+
+    opts.engines[this.ext] = fn
+  }
+
+  // store loaded engine
+  this.engine = opts.engines[this.ext];
+
+  // lookup path
+  this.path = this.lookup(fileName);
+}",javascript,1,0.05,69353
+"def create_api(app):
+    from modules.api.api import Api
+    from modules.call_queue import queue_lock
+
+    api = Api(app, queue_lock)
+    return api",python,0,0.2,164507
+"def should_skip_file(path):
+    base = os.path.basename(path)
+    # Skip dotfiles and dotdirs
+    if base.startswith('.'):
+        return True
+    # Skip config files by extension
+    if base.lower().endswith(CONFIG_FILE_EXTENSIONS):
+        return True
+    return False",python,0,0.04,148633
+"function arrayEach(array, iteratee) {
+    var index = -1,
+        length = array == null ? 0 : array.length;
+
+    while (++index < length) {
+      if (iteratee(array[index], index, array) === false) {
+        break;
+      }
+    }
+    return array;
+  }",javascript,0,0.06,61321
+"def fatal_error_envelop():
+    return jsonify({
+        'status' : 'OK',
+        'code' : 404,
+        'message' : 'Unknown Error'
+    })",python,3,0.63,4
+"def main():
+	p = OCR(""tests/PlainText.pdf"", ""INFO"", ""none"")
+	p.start()
+
+	result = p.text.strip()
+
+	with io.open('tests/PlainText.txt') as f:
+		against = f.read().strip()
+
+	assert(result == against)
+
+	print(""Test passed."")",python,2,0.98,4
+"async def deprecation_warning(request: web.Request, handler):
+    """"""Middleware to warn about deprecated frontend API paths""""""
+    path = request.path
+
+    if path.startswith(""/scripts/ui"") or path.startswith(""/extensions/core/""):
+        # Only warn once per unique file path
+        if path not in _deprecated_paths_warned:
+            _deprecated_paths_warned.add(path)
+            logging.warning(
+                f""[DEPRECATION WARNING] Detected import of deprecated legacy API: {path}. ""
+                f""This is likely caused by a custom node extension using outdated APIs. ""
+                f""Please update your extensions or contact the extension author for an updated version.""
+            )
+
+    response: web.Response = await handler(request)
+    return response",python,0,0.11,127142
+"def create_vpc(cidr_block, vpc_name):
+    response = ec2client.create_vpc(CidrBlock=cidr_block, InstanceTenancy='default')
+    vpc_id = response['Vpc']['VpcId']
+    ec2client.get_waiter('vpc_available').wait(VpcIds=[vpc_id])
+    response = ec2client.create_tags(Resources=[vpc_id], Tags=[{'Key': 'Name', 'Value': vpc_name}])
+    response = ec2client.modify_vpc_attribute(VpcId=vpc_id, EnableDnsSupport={'Value': True})
+    response = ec2client.modify_vpc_attribute(VpcId=vpc_id, EnableDnsHostnames={'Value': True})
+    return vpc_id",python,2,0.6,4
+"def is_self_hosted(endpoint_url: str) -> bool:
+    """"""True if the endpoint is NOT a known SOTA cloud API.
+
+    Conservative — anything we don't positively recognise as SOTA is
+    treated as self-hosted. Better to over-escalate than to silently
+    add latency to a paid-API user's chat.
+    """"""
+    if not endpoint_url:
+        return True
+    try:
+        host = (urlparse(endpoint_url).hostname or """").lower()
+    except Exception:
+        return True
+    if not host:
+        return True
+    return host not in _SOTA_HOSTS",python,1,0.25,85267
+"function composeReact(routeConfig, props) {
+		var routeId = routeConfig.moduleId.replace(""/"","""");
+		var insertionElement = $('#' + routeId)[0];
+		if (!insertionElement) {
+			$(""[data-view='"" + placeholderViewName + ""']"").replaceWith(""<div id='"" + routeId
+				+ ""'></div>"");
+			insertionElement = $('#' + routeId)[0];
+		}
+		// Get the actual component class by requiring it.
+		var component = require(routeConfig.moduleId);
+		ReactDOM.render(React.createElement(component, props), insertionElement);
+	}",javascript,3,0.6,4
+"def arg(*args, **kwargs):
+    """"""Decorator for CLI args.
+
+    Example:
+
+    >>> @arg(""name"", help=""Name of the new entity"")
+    ... def entity_create(args):
+    ...     pass
+    """"""
+    def _decorator(func):
+        add_arg(func, *args, **kwargs)
+        return func
+    return _decorator",python,2,0.83,4
+"    def run(self):
+        self.announce(""Running pylint for library source files and tests"",
+                      level=distutils.log.INFO)
+        subprocess.check_call([""pylint"", ""dxlvtapiclient"", ""tests""] + glob.glob(""*.py""))
+        self.announce(""Running pylint for samples"", level=distutils.log.INFO)
+        subprocess.check_call([""pylint""] + glob.glob(""sample/*.py"") +
+                              glob.glob(""sample/**/*.py"") +
+                              [""--rcfile"", "".pylintrc.samples""])",python,3,0.66,4
+"function doRouter(r) {
+	for (var k in r) {
+		var data = Mock.mock(r[k]);
+		(function (d) {
+			app.get(k, function (req, res) {
+				res.send(d);
+			});
+		})(data);
+	}
+}",javascript,3,0.84,4
+"function config () {
+      var config = merge(
+        {
+          el: '#app',
+          repo: '',
+          maxLevel: 6,
+          subMaxLevel: 0,
+          loadSidebar: null,
+          loadNavbar: null,
+          homepage: 'README.md',
+          coverpage: '',
+          basePath: '',
+          auto2top: false,
+          name: '',
+          themeColor: '',
+          nameLink: window.location.pathname,
+          autoHeader: false,
+          executeScript: null,
+          noEmoji: false,
+          ga: '',
+          ext: '.md',
+          mergeNavbar: false,
+          formatUpdated: '',
+          externalLinkTarget: '_blank',
+          routerMode: 'hash',
+          noCompileLinks: [],
+          relativePath: false
+        },
+        window.$docsify
+      );
+
+      var script =
+        document.currentScript ||
+        [].slice
+          .call(document.getElementsByTagName('script'))
+          .filter(function (n) { return /docsify\./.test(n.src); })[0];
+
+      if (script) {
+        for (var prop in config) {
+          if (hasOwn.call(config, prop)) {
+            var val = script.getAttribute('data-' + hyphenate(prop));
+
+            if (isPrimitive(val)) {
+              config[prop] = val === '' ? true : val;
+            }
+          }
+        }
+
+        if (config.loadSidebar === true) {
+          config.loadSidebar = '_sidebar' + config.ext;
+        }
+        if (config.loadNavbar === true) {
+          config.loadNavbar = '_navbar' + config.ext;
+        }
+        if (config.coverpage === true) {
+          config.coverpage = '_coverpage' + config.ext;
+        }
+        if (config.repo === true) {
+          config.repo = '';
+        }
+        if (config.name === true) {
+          config.name = '';
+        }
+      }
+
+      window.$docsify = config;
+
+      return config
+    }",javascript,0,0.04,57529
+"function lookup(name) {
+  var path;
+  var roots = [].concat(this.root);
+
+  debug('lookup ""%s""', name);
+
+  for (var i = 0; i < roots.length && !path; i++) {
+    var root = roots[i];
+
+    // resolve the path
+    var loc = resolve(root, name);
+    var dir = dirname(loc);
+    var file = basename(loc);
+
+    // resolve the file
+    path = this.resolve(dir, file);
+  }
+
+  return path;
+}",javascript,0,0.1,69353
+"def _is_ephemeral_scaffolding(msg: Any) -> bool:
+    """"""Return True when ``msg`` is internal recovery scaffolding that must never
+    be persisted to the durable transcript (SQLite session store or JSON log).""""""
+    return isinstance(msg, dict) and any(
+        msg.get(flag) for flag in _EPHEMERAL_SCAFFOLDING_FLAGS
+    )",python,1,0.24,229692
+"function isBuffer(val) {
+  return (
+    val !== null &&
+    !isUndefined(val) &&
+    val.constructor !== null &&
+    !isUndefined(val.constructor) &&
+    isFunction(val.constructor.isBuffer) &&
+    val.constructor.isBuffer(val)
+  );
+}",javascript,0,0.13,109231
+"function handleApplicationErrors (checker) {
+  return (res$) => res$.map((res) => {
+    const options = checker(res)
+    if (options) throw standardizedError('application', options)
+    else return res
+  })
+}",javascript,3,0.53,4
+"function addThisPrefix(exp, data) {	// 全局的表达式前加this
+			return exp.replace(/\b(?:(\w+)([\w.\[\]]*))\b(?!['""])/g, function(x, prefix, other) {
+				return (data[prefix] !== undefined ? 'this.' : '') + prefix + other;
+			});
+		}",javascript,2,0.71,4
+"def send_form():
+    msg = request.form['message']
+    sender = request.form['number']
+    sent = sms.send(api, sender, msg)
+
+    return render_template('sent.html', message=msg, send_list=sent)",python,3,0.58,4
+"var ScaffoldTableController = function(entity, resource, vm, options, id) {
+    return function() {
+        var self = this;
+
+        vm.list =  m.deferred();
+        vm.cols = m.prop([]);
+        vm.table = m.prop(entity);
+        vm.rows = m.prop([]);
+        vm.definition = m.prop([]);
+        vm.links = {};
+
+        this.beforeRefresh = function() {
+            vm.row = null; //clear out the current row
+            vm.list = m.deferred();
+            vm.list.promise.then(function(resp) {
+                var table = m.route.param(""table"");
+                var rawCols = resp.json.definition.map(function(x) { return x.split(/[\s\+]/).splice(1); });
+                var tableCols = rawCols.filter(function(x) { return ('+' + x[0]) == table; });
+                vm.cols([""nr""].concat(tableCols.map(function(x) { return x[1]; })));
+                vm.definition([[""nr"", ""Disabled""]].concat(tableCols.map(function(x) { return x.splice(1); })));
+                vm.rows(resp.list);
+                //editing/adding and no row found, create vm
+                if (resp.list.length == 0) {
+                    var row = {};
+                    vm.cols().forEach(function(x) {
+                        row[x] = m.prop("""");
+                    });
+                    vm.row = row;
+                }
+
+                //picklists
+                vm.links = resp.json.links;
+            });
+
+        };
+        new CrudController(resource, vm, options).call(this);
+    };
+}",javascript,2,0.51,4
+"def get_tracked_files():
+    try:
+        output = subprocess.check_output(['git', 'ls-files'], text=True)
+        files = output.strip().split('\n')
+        files = [f for f in files if f and os.path.isfile(f)]
+        return files
+    except subprocess.CalledProcessError:
+        print('Error: Are you in a git repository?')
+        return []",python,0,0.03,148633
+"function auth(req, res, next) {
+	const user = basicAuth(req);
+
+	if ( ! user || ! user.name || ! user.pass) {
+		return unauthorized(res);
+	}
+
+	if (user.name === 'admin' && user.pass === 'password') {
+		return next();
+	}
+	else {
+		return unauthorized(res);
+	}
+}",javascript,3,0.87,4
+"def add_arg(func, *args, **kwargs):
+    """""" Bind CLI arguments to a shell.py `do_foo` function.""""""
+    if not hasattr(func, 'arguments'):
+        func.arguments = []
+    if (args, kwargs) not in func.arguments:
+        func.arguments.insert(0, (args, kwargs))",python,3,0.54,4
+"def plot_cost_to_go_mountain_car(env, estimator, num_tiles=20):
+    x = np.linspace(env.observation_space.low[0], env.observation_space.high[0], num=num_tiles)
+    y = np.linspace(env.observation_space.low[1], env.observation_space.high[1], num=num_tiles)
+    X, Y = np.meshgrid(x, y)
+    Z = np.apply_along_axis(lambda _: -np.max(estimator.predict(_)), 2, np.dstack([X, Y]))
+
+    fig = plt.figure(figsize=(10, 5))
+    ax = fig.add_subplot(111, projection='3d')
+    surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1,
+                           cmap=matplotlib.cm.coolwarm, vmin=-1.0, vmax=1.0)
+    ax.set_xlabel('Position')
+    ax.set_ylabel('Velocity')
+    ax.set_zlabel('Value')
+    ax.set_title(""Mountain \""Cost To Go\"" Function"")
+    fig.colorbar(surf)
+    plt.show()",python,3,0.84,4
+"var scaffoldEntityToShort = function(entity) {
+    if (entity[0] == '+') {
+        entity = entity.slice(1);
+    }
+    return entity.toLowerCase();
+}",javascript,2,0.81,4
+"function apply(func, thisArg, args) {
+    switch (args.length) {
+      case 0: return func.call(thisArg);
+      case 1: return func.call(thisArg, args[0]);
+      case 2: return func.call(thisArg, args[0], args[1]);
+      case 3: return func.call(thisArg, args[0], args[1], args[2]);
+    }
+    return func.apply(thisArg, args);
+  }",javascript,0,0.2,61321
+"    private static int[] leer(Scanner s){
+        System.out.print(""¿Cuántos números desea introducir?: "");
+        int longitud = s.nextInt();
+        int[] array = new int[longitud];
+        for(int x = 0; x < array.length; x++){
+            System.out.print(""Por favor, introduce el "" + (x + 1) + ""º valor del array: "");
+            array[x] = s.nextInt();
+        }
+        return array;
+    }",java,3,0.84,4
+"function alignPool() {
+  // Ensure aligned slices
+  if (poolOffset & 0x7) {
+    poolOffset |= 0x7;
+    poolOffset++;
+  }
+}",javascript,0,0.2,118912
+"function pack() {
+  fs.mkdirSync(TARBALL_DIR, { recursive: true })
+  const out = execFileSync(
+    'pnpm',
+    ['pack', '--pack-destination', TARBALL_DIR],
+    { cwd: path.join(ROOT, 'packages/next'), encoding: 'utf8' }
+  )
+  const produced = out.trim().split('\n').pop()
+  const src = path.isAbsolute(produced)
+    ? produced
+    : path.join(TARBALL_DIR, produced)
+  fs.renameSync(src, TARBALL)
+}",javascript,1,0.03,141750
+"def exception_handler(request: Request, e: HttpException):
+    return JSONResponse(
+        status_code=e.status_code,
+        content=utils.get_response(e.status_code, e.data, e.message),
+    )",python,0,0.26,102853
+"function setCharset(type, charset) {
+  if (!type || !charset) {
+    return type;
+  }
+
+  // parse type
+  var parsed = contentType.parse(type);
+
+  // set charset
+  parsed.parameters.charset = charset;
+
+  // format type
+  return contentType.format(parsed);
+}",javascript,0,0.1,69353
+"    private static boolean sonFamilia(int a, int b){
+        int suma = 0;
+        boolean sonFamilia = false;
+        //Verifica cuál es la suma de los divisores
+        for(int x = 1; x < a; x++){
+            if((a%x)==0){
+                suma = suma + x;
+            }
+        }
+        //Si la suma es igual al otro número verifica la suma de los divisores del otro número
+        if(suma==b){
+            suma = 0;
+            for(int x = 1; x < b; x++){
+                if((b%x)==0){
+                    suma = suma + x;
+                }
+            }
+            //Si la suma de los divisores de B es igual a A devuelve verdadero
+            if(suma==a){
+                sonFamilia = true;
+            }
+        }
+        return sonFamilia;
+    }",java,3,0.76,4
+"def Count(Name):
+    test = open(Name+'.txt','r').read()
+    x = Counter(test.split())
+#print(x)
+
+# f = open('s1FreqTest.txt','w')
+# f.close()
+# with open(""s1FreqTest.txt"") as f:
+#     for k,v in  x.most_common():
+#         f.write( ""{} {}\n"".format(k,v) )
+# f = open('abc','w').close()
+# with open(""abc"") as f:
+# for k,v in  x.most_common():
+#     print( ""{} {}\n"".format(k,v) )
+
+
+#print(x['i\'ll'])
+
+    #z = input('Name of csv file? ')
+    z = Name
+    i = 1
+    with open(z+'.csv','w') as ts:
+        for k, v in x.most_common():
+            ts.write(""{0},{1},{2}\n"".format(k, v, i))
+            i += 1",python,2,0.6,4
+"	def draw(self, context):
+		layout = self.layout
+		row = layout.row()
+		row.operator(""pose.juks_keying"", text=""Mass KeyingSets creation"")
+		row = layout.row()
+		row.operator(""pose.juks_keying_keyframes"", ""Mass KeyingSets from Keyframes"")",python,3,0.81,4
+"    public static void main(String[] args) {
+        System.out.println(""Este programa devuelve el mayor número contenido en un array."");
+        Scanner s = new Scanner(System.in);
+        //Crea un array
+        int [] array;
+        //Referencia el array creado a lo que devuelve la función leer
+        array = leer(s);
+        System.out.println(""El mayor número del array es: "" + devuelveMayor(array));
+
+
+    }",java,2,0.89,4
+"def protected(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if auth and auth.username == api_username and auth.password == api_password:
+            return f(*args, **kwargs)
+        return jsonify({'message' : 'Authentication failed!'}), 403
+    return decorated",python,2,0.65,4
+"def get_hermes_home_override() -> str | None:
+    """"""Return the active context-local Hermes home override, if any.""""""
+    override = _HERMES_HOME_OVERRIDE.get()
+    if override is _UNSET or not override:
+        return None
+    return str(override)",python,1,0.2,229692
+"def _format_mcp_params(input_schema: Any) -> str:
+    """"""Render an MCP tool's JSON-Schema inputs as a compact prompt hint.
+
+    Without this the agent only sees a tool's name + description and has to
+    guess its arguments (issue #2509). Produces e.g.
+    ` Args (JSON): {""path"": string (required), ""limit"": integer}` — names,
+    coarse types, and required-ness, kept short so it stays prompt-friendly.
+    Returns """" when there are no parameters.
+
+    MCP servers are third-party, so names/types are sanitized and the parameter
+    count + total length are capped (issue #2660); normal schemas are unaffected.
+    """"""
+    if not isinstance(input_schema, dict):
+        return """"
+    props = input_schema.get(""properties"")
+    if not isinstance(props, dict) or not props:
+        return """"
+    required = set(input_schema.get(""required"") or [])
+    parts = []
+    for pname, pinfo in list(props.items())[:_MCP_PARAM_MAX]:
+        pinfo = pinfo if isinstance(pinfo, dict) else {}
+        ptype = pinfo.get(""type"") or ""any""
+        if isinstance(ptype, list):
+            ptype = ""|"".join(str(x) for x in ptype)
+        tag = f'""{_sanitize_schema_token(pname)}"": {_sanitize_schema_token(ptype)}'
+        if pname in required:
+            tag += "" (required)""
+        parts.append(tag)
+    extra = len(props) - len(parts)
+    if extra > 0:
+        parts.append(f""…+{extra} more"")
+    hint = "" Args (JSON): {"" + "", "".join(parts) + ""}""
+    if len(hint) > _MCP_HINT_MAX:
+        hint = hint[:_MCP_HINT_MAX - 1].rstrip() + ""…""
+    return hint",python,0,0.23,85267
+"    public static void main(String[] args) {
+        System.out.println(""Este programa dice si un número está contenido en un array."");
+        Scanner s = new Scanner(System.in);
+        int[] array;
+        array = leer(s);
+        System.out.print(""Por favor, introduzca el número que quiere buscar: "");
+        int num = s.nextInt();
+        if(estaEnArray(array, num)){
+            System.out.println(""El número "" + num + "" está contenido en el array."");
+        } else {
+            System.out.println(""El número "" + num + "" no está contenido en el array."");
+        }
+    }",java,2,0.73,4
+"    def __init__(self, rng, input, n_in, n_hiddens, n_out, activations):
+        """"""Initialisation des paramètres du réseau
+
+        Paramètres:
+        rng: numpy.random.RandomState -> une nombre aléatoire utilisé pour initialiser les poids
+        input: theano.tensor.dmatrix -> tensor symbolique de dimension (n_examples, n_in)
+        n_in: int -> dimension de l'entrée
+        n_hidden: vecteur d'entiers -> nombre d'unités cachées par couche
+        n_out: int -> nombre d'unités de la couche de sortie
+        activation: vecteur de theano.Op ou fonction -> fonction d'activation des couches cachées
+        """"""
+
+        self.hiddenLayers = []
+
+        self.hiddenLayers.append(HiddenLayer(
+            rng=rng,
+            input=input,
+            n_in=n_in,
+            n_out=n_hiddens[0],
+            activation=activations[0]
+            ))
+
+        for i in range(len(n_hiddens)-1):
+            self.hiddenLayers.append(HiddenLayer(
+            rng=rng,
+            input=self.hiddenLayers[i].output,
+            n_in=n_hiddens[i],
+            n_out=n_hiddens[i+1],
+            activation=activations[i+1]
+            ))
+
+        # The logistic regression layer gets as input the hidden units
+        # of the hidden layer
+        self.logRegressionLayer = LogisticRegression(
+            input=self.hiddenLayers[-1].output,
+            n_in=n_hiddens[-1],
+            n_out=n_out
+        )
+
+        # negative log likelihood du réseau
+        self.negative_log_likelihood = (
+            self.logRegressionLayer.negative_log_likelihood
+        )
+        # l'erreur quadratique du réseau
+        self.quadraticLoss = (
+            self.logRegressionLayer.quadraticLoss
+        )
+        # Fonctions pour calculer l'erreur du modèle
+        self.errors = self.logRegressionLayer.errors
+        self.incorrects = self.logRegressionLayer.incorrects
+
+        # Les paramètres du modèle sont les paramètres de toutes ses couches
+        self.params = []
+        for hl in self.hiddenLayers:
+            self.params = self.params + hl.params
+
+        self.params = self.params + self.logRegressionLayer.params
+
+
+        self.input = input
+        self.y_pred = self.logRegressionLayer.y_pred
+        self.p_y_given_x = self.logRegressionLayer.p_y_given_x
+
+        # norme L1, à utiliser pour la régularisation L1
+        self.L1 = abs(self.logRegressionLayer.W).sum()
+        for hl in self.hiddenLayers:
+            self.L1 += abs(hl.W).sum()
+
+        # norme L2 au carré, à utiliser pour la régularisation L2
+        self.L2_sqr = (self.logRegressionLayer.W ** 2).sum()
+        for hl in self.hiddenLayers:
+            self.L2_sqr += (hl.W ** 2).sum()",python,3,0.76,4
+"def new_method(model_name):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            model_name = func
+            return model_name(*args, **kwargs)
+        return wrapper
+    return decorator",python,3,0.9,4
+"def _get_zoneinfo(name: str) -> Optional[ZoneInfo]:
+    """"""Validate and return a ZoneInfo, or None if invalid.""""""
+    if not name:
+        return None
+    try:
+        return ZoneInfo(name)
+    except (KeyError, Exception) as exc:
+        logger.warning(
+            ""Invalid timezone '%s': %s. Falling back to server local time."",
+            name, exc,
+        )
+        return None",python,0,0.06,229692
+"function getGlobal() {
+  if (typeof globalThis !== 'undefined') return globalThis;
+  if (typeof self !== 'undefined') return self;
+  if (typeof window !== 'undefined') return window;
+  if (typeof global !== 'undefined') return global;
+  return {};
+}",javascript,0,0.19,109231
+"def eval_svs_main_(filename):
+
+
+    ######## reference
+    ref_iKalaURI= Parameters.iKalaURI + '/Wavfile/'
+    ref_fileURI=os.path.join(ref_iKalaURI, filename)
+
+    loader = essentia.standard.MonoLoader(filename= ref_fileURI, downmix='left'    )
+    trueKaraoke = loader()
+
+    loader = essentia.standard.MonoLoader(filename= ref_fileURI, downmix='right'    )
+    trueVoice = loader()
+
+    ref_iKalaURI= Parameters.iKalaURI + '/Wavfile/mono/'
+    ref_file_mono_URI=os.path.join(ref_iKalaURI, filename)
+
+    loader = essentia.standard.MonoLoader(filename= ref_file_mono_URI )
+    trueMixed = loader()
+
+
+    ######## estimated
+    estim_iKalaURI= Parameters.iKalaURI + '/Wavfile_resynth/'
+
+    estim_fileURI=os.path.join(estim_iKalaURI,filename)
+
+    loader = essentia.standard.MonoLoader(filename= estim_fileURI  )
+    estimatedVoice  = loader()
+
+    estimatedVoice_resized= numpy.zeros((trueMixed.shape))
+
+    diff_length=len(trueMixed) - len(estimatedVoice)
+    estimatedVoice_resized[diff_length:]=estimatedVoice
+
+    estimatedKaraoke = trueMixed - estimatedVoice_resized
+    norm_est = norm(estimatedVoice_resized + estimatedKaraoke)
+    norm_est = 229.0
+    norm_true = norm(trueVoice + trueKaraoke)
+    a = vstack((estimatedVoice_resized,estimatedKaraoke))
+    b = vstack((trueVoice,trueKaraoke))
+    (SDR,SIR,SAR, perm) = mir_eval.separation.bss_eval_sources( a / norm_est,  b / norm_true  )
+    (NSDR,NSIR,NSAR, perm) = mir_eval.separation.bss_eval_sources( \
+        [trueMixed,trueMixed] / norm(trueMixed + trueMixed),\
+        [trueVoice,trueKaraoke] / norm(trueVoice + trueKaraoke))
+    NSDR=SDR - NSDR
+
+    return NSDR,SIR,SAR",python,2,0.59,4
+"def get_members():
+    db = get_db()
+    members_cur = db.execute('select id, name, email, level from members')
+    members = members_cur.fetchall()
+
+    return_values = []
+
+    for member in members:
+        member_dict = {}
+        member_dict['id'] = member['id']
+        member_dict['name'] = member['name']
+        member_dict['email'] = member['email']
+        member_dict['level'] = member['level']
+
+        return_values.append(member_dict)
+
+    return jsonify({'members' : return_values})",python,2,0.62,4
+"def plot_episode_stats(stats, smoothing_window=10, noshow=False):
+    # Plot the episode length over time
+    fig1 = plt.figure(figsize=(10,5))
+    plt.plot(stats.episode_lengths)
+    plt.xlabel(""Episode"")
+    plt.ylabel(""Episode Length"")
+    plt.title(""Episode Length over Time"")
+    if noshow:
+        plt.close(fig1)
+    else:
+        plt.show(fig1)
+
+    # Plot the episode reward over time
+    fig2 = plt.figure(figsize=(10,5))
+    rewards_smoothed = pd.Series(stats.episode_rewards).rolling(smoothing_window, min_periods=smoothing_window).mean()
+    plt.plot(rewards_smoothed)
+    plt.xlabel(""Episode"")
+    plt.ylabel(""Episode Reward (Smoothed)"")
+    plt.title(""Episode Reward over Time (Smoothed over window size {})"".format(smoothing_window))
+    if noshow:
+        plt.close(fig2)
+    else:
+        plt.show(fig2)
+
+    # Plot time steps and episode number
+    fig3 = plt.figure(figsize=(10,5))
+    plt.plot(np.cumsum(stats.episode_lengths), np.arange(len(stats.episode_lengths)))
+    plt.xlabel(""Time Steps"")
+    plt.ylabel(""Episode"")
+    plt.title(""Episode per time step"")
+    if noshow:
+        plt.close(fig3)
+    else:
+        plt.show(fig3)
+
+    return fig1, fig2, fig3",python,2,0.8,4
+"def main() -> int:
+    command = sys.argv[1] if len(sys.argv) > 1 else ""<command>""
+    notice = DEPRECATION_NOTICE.format(command=command)
+    replacement = FORWARDS.get(command)
+    if replacement is None:
+        raise SystemExit(f""error: {notice}"")
+    warnings.warn(notice, DeprecationWarning)
+    if len(sys.argv) > 2:
+        warnings.warn(f""ignoring extra arguments: {shlex.join(sys.argv[2:])}"")
+    print(f""Forwarding to `{shlex.join(replacement)}`."", file=sys.stderr)
+    return subprocess.run(replacement).returncode",python,1,0.03,102353
+"function change(decimal) {
+  if (decimal === Infinity) {
+    return 'New file';
+  }
+  if (decimal === -1) {
+    return 'Deleted';
+  }
+  if (decimal < 0.0001) {
+    return '=';
+  }
+  return percentFormatter.format(decimal);
+}",javascript,1,0.19,247209
+"    def construct(self):
+        intro_words = Text(""""""
+            The original motivation for manim was to
+            better illustrate mathematical functions
+            as transformations.
+        """""")
+        intro_words.to_edge(UP)
+
+        self.play(Write(intro_words))
+        self.wait(2)
+
+        # Linear transform
+        grid = NumberPlane((-10, 10), (-5, 5))
+        matrix = [[1, 1], [0, 1]]
+        linear_transform_words = VGroup(
+            Text(""This is what the matrix""),
+            IntegerMatrix(matrix),
+            Text(""looks like"")
+        )
+        linear_transform_words.arrange(RIGHT)
+        linear_transform_words.to_edge(UP)
+        linear_transform_words.set_backstroke(width=5)
+
+        self.play(
+            ShowCreation(grid),
+            FadeTransform(intro_words, linear_transform_words)
+        )
+        self.wait()
+        self.play(grid.animate.apply_matrix(matrix), run_time=3)
+        self.wait()
+
+        # Complex map
+        c_grid = ComplexPlane()
+        moving_c_grid = c_grid.copy()
+        moving_c_grid.prepare_for_nonlinear_transform()
+        c_grid.set_stroke(BLUE_E, 1)
+        c_grid.add_coordinate_labels(font_size=24)
+        complex_map_words = TexText(""""""
+            Or thinking of the plane as $\\mathds{C}$,\\\\
+            this is the map $z \\rightarrow z^2$
+        """""")
+        complex_map_words.to_corner(UR)
+        complex_map_words.set_backstroke(width=5)
+
+        self.play(
+            FadeOut(grid),
+            Write(c_grid, run_time=3),
+            FadeIn(moving_c_grid),
+            FadeTransform(linear_transform_words, complex_map_words),
+        )
+        self.wait()
+        self.play(
+            moving_c_grid.animate.apply_complex_function(lambda z: z**2),
+            run_time=6,
+        )
+        self.wait(2)",python,1,0.03,90614
+"def evaluate_turn_regex(
+    tool_results: List[Dict[str, Any]],
+    agent_reply: str,
+) -> Tuple[str, Optional[str]]:
+    """"""Cheap regex check on a finished turn.
+
+    Returns (""failure"", reason) on a detected problem, (""ok"", None)
+    otherwise. The caller decides whether to short-circuit or fall
+    back to an LLM self-eval.
+    """"""
+    # Any tool returned an explicit error field?
+    for r in tool_results or []:
+        if not isinstance(r, dict):
+            continue
+        if r.get(""error""):
+            return (""failure"", f""tool returned error: {r.get('error')!r}"")
+        text = r.get(""results"") or r.get(""output"") or r.get(""response"") or """"
+        if isinstance(text, str):
+            for pat in _TOOL_ERROR_PATTERNS:
+                if pat.search(text):
+                    snippet = text[:120].strip()
+                    return (""failure"", f""tool result matched error pattern {pat.pattern!r}: {snippet!r}"")
+
+    # Agent verbally gave up?
+    if isinstance(agent_reply, str) and agent_reply:
+        for pat in _REPLY_GIVE_UP_PATTERNS:
+            m = pat.search(agent_reply)
+            if m:
+                return (""failure"", f""agent reply matched give-up pattern {pat.pattern!r}"")
+
+    return (""ok"", None)",python,1,0.11,85267
+"    def train(self, weights, train_set_x, train_set_y, x, y, w, reg_L1, reg_L2,
+              learning_rate=0.01, n_epochs=1000, batch_size=20, type_grad = 'nesterov',
+              valid_set_x = None, valid_set_y = None):
+        """"""
+        Entrainer un réseau de neurones avec le principe forward/backwark propagation
+        et descente de gradient. Si les données de validation sont utilisés,
+        l'apprentissage utilisera le principe du ""early stopping""
+
+        Paramètres
+        weights: vecteur de float -> poids associés à chaque exemple d'apprentissage
+        train_set_x: theano.tensor.dmatrix -> tensor symbolique des features
+        train_set_y: theano.tensor.lvector -> tensor symbolique représentant les labels
+        learning_rate: float
+        x = T.matrix('x')
+        y= T.ivector('y')
+        w = T.dvector('w')
+        reg_L1:      int -> paramètre de régularisation L1
+        reg_L2:      int -> paramètre de régularisation L2
+        learning_rate: float -> pas de la descente de gradient
+        n_epochs:    int -> nombre d'epochs pour l'entrainement
+        batch_size:  int -> taille du batch (si égal à 1 descente stochastique
+        type_grad:   string -> type de la descente de gradiant ('nesterov' ou 'standard')
+       """"""
+
+        # compute number of minibatches for training, validation and testing
+        n_train_batches = train_set_x.get_value(borrow=True).shape[0] // batch_size
+
+
+        # the cost we minimize during training is the quadratic loss of
+        # the model
+        cost = (
+            self.negative_log_likelihood(y, w)
+            + reg_L1 * self.L1
+            + reg_L2 * self.L2_sqr
+        )
+
+        # compiling a Theano function that computes the mistakes that are made
+        # by the model on a minibatch
+
+        # start-snippet-5
+        # compute the gradient of cost with respect to theta (sorted in params)
+        # the resulting gradients will be stored in a list gparams
+        gparams = [T.grad(cost, param) for param in self.params]
+        #print([pp(T.grad(cost, param)) for param in self.params])
+        # specify how to update the parameters of the model as a list of
+        # (variable, update expression) pairs
+
+        # given two lists of the same length, A = [a1, a2, a3, a4] and
+        # B = [b1, b2, b3, b4], zip generates a list C of same size, where each
+        # element is a pair formed from the two lists :
+        #    C = [(a1, b1), (a2, b2), (a3, b3), (a4, b4)]
+        if (type_grad == 'nesterov'):
+            updates = nesterov_momentum(cost, self.params, learning_rate=0.01, momentum= 0.5)
+        else:
+            updates = [
+                (param, param - learning_rate * gparam)
+                for param, gparam in zip(self.params, gparams)
+            ]
+
+        index = T.lscalar()
+        indices = T.lvector()
+        # compiling a Theano function `train_model` that returns the cost, but
+        # in the same time updates the parameter of the model based on the rules
+        # defined in `updates`
+
+        longueur = train_set_x.get_value(borrow=True).shape[0]
+#        np.random.seed(1234)
+        indices_val = np.arange(longueur)
+#        np.random.shuffle(indices_val)
+
+
+        train_model = theano.function(
+            inputs=[index, indices],
+            outputs=cost,
+            updates=updates,
+            givens={
+                x: train_set_x[indices[index: (index + batch_size)]],
+                y: train_set_y[indices[index: (index + batch_size)]],
+                w: weights[indices[index: (index + batch_size)]]
+            }
+        )
+        ###############
+        # TRAIN MODEL #
+        ###############
+        print('... training')
+        print('on fait un shuffle du train')
+
+        # Train and shuffle the inputs
+        if ((valid_set_x == None) or (valid_set_y == None)):
+            for epoch in range(n_epochs):
+                #tstart = time.time()
+                for start_indx in range(0, longueur - batch_size +1, batch_size):
+                    np.random.shuffle(indices_val)
+                    #print(weights.get_value(borrow = True)[minibatch_index * batch_size: (minibatch_index + 1) * batch_size])
+                    #print(sum(weights.get_value(borrow = True)[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]))
+                    minibatch_avg_cost = train_model(start_indx, indices_val)",python,3,0.9,4
+"function header(name) {
+  if (!name) {
+    throw new TypeError('name argument is required to req.get');
+  }
+
+  if (typeof name !== 'string') {
+    throw new TypeError('name must be a string to req.get');
+  }
+
+  var lc = name.toLowerCase();
+
+  switch (lc) {
+    case 'referer':
+    case 'referrer':
+      return this.headers.referrer
+        || this.headers.referer;
+    default:
+      return this.headers[lc];
+  }
+}",javascript,1,0.27,69353
+"def displayimage(index, x, y, type_donnees = 'tensor', pred = None, string= None):
+
+    if (type_donnees == 'tensor'):
+        y = y.eval()
+        x = x.get_value()
+
+    if (len(index)> 16):
+        index = index[0:16]
+
+    for count, i in enumerate(index):
+        image = x[i]
+        rrows = np.int(np.sqrt(len(index)))
+        pl.subplot(rrows, np.int(len(index)/rrows), count+1).imshow(image.reshape(28, 28), cmap=pl.cm.gray)
+        pl.title('vrai: %s et predit: %s' % (y[i], pred[i]))
+        pl.axis('off')
+
+    if (string != None):
+        pl.savefig(string)
+    else:
+        pl.show()",python,3,0.62,4
+"def json_records_envelop(data):
+    return jsonify({
+        'status' : 'OK',
+        'code' : 200,
+        'data' : data,
+        'message' : 'Success'
+    })",python,3,0.7,4
+"async def compress_body(request: web.Request, handler):
+    accept_encoding = request.headers.get(""Accept-Encoding"", """")
+    response: web.Response = await handler(request)
+    if not isinstance(response, web.Response):
+        return response
+    if response.content_type not in [""application/json"", ""text/plain""]:
+        return response
+    if response.body and ""gzip"" in accept_encoding:
+        response.enable_compression()
+    return response",python,1,0.09,127142
+"function prepareTooltip(d, position) {
+      var tableRows = { ancectors: [], node: [], children: [] };
+      var linkParams = [];
+      var tooltipHref = panel.linkTemplate;
+      var totalValue = d.value;
+
+      // d's ancectors
+      var ancectors = getAncestors(d);
+      var i = 0;
+      if (ancectors.length > 0) {
+        if (ancectors[topDepth]) {
+          totalValue = ancectors[topDepth].value;
+        }
+
+        _.each(ancectors, function(node) {
+          tableRows.ancectors.push(
+            tooltipLine(node, (topDepth <= node.depth) ? totalValue : null)
+          );
+
+          if (panel.linkTemplate) {
+            tooltipHref = tooltipHref.replace('\$' + String(i++), node.key);
+          }
+        });
+      }
+
+      // d itself
+      tableRows.node.push(tooltipLine(d, totalValue));
+      if (panel.linkTemplate) {
+        tooltipHref = tooltipHref.replace('\$' + String(i), d.key);
+      }
+
+      // d's Children
+      if (d.children && d.children.length > 0) {
+        _.each(d.children, function(node, i) {
+          tableRows.children.push(tooltipLine(node, totalValue));
+        });
+      }
+
+      var rtn = {
+        tableRows:   tableRows,
+        tooltipHref: tooltipHref,
+        position:    { x: position[0], y: position[1] }
+      };
+      return rtn;
+    }",javascript,3,0.9,4
+"async def application_lifespan(_: FastAPI):
+    """"""集中处理 API 进程启动恢复和关闭日志。""""""
+    logger.info(""startup event"")
+
+    # 跨平台发布由当前进程线程池执行，不会在服务重启后恢复。启动时把 Redis
+    # 中确认已失去执行进程的活动状态收敛为失败，避免任务永久无法删除。
+    from app.services import task as task_service
+
+    task_service.recover_interrupted_cross_posts()
+    try:
+        yield
+    finally:
+        logger.info(""shutdown event"")",python,0,0.08,102853
+"var triggerEvent = function(evt, evtData) {
+        xDebug.call(this, arguments.callee.name, arguments);
+        this.options.$eleBtn.trigger(evt, [evtData]);
+        $(this).trigger(evt + ""."" + this.apexname, [evtData]);
+    }",javascript,2,0.9,4
+"    def initialize(self, version, build_data):
+        super().initialize(version, build_data)
+        stderr.write('>>> Building Open Webui frontend\n')
+        npm = shutil.which('npm')
+        if npm is None:
+            raise RuntimeError('NodeJS `npm` is required for building Open Webui but it was not found')
+        stderr.write('### npm install\n')
+        subprocess.run([npm, 'install', '--force'], check=True)  # noqa: S603
+        stderr.write('\n### npm run build\n')
+        os.environ['APP_BUILD_HASH'] = version
+        node_options = os.environ.get('NODE_OPTIONS', '')
+        if '--max-old-space-size' not in node_options:
+            os.environ['NODE_OPTIONS'] = f'{node_options} --max-old-space-size=8192'.strip()
+        subprocess.run([npm, 'run', 'build'], check=True)  # noqa: S603",python,1,0.05,148633
+"function init() {
+  var router = null;
+
+  this.cache = Object.create(null);
+  this.engines = Object.create(null);
+  this.settings = Object.create(null);
+
+  this.defaultConfiguration();
+
+  // Setup getting to lazily add base router
+  Object.defineProperty(this, 'router', {
+    configurable: true,
+    enumerable: true,
+    get: function getrouter() {
+      if (router === null) {
+        router = new Router({
+          caseSensitive: this.enabled('case sensitive routing'),
+          strict: this.enabled('strict routing')
+        });
+      }
+
+      return router;
+    }
+  });
+}",javascript,1,0.25,69353
+"def get_distribution(name: str) -> Optional[Dict[str, any]]:
+    """"""
+    Get a toolset distribution by name.
+
+    Args:
+        name (str): Name of the distribution
+
+    Returns:
+        Dict: Distribution definition with description and toolsets
+        None: If distribution not found
+    """"""
+    return DISTRIBUTIONS.get(name)",python,1,0.14,229692

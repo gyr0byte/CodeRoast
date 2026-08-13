@@ -37,8 +37,10 @@ ipython_config.py
 models_cache/
 data/raw/*
 !data/raw/.gitkeep
+!data/raw/scraped_code.csv
 data/processed/*
 !data/processed/.gitkeep
+!data/processed/code_samples.csv
 
 # Models (Uncomment to ignore large trained models)
 # models/*.pkl
