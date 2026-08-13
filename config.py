@@ -15,6 +15,5 @@ DATA_PROCESSED_DIR = DATA_DIR / "processed"
 # This prevents model weights from being downloaded to C:\Users\<You>\.cache\
 os.environ["HF_HOME"] = str(PROJECT_ROOT / "models_cache")
 
-# ─── Suppress TensorFlow info/warning logs ────────────────────────────────────
-# 0 = all logs, 1 = filter INFO, 2 = filter WARNING, 3 = filter ERROR
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+# ─── Suppress noisy framework logs ────────────────────────────────────────────
+os.environ["TOKENIZERS_PARALLELISM"] = "false"  # Silence HuggingFace tokenizer warnings
