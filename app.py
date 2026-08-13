@@ -382,11 +382,22 @@ with col2:
 
         st.markdown("<br>", unsafe_allow_html=True)
 
+        # Determine roast source badge (Qwen AI vs Rule-Based Template)
+        if "Qwen" in roast_text or "[Qwen" in roast_text:
+            roast_source_badge = '<span style="background: rgba(168, 85, 247, 0.2); color: #c084fc; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; border: 1px solid rgba(168, 85, 247, 0.4);">🤖 Qwen2.5-Coder AI</span>'
+            clean_roast_text = roast_text.replace("🤖 [Qwen2.5-Coder AI Roast]: ", "").replace("🤖 AI Roast: ", "")
+        else:
+            roast_source_badge = '<span style="background: rgba(234, 179, 8, 0.2); color: #fde047; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; border: 1px solid rgba(234, 179, 8, 0.4);">⚡ Rule-Based Template Engine</span>'
+            clean_roast_text = roast_text
+
         # The Roast
         st.markdown(f"""
         <div class="roast-box">
-            🔥 <strong>CodeRoast Says:</strong><br><br>
-            {roast_text}
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <span>🔥 <strong>CodeRoast Says:</strong></span>
+                {roast_source_badge}
+            </div>
+            {clean_roast_text}
             <br><br>
             <em style="color: #888;">— {grade_reaction}</em>
         </div>
