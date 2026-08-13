@@ -186,9 +186,11 @@ def get_classifier():
 def get_codebert_scorer():
     try:
         from src.ml.codebert_model import CodeBERTScorer, SAVED_MODEL_DIR
-        scorer = CodeBERTScorer(model_dir=SAVED_MODEL_DIR)
-        if scorer._is_loaded:
-            return scorer
+        # Only load CodeBERT if custom fine-tuned weights exist to avoid cloud RAM OOM
+        if SAVED_MODEL_DIR.exists():
+            scorer = CodeBERTScorer(model_dir=SAVED_MODEL_DIR)
+            if scorer._is_loaded:
+                return scorer
     except Exception:
         return None
     return None
