@@ -1,6 +1,6 @@
 """
 CodeRoast — Dynamic LLM Roast Generator
-Supports Hugging Face Serverless Inference API (Fast Cloud GPUs) and local PyTorch fallback.
+Supports Hugging Face Serverless Inference API (Fast Cloud GPUs) with instant fallback.
 """
 
 import os
@@ -14,7 +14,7 @@ MODEL_NAME = "Qwen/Qwen2.5-Coder-7B-Instruct"
 class LLMRoastGenerator:
     """
     Generates dynamic, AI-powered code roasts using Hugging Face Serverless API
-    (1-2 second fast response via Cloud GPUs) with local PyTorch model fallback.
+    (1-2 second fast response via Cloud GPUs).
     """
 
     def __init__(self, model_name: str = MODEL_NAME):
@@ -38,23 +38,23 @@ class LLMRoastGenerator:
     def _generate_hf_api(self, messages: list) -> Optional[str]:
         """Calls Hugging Face Serverless Inference API (uses 0 MB local RAM, ~1.5s response)."""
         token = self._get_hf_token()
-        headers = {}
+        headers = {"Content-Type": "application/json"}
         if token:
             headers["Authorization"] = f"Bearer {token}"
         else:
-            print("[INFO] No HF_TOKEN found in environment or secrets.toml. Attempting unauthenticated request...")
+            print("[INFO] No HF_TOKEN found. Attempting request...")
 
+        # Endpoint 1: Hugging Face Router API (OpenAI compatible)
         api_url = "https://router.huggingface.co/hf-inference/v1/chat/completions"
         payload = {
             "model": self.model_name,
             "messages": messages,
-            "max_tokens": 90,
+            "max_tokens": 120,
             "temperature": 0.85,
-            "top_p": 0.9,
         }
 
         try:
-            res = requests.post(api_url, headers=headers, json=payload, timeout=6)
+            res = requests.post(api_url, headers=headers, json=payload, timeout=5)
             if res.status_code == 200:
                 data = res.json()
                 if "choices" in data and len(data["choices"]) > 0:
@@ -62,44 +62,32 @@ class LLMRoastGenerator:
                     if content:
                         return content.strip()
             else:
-                print(f"[WARNING] HF Inference API returned status {res.status_code}: {res.text[:200]}")
+                print(f"[INFO] HF Router status {res.status_code}: {res.text[:150]}")
         except Exception as e:
-            print(f"[WARNING] HF Inference API call failed: {e}")
+            print(f"[WARNING] HF Router API call failed: {e}")
 
-        return None
-
-    def _load_local_model_if_needed(self) -> bool:
-        """Lazy loader for local PyTorch Transformers execution."""
-        # Never attempt heavy local model download on Streamlit Cloud to prevent freezes/OOM
-        if os.path.exists("/mount/src"):
-            return False
-
-        if self.local_model is not None:
-            return True
-
-        import torch
-        from transformers import AutoTokenizer, AutoModelForCausalLM
-
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        local_model_name = "Qwen/Qwen2.5-Coder-1.5B-Instruct"
+        # Endpoint 2: Direct Hugging Face Inference API
+        direct_url = f"https://api-inference.huggingface.co/models/{self.model_name}"
+        prompt_text = f"System: {messages[0]['content']}\nUser: {messages[1]['content']}\nAssistant:"
+        direct_payload = {
+            "inputs": prompt_text,
+            "parameters": {"max_new_tokens": 120, "temperature": 0.85, "return_full_text": False}
+        }
 
         try:
-            print(f"[INFO] Loading local LLM model ({local_model_name}) on {self.device}...")
-            self.tokenizer = AutoTokenizer.from_pretrained(local_model_name, trust_remote_code=True)
-            torch_dtype = torch.float16 if self.device.type == "cuda" else torch.bfloat16
-            self.local_model = AutoModelForCausalLM.from_pretrained(
-                local_model_name,
-                dtype=torch_dtype,
-                low_cpu_mem_usage=True,
-                device_map="auto" if self.device.type == "cuda" else None,
-                trust_remote_code=True
-            )
-            if self.device.type != "cuda":
-                self.local_model = self.local_model.to(self.device)
-            return True
+            res = requests.post(direct_url, headers=headers, json=direct_payload, timeout=5)
+            if res.status_code == 200:
+                data = res.json()
+                if isinstance(data, list) and len(data) > 0:
+                    text = data[0].get("generated_text", "")
+                    if text:
+                        return text.strip()
+            else:
+                print(f"[INFO] HF Direct API status {res.status_code}: {res.text[:150]}")
         except Exception as e:
-            print(f"[WARNING] Failed to load local LLM model: {e}")
-            return False
+            print(f"[WARNING] HF Direct API call failed: {e}")
+
+        return None
 
     def generate_roast(
         self,
@@ -110,8 +98,8 @@ class LLMRoastGenerator:
     ) -> Optional[str]:
         """
         Generates a dynamic roast text response:
-        - Primary: HF Cloud API (Lightning fast 1-2s response).
-        - Fallback: Local PyTorch CPU/GPU execution if API offline.
+        - Uses Hugging Face Cloud API (1-2s response).
+        - Instantly falls back to template if API is unreachable (never takes 5 mins).
         """
         severity_labels = {1: "Gentle & Witty", 2: "Standard Brutal", 3: "No Mercy Savage"}
         sev_label = severity_labels.get(severity, "Standard Brutal")
@@ -138,35 +126,10 @@ class LLMRoastGenerator:
             {"role": "user", "content": user_content}
         ]
 
-        # 1. Primary: Try Hugging Face Serverless Cloud API (Super fast 1-2s response)
+        # Call Hugging Face Serverless Cloud API
         api_roast = self._generate_hf_api(messages)
         if api_roast:
             return api_roast
 
-        # 2. Fallback: Local PyTorch Transformers (Only if HF API unavailable & on local PC)
-        if self._load_local_model_if_needed():
-            try:
-                import torch
-                text_prompt = self.tokenizer.apply_chat_template(
-                    messages, tokenize=False, add_generation_prompt=True
-                )
-                inputs = self.tokenizer([text_prompt], return_tensors="pt").to(self.device)
-                with torch.no_grad():
-                    generated_ids = self.local_model.generate(
-                        **inputs,
-                        max_new_tokens=75,
-                        temperature=0.8,
-                        top_p=0.9,
-                        do_sample=True,
-                        pad_token_id=self.tokenizer.eos_token_id
-                    )
-                generated_ids = [
-                    output_ids[len(input_ids):]
-                    for input_ids, output_ids in zip(inputs.input_ids, generated_ids)
-                ]
-                response = self.tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
-                return response.strip()
-            except Exception as e:
-                print(f"[ERROR] Error during local LLM generation: {e}")
-
+        # Never freeze for 5 mins on CPU during UI interaction
         return None
