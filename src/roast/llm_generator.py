@@ -33,7 +33,7 @@ class LLMRoastGenerator:
                     token = st.secrets["HF_TOKEN"]
             except Exception:
                 pass
-        return token
+        return token.strip() if token else None
 
     def _generate_hf_api(self, messages: list) -> Optional[str]:
         """Calls Hugging Face Serverless Inference API (uses 0 MB local RAM, ~1.5s response)."""
@@ -41,6 +41,8 @@ class LLMRoastGenerator:
         headers = {}
         if token:
             headers["Authorization"] = f"Bearer {token}"
+        else:
+            print("[INFO] No HF_TOKEN found in environment or secrets.toml. Attempting unauthenticated request...")
 
         api_url = "https://router.huggingface.co/hf-inference/v1/chat/completions"
         payload = {
@@ -59,6 +61,8 @@ class LLMRoastGenerator:
                     content = data["choices"][0]["message"]["content"]
                     if content:
                         return content.strip()
+            else:
+                print(f"[WARNING] HF Inference API returned status {res.status_code}: {res.text[:200]}")
         except Exception as e:
             print(f"[WARNING] HF Inference API call failed: {e}")
 
