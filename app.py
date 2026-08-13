@@ -223,6 +223,12 @@ with col1:
             help="1 = Gentle Nudge, 2 = Standard Roast, 3 = No Mercy",
         )
 
+    use_ai_llm = st.checkbox(
+        "🤖 Enable Dynamic AI Roast (Qwen2.5-Coder LLM)",
+        value=False,
+        help="Generates brand-new, unique AI code roasts using a local LLM instead of templates."
+    )
+
     with row3:
         roast_button = st.button(
             "🔥 Roast My Code",
@@ -262,8 +268,17 @@ with col2:
                 model_used_label = "📊 Rule-Based Static Analysis (Fallback)"
 
             # ── Generate roast ───────────────────────────────────────────
+            if use_ai_llm and roast_generator.llm_generator is None:
+                with st.spinner("🤖 Loading AI Roast LLM model (Qwen2.5-Coder-1.5B)..."):
+                    from src.roast.llm_generator import LLMRoastGenerator
+                    roast_generator.llm_generator = LLMRoastGenerator()
+
             roast_text = roast_generator.generate_roast(
-                metrics, quality_level, severity
+                metrics=metrics,
+                quality_level=quality_level,
+                severity=severity,
+                code=code_input,
+                use_llm=use_ai_llm
             )
             grade_reaction = roast_generator.get_grade_reaction(scores["grade"])
 
