@@ -196,7 +196,7 @@ def main():
     train_lstm_severity(df)
 
     print("\n" + "=" * 60)
-    print("✅ All models trained and saved to:", config.MODELS_DIR)
+    print("All models trained and saved to:", config.MODELS_DIR)
     print("=" * 60)
 
 
