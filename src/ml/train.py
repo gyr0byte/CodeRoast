@@ -180,7 +180,7 @@ def train_lstm_severity(df: pd.DataFrame) -> None:
 
 def main():
     """Run the full training pipeline."""
-    print("🔥 CodeRoast — Model Training Pipeline")
+    print("CodeRoast — Model Training Pipeline")
     print("=" * 60)
 
     # 1. Load dataset

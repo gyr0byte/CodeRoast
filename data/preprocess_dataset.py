@@ -118,7 +118,7 @@ def save_dataset(df: pd.DataFrame) -> None:
 
 
 def main():
-    print("🔥 CodeRoast — Dataset Preprocessor")
+    print("CodeRoast — Dataset Preprocessor")
     print("=" * 60)
 
     df = load_raw_data()

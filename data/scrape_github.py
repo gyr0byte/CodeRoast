@@ -345,7 +345,7 @@ def _scrape_repos(query: str, language: str, extractor, extensions: list,
 # ─── Main ────────────────────────────────────────────────────────────────────
 
 def main():
-    print("🔥 CodeRoast — GitHub Code Scraper")
+    print("CodeRoast — GitHub Code Scraper")
     print("=" * 60)
 
     if not GITHUB_TOKEN:
