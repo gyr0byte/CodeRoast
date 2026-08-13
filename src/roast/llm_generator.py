@@ -43,15 +43,71 @@ class LLMRoastGenerator:
         Generates a dynamic roast text response using Qwen2.5-Coder on HF Cloud GPU.
         """
         token = self._get_hf_token()
-        severity_labels = {1: "Gentle & Witty", 2: "Standard Brutal", 3: "No Mercy Savage"}
-        sev_label = severity_labels.get(severity, "Standard Brutal")
+        
+        # 1. Direct Severity Mapping for the System Instructions
+        if severity == 1:
+            tone_instructions = (
+                "Role: Playful, mildly sarcastic peer reviewer. "
+                "Instructions: Give a light, witty critique of the code metrics. Use gentle teasing "
+                "but end on a supportive note reminding them that they can improve."
+            )
+            few_shot_examples = [
+                {
+                    "role": "user",
+                    "content": (
+                        "Language: Python\nLines of Code: 15\nCyclomatic Complexity: 1\nNesting Depth: 0\nComment Ratio: 0.0%\n\n"
+                        "Code Snippet:\ndef add(a, b):\n    return a + b"
+                    )
+                },
+                {
+                    "role": "assistant",
+                    "content": "A simple one-line adder function! It's clean and does exactly what it says, but zero comments? I guess you really wanted to keep the addition math a closely guarded secret. Keep practicing!"
+                }
+            ]
+        elif severity == 3:
+            tone_instructions = (
+                "Role: Merciless, extremely savage senior developer. "
+                "Instructions: Unleash absolute havoc. Use hyperbole, sharp tech analogies, and brutal sarcasm. "
+                "Compare the code to historical disasters, trash cans, or pure spaghetti. "
+                "Tell them to delete the file, start over, or consider a career shift."
+            )
+            few_shot_examples = [
+                {
+                    "role": "user",
+                    "content": (
+                        "Language: Python\nLines of Code: 120\nCyclomatic Complexity: 18\nNesting Depth: 6\nComment Ratio: 1.5%\n\n"
+                        "Code Snippet:\ndef process_data(data):\n    if data:\n        for item in data:\n            if item.status == 'active':\n                ..."
+                    )
+                },
+                {
+                    "role": "assistant",
+                    "content": "This nesting depth is a literal spelunking hazard; even Christopher Nolan couldn't follow these layers. Indentation so far right it's about to fall off the display. Please delete this, run git reset --hard HEAD~999, and consider a career in botany."
+                }
+            ]
+        else:  # Standard Severity (2)
+            tone_instructions = (
+                "Role: Sarcastic, honest senior developer. "
+                "Instructions: Provide a realistic, technically accurate code review roast. "
+                "Use dry humor, developer tropes, and critique the metrics directly without being overly mean."
+            )
+            few_shot_examples = [
+                {
+                    "role": "user",
+                    "content": (
+                        "Language: Python\nLines of Code: 45\nCyclomatic Complexity: 8\nNesting Depth: 4\nComment Ratio: 0.0%\n\n"
+                        "Code Snippet:\ndef handle_request(req):\n    ..."
+                    )
+                },
+                {
+                    "role": "assistant",
+                    "content": "Forty-five lines in a single request handler and not a single comment to guide the lost souls reading it. Complexity is climbing faster than my blood pressure looking at this nesting. Do better."
+                }
+            ]
 
         system_prompt = (
-            "You are CodeRoast, a brutally honest, hilarious senior developer reviewing user code. "
-            "Your job is to roast the submitted code based on its metrics. "
-            f"Set tone to: {sev_label}. "
-            "Be technically accurate, witty, and savage. Keep the roast under 3 concise sentences. "
-            "Do not output markdown code blocks or explanations, just the roast text."
+            "You are CodeRoast, a hilariously honest code reviewer. "
+            f"{tone_instructions} "
+            "Keep the roast under 3 concise sentences. Do not use markdown formatting, code blocks, or explanations."
         )
 
         user_content = (
@@ -63,10 +119,10 @@ class LLMRoastGenerator:
             f"Code Snippet:\n{code[:800]}"
         )
 
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_content}
-        ]
+        # Build messages payload with few-shot context
+        messages = [{"role": "system", "content": system_prompt}]
+        messages.extend(few_shot_examples)
+        messages.append({"role": "user", "content": user_content})
 
         # Primary Hugging Face Serverless GPU model: Qwen2.5-Coder-32B-Instruct
         try:
