@@ -44,8 +44,8 @@ if GITHUB_TOKEN:
 
 BASE_URL = "https://api.github.com"
 
-# Target: ~600 samples across 3 languages
-SAMPLES_PER_LANGUAGE = 200
+# Target: ~60 samples across 3 languages for quick demonstration
+SAMPLES_PER_LANGUAGE = 20
 LANGUAGES = ["python", "java", "javascript"]
 
 # File extensions to look for
