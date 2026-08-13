@@ -1,1 +1,30 @@
+# ─── Static Analysis ─────────────────────────────────────────────────────────
+radon>=5.1
+pylint>=3.0
+pyflakes>=3.1
 
+# ─── NLP Layer ───────────────────────────────────────────────────────────────
+nltk>=3.8
+textblob>=0.17
+scikit-learn>=1.3
+transformers>=4.35
+
+# ─── Deep Learning ───────────────────────────────────────────────────────────
+# PyTorch GPU (CUDA 11.8) — install separately with:
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+tensorflow>=2.13
+numpy>=1.24
+
+# ─── Frontend & Visualization ────────────────────────────────────────────────
+streamlit>=1.28
+plotly>=5.18
+streamlit-ace>=0.1.1
+
+# ─── Dataset & GitHub Scraping ───────────────────────────────────────────────
+pandas>=2.1
+requests>=2.31
+PyGithub>=2.1
+
+# ─── Development Tools ──────────────────────────────────────────────────────
+jupyter>=1.0
+joblib>=1.3
