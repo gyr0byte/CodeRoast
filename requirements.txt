@@ -11,6 +11,7 @@ transformers>=4.35
 
 # ─── Deep Learning & ML ───────────────────────────────────────────────────────
 torch>=2.0.0
+torchvision>=0.15.0
 accelerate>=0.25.0
 numpy>=1.24
 
