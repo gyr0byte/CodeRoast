@@ -12,22 +12,40 @@ from src.roast.templates import (
 )
 
 
+from src.roast.llm_generator import LLMRoastGenerator
+
+
 class RoastGenerator:
     """
     Generates roasts by selecting and filling templates based on
-    code analysis metrics, quality level, and severity setting.
+    code analysis metrics, quality level, and severity setting,
+    or using a local Hugging Face LLM if enabled.
 
     Usage:
         generator = RoastGenerator()
-        roast = generator.generate_roast(metrics, quality_level=2, severity=2)
+        roast = generator.generate_roast(metrics, quality_level=2, severity=2, use_llm=True)
     """
 
-    def __init__(self):
+    def __init__(self, load_llm: bool = False):
         self.templates = ROAST_TEMPLATES
         self.severity_modifiers = SEVERITY_MODIFIERS
+        self.llm_generator = None
+        if load_llm:
+            try:
+                self.llm_generator = LLMRoastGenerator()
+                if not self.llm_generator._is_loaded:
+                    self.llm_generator = None
+            except Exception:
+                self.llm_generator = None
 
-    def generate_roast(self, metrics: dict, quality_level: int,
-                       severity: int = 2) -> str:
+    def generate_roast(
+        self,
+        metrics: dict,
+        quality_level: int,
+        severity: int = 2,
+        code: str = "",
+        use_llm: bool = False
+    ) -> str:
         """
         Generate a roast based on code metrics and quality assessment.
 
@@ -35,10 +53,18 @@ class RoastGenerator:
             metrics: Dictionary from CodeAnalyzer.get_metrics()
             quality_level: 0 (Pristine) to 3 (Disaster)
             severity: 1 (Gentle), 2 (Standard), 3 (No Mercy)
+            code: Original code string for LLM generation
+            use_llm: Whether to attempt dynamic LLM text generation
 
         Returns:
             A string containing the complete roast.
         """
+        # Try dynamic LLM generation first if requested
+        if use_llm and self.llm_generator is not None and code:
+            ai_roast = self.llm_generator.generate_roast(code, metrics, quality_level, severity)
+            if ai_roast:
+                return f"🤖 AI Roast: {ai_roast}"
+
         roast_parts = []
 
         # ── Check for syntax errors (Python AST failed) ─────────────────
