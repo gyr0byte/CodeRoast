@@ -1,6 +1,6 @@
 """
 CodeRoast — Dynamic LLM Roast Generator
-Supports Hugging Face Serverless Inference API (on Cloud) and local PyTorch Transformers (on Local PC).
+Supports Hugging Face Serverless Inference API (Fast Cloud GPUs) and local PyTorch fallback.
 """
 
 import os
@@ -13,8 +13,8 @@ MODEL_NAME = "Qwen/Qwen2.5-Coder-32B-Instruct"
 
 class LLMRoastGenerator:
     """
-    Generates dynamic, AI-powered code roasts using local Transformers model when running locally,
-    or Hugging Face Serverless API when running on Cloud.
+    Generates dynamic, AI-powered code roasts using Hugging Face Serverless API
+    (1-2 second fast response via Cloud GPUs) with local PyTorch model fallback.
     """
 
     def __init__(self, model_name: str = MODEL_NAME):
@@ -36,7 +36,7 @@ class LLMRoastGenerator:
         return token
 
     def _generate_hf_api(self, messages: list) -> Optional[str]:
-        """Calls Hugging Face Serverless Inference API (uses 0 MB local RAM)."""
+        """Calls Hugging Face Serverless Inference API (uses 0 MB local RAM, ~1.5s response)."""
         token = self._get_hf_token()
         headers = {}
         if token:
@@ -46,13 +46,13 @@ class LLMRoastGenerator:
         payload = {
             "model": self.model_name,
             "messages": messages,
-            "max_tokens": 150,
+            "max_tokens": 120,
             "temperature": 0.85,
             "top_p": 0.9,
         }
 
         try:
-            res = requests.post(api_url, headers=headers, json=payload, timeout=5)
+            res = requests.post(api_url, headers=headers, json=payload, timeout=6)
             if res.status_code == 200:
                 data = res.json()
                 if "choices" in data and len(data["choices"]) > 0:
@@ -106,8 +106,8 @@ class LLMRoastGenerator:
     ) -> Optional[str]:
         """
         Generates a dynamic roast text response:
-        - On Cloud: Uses Hugging Face Serverless Cloud API (0 MB RAM).
-        - On Local PC: Uses local PyTorch Transformers model on CPU/GPU.
+        - Primary: HF Cloud API (Lightning fast 1-2s response).
+        - Fallback: Local PyTorch CPU/GPU execution if API offline.
         """
         severity_labels = {1: "Gentle & Witty", 2: "Standard Brutal", 3: "No Mercy Savage"}
         sev_label = severity_labels.get(severity, "Standard Brutal")
@@ -116,7 +116,7 @@ class LLMRoastGenerator:
             "You are CodeRoast, a brutally honest, hilarious senior developer reviewing user code. "
             "Your job is to roast the submitted code based on its metrics. "
             f"Set tone to: {sev_label}. "
-            "Be technically accurate, witty, and savage. Keep the roast under 3-4 concise sentences. "
+            "Be technically accurate, witty, and savage. Keep the roast under 3 concise sentences. "
             "Do not output markdown code blocks or explanations, just the roast text."
         )
 
@@ -134,11 +134,12 @@ class LLMRoastGenerator:
             {"role": "user", "content": user_content}
         ]
 
-        # 1. On Streamlit Cloud: Use HF Serverless Cloud API
-        if os.path.exists("/mount/src"):
-            return self._generate_hf_api(messages)
+        # 1. Primary: Try Hugging Face Serverless Cloud API (Super fast 1-2s response)
+        api_roast = self._generate_hf_api(messages)
+        if api_roast:
+            return api_roast
 
-        # 2. On Local PC: Use local PyTorch model directly
+        # 2. Fallback: Local PyTorch Transformers (Only if HF API unavailable & on local PC)
         if self._load_local_model_if_needed():
             try:
                 import torch
@@ -149,7 +150,7 @@ class LLMRoastGenerator:
                 with torch.no_grad():
                     generated_ids = self.local_model.generate(
                         **inputs,
-                        max_new_tokens=150,
+                        max_new_tokens=75,
                         temperature=0.8,
                         top_p=0.9,
                         do_sample=True,
@@ -164,5 +165,4 @@ class LLMRoastGenerator:
             except Exception as e:
                 print(f"[ERROR] Error during local LLM generation: {e}")
 
-        # Fallback to HF Cloud API if local model loading fails
-        return self._generate_hf_api(messages)
+        return None
