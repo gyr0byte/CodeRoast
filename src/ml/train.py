@@ -125,9 +125,9 @@ def train_quality_classifier(df: pd.DataFrame, metric_features: np.ndarray) -> N
 
 
 def train_lstm_severity(df: pd.DataFrame) -> None:
-    """Train and save the LSTM severity scorer."""
+    """Train and save the LSTM severity scorer (PyTorch)."""
     print("\n" + "=" * 60)
-    print("TRAINING: LSTM Severity Scorer")
+    print("TRAINING: LSTM Severity Scorer (PyTorch)")
     print("=" * 60)
 
     code_samples = df["code"].tolist()
@@ -149,29 +149,26 @@ def train_lstm_severity(df: pd.DataFrame) -> None:
     print(f"[INFO] Train: {len(X_train)}, Validation: {len(X_val)}")
 
     # Build and train model
-    model = build_roast_severity_model(
+    lstm = LSTMSeverityModel(
         vocab_size=tokenizer.vocab_size,
         max_length=tokenizer.max_length,
     )
-    model.summary()
 
-    results = train_severity_model(
-        model, X_train, y_train, X_val, y_val,
+    results = lstm.train(
+        X_train, y_train, X_val, y_val,
         epochs=20, batch_size=32,
     )
 
     print(f"\n[RESULTS] Epochs trained: {results['epochs_trained']}")
     print(f"[RESULTS] Final loss: {results['final_loss']:.4f}")
-    print(f"[RESULTS] Final accuracy: {results['final_accuracy']:.4f}")
 
     # Evaluate MAE on validation set
-    from src.ml.lstm_model import predict_severity
-    predictions = predict_severity(model, X_val)
+    predictions = lstm.predict(X_val)
     mae = np.mean(np.abs(predictions - y_val))
     print(f"[RESULTS] Validation MAE: {mae:.4f} (target: < 0.15)")
 
     # Save model
-    path = save_severity_model(model)
+    path = lstm.save()
     print(f"\n[SAVED] LSTM model saved to: {path}")
 
     # Save tokenizer
