@@ -178,6 +178,27 @@ def train_lstm_severity(df: pd.DataFrame) -> None:
     print(f"[SAVED] Tokenizer saved to: {tokenizer_path}")
 
 
+from src.ml.codebert_model import CodeBERTScorer
+
+
+def train_codebert(df: pd.DataFrame) -> None:
+    """Fine-tune the Hugging Face CodeBERT model."""
+    print("\n" + "=" * 60)
+    print("TRAINING: Hugging Face CodeBERT Model (microsoft/codebert-base)")
+    print("=" * 60)
+
+    scorer = CodeBERTScorer()
+    if not scorer._is_loaded:
+        print("[WARNING] Skipping CodeBERT training as model failed to initialize.")
+        return
+
+    texts = df["code"].tolist()
+    labels = df["quality_label"].tolist()
+
+    results = scorer.train_on_dataset(texts, labels, epochs=2, batch_size=4)
+    print(f"[RESULTS] CodeBERT Training Complete — Final Loss: {results['final_loss']:.4f}")
+
+
 def main():
     """Run the full training pipeline."""
     print("CodeRoast — Model Training Pipeline")
@@ -194,6 +215,9 @@ def main():
 
     # 4. Train LSTM severity scorer
     train_lstm_severity(df)
+
+    # 5. Fine-tune Hugging Face CodeBERT
+    train_codebert(df)
 
     print("\n" + "=" * 60)
     print("All models trained and saved to:", config.MODELS_DIR)
