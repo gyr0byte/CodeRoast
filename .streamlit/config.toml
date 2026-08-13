@@ -2,7 +2,4 @@
 headless = true
 enableCORS = false
 enableXsrfProtection = false
-
-[server.fileWatcherType]
-# Prevents Streamlit from scanning third-party site-packages modules
-type = "auto"
+fileWatcherType = "auto"
