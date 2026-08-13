@@ -246,7 +246,7 @@ with col1:
         roast_button = st.button(
             "🔥 Roast My Code",
             type="primary",
-            use_container_width=True,
+            width="stretch",
         )
 
 # Execute analysis if the roast button is clicked
@@ -450,7 +450,7 @@ if has_results:
             margin=dict(l=60, r=60, t=30, b=30),
             height=300,
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     # Raw Metrics (expandable)
     with st.expander("📊 Raw Metrics"):
