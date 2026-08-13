@@ -63,7 +63,7 @@ class RoastGenerator:
         if use_llm and self.llm_generator is not None and code:
             ai_roast = self.llm_generator.generate_roast(code, metrics, quality_level, severity)
             if ai_roast:
-                return f"🤖 AI Roast: {ai_roast}"
+                return f"🤖 [Qwen2.5-Coder AI Roast]: {ai_roast}"
 
         roast_parts = []
 
