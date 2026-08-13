@@ -277,7 +277,7 @@ with col2:
 
             # ── Generate roast ───────────────────────────────────────────
             if use_ai_llm and roast_generator.llm_generator is None:
-                with st.spinner("🤖 Loading AI Roast LLM model (Qwen2.5-Coder-1.5B)..."):
+                with st.spinner("🤖 Connecting to Hugging Face Cloud AI (Qwen2.5-Coder)..."):
                     from src.roast.llm_generator import LLMRoastGenerator
                     roast_generator.llm_generator = LLMRoastGenerator()
 
