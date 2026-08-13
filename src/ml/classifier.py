@@ -196,4 +196,5 @@ class CodeQualityClassifier:
         data = joblib.load(filepath)
         self.vectorizer = data["vectorizer"]
         self.classifier = data["classifier"]
+        self.classifier.n_jobs = 1  # Force single thread for cloud container compatibility
         self._is_fitted = data["is_fitted"]

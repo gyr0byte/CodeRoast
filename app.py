@@ -243,14 +243,13 @@ with col1:
 
 with col2:
     if roast_button and code_input:
-        with st.spinner("Analyzing your code... (taking deep breaths)"):
-            # ── Run analysis pipeline ────────────────────────────────────
+        # 1. AST Static Analysis & Machine Learning Quality Scoring
+        with st.spinner("📊 Analyzing AST Code Metrics & Quality..."):
             lang_key = language.lower()
             analyzer = CodeAnalyzer(code_input, language=lang_key)
             metrics = analyzer.get_metrics()
             scores = calculate_scores(metrics)
 
-            # ── Determine quality level & severity score ──────────────────
             codebert_scorer = get_codebert_scorer()
             classifier = get_classifier()
 
@@ -263,7 +262,6 @@ with col2:
                 )
                 model_used_label = "🌲 Random Forest Quality Classifier"
             else:
-                # Fallback: estimate quality from overall score
                 overall = scores["overall"]
                 if overall >= 75:
                     quality_level = 0
@@ -275,20 +273,30 @@ with col2:
                     quality_level = 3
                 model_used_label = "📊 Rule-Based Static Analysis (Fallback)"
 
-            # ── Generate roast ───────────────────────────────────────────
-            if use_ai_llm and roast_generator.llm_generator is None:
-                with st.spinner("🤖 Connecting to Hugging Face Cloud AI (Qwen2.5-Coder)..."):
+        # 2. Roast Generation
+        if use_ai_llm:
+            with st.spinner("🤖 Requesting AI Roast from Hugging Face (Qwen2.5-Coder)..."):
+                if roast_generator.llm_generator is None:
                     from src.roast.llm_generator import LLMRoastGenerator
                     roast_generator.llm_generator = LLMRoastGenerator()
 
+                roast_text = roast_generator.generate_roast(
+                    metrics=metrics,
+                    quality_level=quality_level,
+                    severity=severity,
+                    code=code_input,
+                    use_llm=True
+                )
+        else:
             roast_text = roast_generator.generate_roast(
                 metrics=metrics,
                 quality_level=quality_level,
                 severity=severity,
                 code=code_input,
-                use_llm=use_ai_llm
+                use_llm=False
             )
-            grade_reaction = roast_generator.get_grade_reaction(scores["grade"])
+
+        grade_reaction = roast_generator.get_grade_reaction(scores["grade"])
 
         # ── Display Results ──────────────────────────────────────────────
 

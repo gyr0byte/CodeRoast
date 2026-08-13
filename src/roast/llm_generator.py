@@ -22,7 +22,7 @@ class LLMRoastGenerator:
         self.tokenizer = None
         self.local_model = None
         self.device = None
-        self._is_loaded = True  # Always ready via HF Serverless API or local fallback
+        self._is_loaded = True
 
     def _get_hf_token(self) -> Optional[str]:
         token = os.environ.get("HF_TOKEN")
@@ -52,33 +52,24 @@ class LLMRoastGenerator:
         }
 
         try:
-            res = requests.post(api_url, headers=headers, json=payload, timeout=12)
+            res = requests.post(api_url, headers=headers, json=payload, timeout=5)
             if res.status_code == 200:
                 data = res.json()
                 if "choices" in data and len(data["choices"]) > 0:
                     content = data["choices"][0]["message"]["content"]
-                    return content.strip()
-            elif res.status_code == 503:
-                print("[INFO] HF Model is warming up on serverless infrastructure...")
+                    if content:
+                        return content.strip()
         except Exception as e:
             print(f"[WARNING] HF Inference API call failed: {e}")
-
-        # Fallback to secondary model endpoint on HF
-        try:
-            payload["model"] = "Qwen/Qwen2.5-Coder-7B-Instruct"
-            res = requests.post(api_url, headers=headers, json=payload, timeout=10)
-            if res.status_code == 200:
-                data = res.json()
-                if "choices" in data and len(data["choices"]) > 0:
-                    content = data["choices"][0]["message"]["content"]
-                    return content.strip()
-        except Exception:
-            pass
 
         return None
 
     def _load_local_model_if_needed(self) -> bool:
         """Lazy loader for local PyTorch Transformers execution."""
+        # Never attempt heavy local model download on Streamlit Cloud to prevent freezes/OOM
+        if os.path.exists("/mount/src"):
+            return False
+
         if self.local_model is not None:
             return True
 
@@ -146,7 +137,7 @@ class LLMRoastGenerator:
         if api_roast:
             return api_roast
 
-        # 2. Fallback: Local PyTorch Transformers (If running locally with GPU/RAM)
+        # 2. Fallback: Local PyTorch Transformers (Only on local hardware)
         if self._load_local_model_if_needed():
             try:
                 import torch
