@@ -25,10 +25,11 @@ class LLMRoastGenerator:
             print(f"[INFO] Loading LLM Roast Model ({self.model_name}) on {self.device}...")
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, trust_remote_code=True)
             
-            torch_dtype = torch.float16 if self.device.type == "cuda" else torch.float32
+            torch_dtype = torch.float16 if self.device.type == "cuda" else torch.bfloat16
             self.model = AutoModelForCausalLM.from_pretrained(
                 self.model_name,
                 dtype=torch_dtype,
+                low_cpu_mem_usage=True,
                 device_map="auto" if self.device.type == "cuda" else None,
                 trust_remote_code=True
             )
