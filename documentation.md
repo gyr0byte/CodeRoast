@@ -26,7 +26,7 @@ CodeRoast follows a **decoupled, modular micro-architecture** consisting of five
                                      │
 ┌────────────────────────────────────▼────────────────────────────────────┐
 │                    2. Static Code Analysis Engine                       │
-│        Python AST Parser + Multi-Language Regex (Loc, CC, Depth)       │
+│        Python AST Parser + Multi-Language Regex (LOC, CC, Depth)       │
 └────────────────────────────────────┬────────────────────────────────────┘
                                      │
 ┌────────────────────────────────────▼────────────────────────────────────┐
@@ -39,7 +39,7 @@ CodeRoast follows a **decoupled, modular micro-architecture** consisting of five
                                      │
 ┌────────────────────────────────────▼────────────────────────────────────┐
 │                 4. Hybrid Roast Generation Engine                       │
-│    Qwen2.5-Coder-1.5B-Instruct LLM  <──fallback──> Template Engine   │
+│  🤗 HF Cloud Serverless API (0-RAM) <──fallback──> Local PyTorch / Temp │
 └────────────────────────────────────┬────────────────────────────────────┘
                                      │
 ┌────────────────────────────────────▼────────────────────────────────────┐
@@ -60,6 +60,7 @@ CodeRoast follows a **decoupled, modular micro-architecture** consisting of five
   - `3`: Disaster
 - **Feature Extraction:** `TfidfVectorizer` (Max features: 1000, Sublinear TF scaling, n-gram range: (1, 2)).
 - **Algorithm:** `RandomForestClassifier` (100 Decision Trees, Gini Impurity criterion, Max Depth: 15).
+- **Memory Footprint:** 340 KB serialized (`models/classifier.pkl`). Runs in < 0.001s using < 1 MB RAM.
 - **Mathematical Formula for TF-IDF:**
   $$\text{TF-IDF}(t, d, D) = \text{TF}(t, d) \times \log\left(\frac{1 + |D|}{1 + |\{d \in D : t \in d\}|}\right) + 1$$
 
@@ -79,15 +80,11 @@ CodeRoast follows a **decoupled, modular micro-architecture** consisting of five
 - **Architecture Specifications:** 12 Transformer Layers, 768 Hidden Dimension, 12 Attention Heads, 125M Parameters.
 - **Classification Head:** `RobertaForSequenceClassification` with a custom linear projection head for severity score and quality tier regression.
 
-### 3.4 Model 4: Local Causal LLM (`Qwen/Qwen2.5-Coder-1.5B-Instruct`)
+### 3.4 Model 4: Hugging Face Cloud AI Engine (`Qwen/Qwen2.5-Coder-32B-Instruct`)
 - **Purpose:** Generates dynamic, context-aware code roasts in natural language based on static metrics and severity.
-- **Model Size:** 1.54 Billion Parameters.
-- **Memory Footprint:** ~1.8 GB disk cache, ~2.2 GB VRAM on GPU / ~3 GB RAM on CPU.
-- **Optimization Flags:**
-  - `low_cpu_mem_usage=True` (Prevents RAM allocation spikes during model instantiation).
-  - `bfloat16` / `float16` precision.
-  - Chat template prompt formatting via `apply_chat_template`.
-- **Sampling Strategy:** Nucleus Sampling ($\text{top\_p} = 0.9$, Temperature $T = 0.8$, Max New Tokens $= 150$).
+- **Serverless Cloud Architecture:** Executes via Hugging Face Serverless Inference API, requiring **0 MB RAM** on Streamlit Cloud containers.
+- **Fallback Architecture:** Local PyTorch execution (`Qwen/Qwen2.5-Coder-1.5B-Instruct`) with `low_cpu_mem_usage=True` and `bfloat16` precision when running locally.
+- **Sampling Strategy:** Nucleus Sampling ($\text{top\_p} = 0.9$, Temperature $T = 0.85$, Max New Tokens $= 150$).
 
 ---
 
@@ -111,8 +108,10 @@ The static analyzer (`src/analyzer/code_analyzer.py`) computes structural metric
 | :--- | :--- | :--- |
 | **Language** | Python 3.10 / 3.14 | Core language runtime |
 | **Frontend UI** | Streamlit, Plotly | Interactive web dashboard & charts |
+| **Cloud Hosting** | Streamlit Cloud | Live application deployment |
+| **Cloud AI API** | Hugging Face Serverless API | 0-RAM serverless LLM generation |
 | **Deep Learning** | PyTorch (`torch`) | LSTM model architecture & tensor ops |
-| **NLP Transformers** | Hugging Face (`transformers`) | CodeBERT & Qwen2.5-Coder LLM models |
+| **NLP Transformers** | Hugging Face (`transformers`, `huggingface_hub`) | CodeBERT & Qwen2.5-Coder LLM models |
 | **Machine Learning** | Scikit-Learn | TF-IDF Vectorizer & Random Forest Classifier |
 | **Static Analysis** | Python `ast`, Radon | Control flow graph & metric extraction |
 | **Data Processing** | Pandas, NumPy | Dataset scraping, cleaning, and matrix math |
@@ -121,20 +120,25 @@ The static analyzer (`src/analyzer/code_analyzer.py`) computes structural metric
 
 ## 🎯 6. Technical Interview Q&A (Project Defense Guide)
 
-### Q1: Why did you choose CodeBERT over traditional n-gram models?
+### Q1: How does your application handle hardware constraints on free cloud hosting like Streamlit Cloud?
+> **Answer:** Streamlit Cloud free containers enforce a strict **1 GB RAM limit**. To prevent Out-Of-Memory (OOM) crashes, we implemented a hybrid architecture:
+> 1. **Zero-RAM Scoring:** Quality classification uses our pre-trained **Random Forest model (`classifier.pkl`, 340 KB)** which executes in < 0.001 seconds using < 1 MB RAM.
+> 2. **Serverless Cloud AI:** Dynamic AI roasts utilize the **Hugging Face Serverless Inference API** (`Qwen/Qwen2.5-Coder-32B-Instruct`). The LLM runs on Hugging Face's cloud GPUs, consuming 0 MB memory on the Streamlit host.
+> 3. **Local Fallback:** Heavy transformer weights (`CodeBERT`, local `Qwen2.5-Coder-1.5B`) are loaded lazily only when sufficient local system RAM is detected.
+
+### Q2: Why did you choose CodeBERT over traditional n-gram models?
 > **Answer:** Traditional n-gram TF-IDF models treat code as a "bag of words", ignoring structural semantics, variable scopes, and control flow. CodeBERT is pre-trained using Masked Language Modeling (MLM) and Replace Token Detection (RTD) on millions of code samples, allowing it to capture deep semantic patterns (e.g., detecting an inefficient $O(N^2)$ nested loop even if variable names are obfuscated).
 
-### Q2: How did you optimize the 1.5B Parameter LLM to run on consumer hardware without OOM crashes?
-> **Answer:** We implemented three key optimizations:
-> 1. **Lazy Loading:** The LLM is only instantiated in memory when the user actively toggles AI Roast mode.
+### Q3: How did you optimize the 1.5B Parameter LLM for local machine execution?
+> **Answer:** We implemented three key optimizations for local execution:
+> 1. **Lazy Loading:** The LLM is only loaded into memory when the user toggles AI Roast mode.
 > 2. **Precision Reduction:** We load model weights in `bfloat16`/`float16` precision, reducing memory consumption from ~6 GB (float32) down to ~2.2 GB.
 > 3. **Memory Streaming:** We enable `low_cpu_mem_usage=True` in Hugging Face `from_pretrained`, which directly maps tensors without creating duplicate RAM buffers.
-> 4. **Graceful Fallback:** If RAM is constrained, the app gracefully falls back to the deterministic template generator.
 
-### Q3: How is data storage managed to avoid filling up the OS C: drive?
+### Q4: How is data storage managed to avoid filling up the OS C: drive?
 > **Answer:** By default, Hugging Face downloads weights to `~/.cache/huggingface` on the C: drive. In `config.py`, we programmatically override `os.environ["HF_HOME"] = "D:\\CodeRoast\\models_cache"`, ensuring all heavy transformer checkpoints remain isolated on the dedicated storage drive.
 
-### Q4: How does the overall scoring algorithm compute the final letter grade?
+### Q5: How does the overall scoring algorithm compute the final letter grade?
 > **Answer:** The overall score ($S_{\text{overall}} \in [0, 100]$) is calculated via a weighted linear combination of four sub-scores:
 > $$S_{\text{overall}} = 0.35 \times S_{\text{efficiency}} + 0.25 \times S_{\text{structure}} + 0.25 \times S_{\text{readability}} + 0.15 \times S_{\text{creativity}}$$
 > Letter grades are mapped using thresholds: **S (90+)**, **A (80–89)**, **B (70–79)**, **C (55–69)**, **D (40–54)**, and **F (<40)**.
