@@ -156,16 +156,21 @@ class RoastGenerator:
 
         return self._finalize(roast_parts, severity)
 
-    def get_grade_reaction(self, grade: str) -> str:
+    def get_grade_reaction(
+        self,
+        grade: str,
+        use_llm: bool = False,
+        code: str = "",
+        metrics: dict = None
+    ) -> str:
         """
-        Get a one-liner reaction for the letter grade.
-
-        Args:
-            grade: Full grade string like "S — Suspiciously Good"
-
-        Returns:
-            A reaction string.
+        Get a one-liner reaction for the letter grade (from Qwen AI if active, or template fallback).
         """
+        if use_llm and self.llm_generator is not None and code:
+            ai_reaction = self.llm_generator.generate_grade_reaction(grade, code, metrics or {})
+            if ai_reaction:
+                return ai_reaction
+
         letter = grade[0] if grade else "F"
         reactions = GRADE_REACTIONS.get(letter, ["No comment."])
         if isinstance(reactions, list):

@@ -314,7 +314,12 @@ if roast_button:
                 use_llm=False
             )
 
-        grade_reaction = roast_generator.get_grade_reaction(scores["grade"])
+        grade_reaction = roast_generator.get_grade_reaction(
+            scores["grade"],
+            use_llm=use_ai_llm,
+            code=code_input,
+            metrics=metrics
+        )
         has_results = True
 
         # Store in session state for persistence across potential UI refreshes
