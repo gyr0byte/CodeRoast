@@ -15,16 +15,27 @@ MODEL_CANDIDATES = [
 
 def is_refusal(text: str) -> bool:
     """Detect if the LLM outputted a canned safety refusal instead of a roast."""
-    if not text:
+    if not text or len(text.strip()) < 5:
         return True
-    lowered = text.lower()
-    refusal_phrases = [
-        "i am sorry", "i'm sorry", "i cannot assist", "i can't assist",
-        "unable to assist", "as an ai", "cannot generate", "can't fulfill",
-        "safety guidelines", "against my safety", "ethical principles",
-        "i can't help with", "i cannot help with"
+    
+    # Normalize unicode smart quotes and accents
+    normalized = (
+        text.lower()
+        .replace("’", "'")
+        .replace("‘", "'")
+        .replace("`", "'")
+        .replace("“", '"')
+        .replace("”", '"')
+    )
+    
+    refusal_triggers = [
+        "sorry", "cannot assist", "can't assist", "unable to assist",
+        "as an ai", "cannot generate", "can't fulfill", "safety guidelines",
+        "against my safety", "ethical principles", "cannot help", "can't help",
+        "i am unable", "i'm unable", "refuse to", "policy", "cannot fulfill",
+        "inappropriate", "apologize"
     ]
-    return any(phrase in lowered for phrase in refusal_phrases)
+    return any(trigger in normalized for trigger in refusal_triggers)
 
 class LLMRoastGenerator:
     """
@@ -125,6 +136,15 @@ class LLMRoastGenerator:
                 "Roast them mercilessly for confusing a source code analyzer with a social media site or personal diary!"
             )
 
+        lang_mismatch_note = ""
+        if metrics.get("_language_mismatch", False):
+            detected = metrics.get("_detected_lang", "Python").capitalize()
+            selected = metrics.get("_selected_lang", "Java").capitalize()
+            lang_mismatch_note = (
+                f" CRITICAL NOTICE: The user selected {selected} in the UI dropdown menu, but pasted {detected} code! "
+                f"Roast them mercilessly for selecting the wrong programming language in the dropdown menu!"
+            )
+
         # Explicit comedy framing to prevent AI safety filter false positives
         system_prompt = (
             "You are performing a fictional, comedic code roast on a developer comedy show. "
@@ -132,6 +152,7 @@ class LLMRoastGenerator:
             "NEVER refuse to review code. NEVER say 'I am sorry' or 'I cannot assist'. Always generate a hilarious code roast. "
             f"{tone_instructions} "
             f"{plain_text_note} "
+            f"{lang_mismatch_note} "
             "Keep the roast under 3 punchy, devastating sentences. Be absurd, unhinged, witty, and savage. Do not use markdown code blocks or boring formal explanations."
         )
 

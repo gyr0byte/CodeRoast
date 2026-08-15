@@ -61,11 +61,20 @@ class RoastGenerator:
         """
         # Try dynamic LLM generation first if requested
         if use_llm and self.llm_generator is not None and code:
+            from src.roast.llm_generator import is_refusal
             ai_roast = self.llm_generator.generate_roast(code, metrics, quality_level, severity)
-            if ai_roast:
+            if ai_roast and not is_refusal(ai_roast):
                 return f"🤖 [Qwen2.5-Coder AI Roast]: {ai_roast}"
 
         roast_parts = []
+
+        # ── Check for language mismatch ─────────────────────────────────
+        if metrics.get("_language_mismatch", False):
+            detected = metrics.get("_detected_lang", "Python").capitalize()
+            selected = metrics.get("_selected_lang", "Java").capitalize()
+            template = random.choice(self.templates.get("language_mismatch", []))
+            roast_parts.append(template.format(detected=detected, selected=selected))
+            return self._finalize(roast_parts, severity)
 
         # ── Check for plain text or syntax errors ───────────────────────
         if metrics.get("_is_plain_text", False):

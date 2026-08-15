@@ -184,6 +184,14 @@ ROAST_TEMPLATES = {
         "This snippet has 0 functions, 0 variables, and 100% prose. Go write some real code!",
         "Did you paste a LinkedIn post into a code reviewer? I roast source code syntax, not social media captions!",
     ],
+
+    "language_mismatch": [
+        "You selected {selected} in the dropdown, but pasted pure {detected} code. Can you even read dropdown menus?",
+        "This is clearly {detected} code, not {selected}. Selecting the wrong language in the dropdown won't make your code pass!",
+        "Do you think {selected} and {detected} are the same language? Check your language selector before compiling!",
+        "Pasting {detected} code while selecting {selected} in the UI is a whole new level of developer confusion.",
+        "Your code is written in {detected}, but you told me it was {selected}. The compiler is laughing at you.",
+    ],
 }
 
 

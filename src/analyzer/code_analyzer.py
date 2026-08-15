@@ -51,6 +51,39 @@ class CodeAnalyzer:
             except SyntaxError:
                 self.tree = None
 
+    def detect_actual_language(self) -> str:
+        """
+        Detects whether code is Python, Java, JavaScript, or unknown.
+        """
+        python_markers = [
+            r"\bdef\s+\w+", r"\belif\b", r"\bself\.", r"\bisinstance\s*\(",
+            r"^\s*#\s*\w+", r"\bprint\s*\(", r"\b__init__\b", r"\[\s*\w+\s+for\s+\w+\s+in\s+",
+            r"\bfrom\s+\w+\s+import\b", r"maketrans"
+        ]
+        java_markers = [
+            r"\bpublic\s+class\b", r"\bpublic\s+static\s+void\b", r"\bSystem\.out\.print",
+            r"\bString\[\]\s+args\b", r"\bimport\s+java\.", r"\bprivate\s+final\b",
+            r"\bextends\s+\w+\b", r"\bimplements\s+\w+\b", r"\b@Override\b"
+        ]
+        js_markers = [
+            r"\bconsole\.log\b", r"\bconst\s+\w+\s*=", r"\blet\s+\w+\s*=",
+            r"\bvar\s+\w+\s*=", r"=>", r"\bdocument\.getElementById\b",
+            r"\brequire\s*\(", r"\bmodule\.exports\b", r"\bexport\s+default\b"
+        ]
+
+        py_score = sum(1 for m in python_markers if re.search(m, self.code, re.MULTILINE))
+        java_score = sum(1 for m in java_markers if re.search(m, self.code, re.MULTILINE))
+        js_score = sum(1 for m in js_markers if re.search(m, self.code, re.MULTILINE))
+
+        if py_score > java_score and py_score > js_score and py_score >= 1:
+            return "python"
+        elif java_score > py_score and java_score > js_score and java_score >= 1:
+            return "java"
+        elif js_score > py_score and js_score > java_score and js_score >= 1:
+            return "javascript"
+
+        return "unknown"
+
     def is_valid_code(self) -> bool:
         """
         Check if the input appears to be valid source code rather than plain text.
@@ -64,7 +97,8 @@ class CodeAnalyzer:
             r"\bpublic\s+(?:static\s+)?\w+", r"\bprivate\s+\w+", r"\bprotected\s+\w+",
             r"\bif\s*\(", r"\bfor\s*\(", r"\bwhile\s*\(", r"\breturn\b",
             r"\bprint\s*\(", r"\bconsole\.log\s*\(", r"\bSystem\.out\.print",
-            r"=>", r"\{.*\}", r"\b[\w_]+\s*=\s*", r"#include", r"\bpackage\s+\w+"
+            r"=>", r"\{.*\}", r"\b[\w_]+\s*=\s*", r"#include", r"\bpackage\s+\w+",
+            r"\bisinstance\s*\("
         ]
         
         matches = sum(1 for pattern in code_patterns if re.search(pattern, self.code, re.IGNORECASE))
@@ -77,6 +111,7 @@ class CodeAnalyzer:
         Extract all 8 metrics from the code snippet.
         """
         is_code = self.is_valid_code()
+        actual_lang = self.detect_actual_language()
 
         if self.language == "python":
             metrics = self._python_metrics()
@@ -86,6 +121,10 @@ class CodeAnalyzer:
         if not is_code:
             metrics["_is_plain_text"] = True
             metrics["_syntax_error"] = True
+        elif actual_lang != "unknown" and actual_lang != self.language:
+            metrics["_language_mismatch"] = True
+            metrics["_detected_lang"] = actual_lang
+            metrics["_selected_lang"] = self.language
 
         return metrics
 
