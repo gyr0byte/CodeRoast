@@ -263,6 +263,10 @@ if roast_button:
 
             if metrics.get("_is_plain_text", False):
                 st.warning("⚠️ Non-Code Text Detected: This snippet looks like plain text prose rather than source code.")
+            elif metrics.get("_language_mismatch", False):
+                detected = metrics.get("_detected_lang", "Python").capitalize()
+                selected = metrics.get("_selected_lang", "Java").capitalize()
+                st.warning(f"⚠️ Language Mismatch Detected: You selected {selected} in the dropdown, but pasted {detected} code!")
 
             codebert_scorer = get_codebert_scorer()
             classifier = get_classifier()
