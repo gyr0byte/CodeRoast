@@ -286,7 +286,7 @@ if roast_button:
 
         # 2. Roast Generation
         if use_ai_llm:
-            with st.spinner("🤖 Requesting AI Roast from Hugging Face (Qwen2.5-Coder)..."):
+            with st.spinner("🤖 Generating Unhinged Roast from Qwen AI (Qwen2.5-Coder)..."):
                 if roast_generator.llm_generator is None:
                     from src.roast.llm_generator import LLMRoastGenerator
                     roast_generator.llm_generator = LLMRoastGenerator()
