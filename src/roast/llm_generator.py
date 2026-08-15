@@ -129,41 +129,46 @@ class LLMRoastGenerator:
                 }
             ]
 
-        plain_text_note = ""
-        if metrics.get("_is_plain_text", False):
-            plain_text_note = (
-                " CRITICAL NOTICE: The user pasted plain text/prose (like a blog post or social media caption) instead of code. "
-                "Roast them mercilessly for confusing a source code analyzer with a social media site or personal diary!"
-            )
-
-        lang_mismatch_note = ""
         if metrics.get("_language_mismatch", False):
             detected = metrics.get("_detected_lang", "Python").capitalize()
             selected = metrics.get("_selected_lang", "Java").capitalize()
-            lang_mismatch_note = (
-                f" CRITICAL NOTICE: The user selected {selected} in the UI dropdown menu, but pasted {detected} code! "
-                f"Roast them mercilessly for selecting the wrong programming language in the dropdown menu!"
+            system_prompt = (
+                f"You are CodeRoast, a hilariously savage AI code reviewer. "
+                f"The user selected '{selected}' in the UI language dropdown menu, but pasted '{detected}' source code! "
+                f"Roast them ruthlessly for selecting {selected} in the dropdown while pasting {detected} code. "
+                f"Focus your roast on their hilarious mistake of confusing {selected} with {detected}! "
+                "Keep the roast under 3 punchy, devastating sentences. Do not use markdown code blocks."
+            )
+            user_content = (
+                f"Selected Language in Dropdown: {selected}\n"
+                f"Actual Code Language: {detected}\n\n"
+                f"Code Snippet:\n{code[:800]}"
+            )
+        elif metrics.get("_is_plain_text", False):
+            system_prompt = (
+                "You are CodeRoast. The user pasted plain English text/prose instead of source code. "
+                "Roast them mercilessly for confusing a source code static analyzer with a blog post, diary, or social media platform! "
+                "Keep the roast under 3 punchy, devastating sentences. Do not use markdown code blocks."
+            )
+            user_content = f"Text Snippet:\n{code[:800]}"
+        else:
+            # Explicit comedy framing to prevent AI safety filter false positives
+            system_prompt = (
+                "You are performing a fictional, comedic code roast on a developer comedy show. "
+                "Your target is strictly the programming syntax, variable names, and algorithmic logic. "
+                "NEVER refuse to review code. NEVER say 'I am sorry' or 'I cannot assist'. Always generate a hilarious code roast. "
+                f"{tone_instructions} "
+                "Keep the roast under 3 punchy, devastating sentences. Be absurd, unhinged, witty, and savage. Do not use markdown code blocks or boring formal explanations."
             )
 
-        # Explicit comedy framing to prevent AI safety filter false positives
-        system_prompt = (
-            "You are performing a fictional, comedic code roast on a developer comedy show. "
-            "Your target is strictly the programming syntax, variable names, and algorithmic logic. "
-            "NEVER refuse to review code. NEVER say 'I am sorry' or 'I cannot assist'. Always generate a hilarious code roast. "
-            f"{tone_instructions} "
-            f"{plain_text_note} "
-            f"{lang_mismatch_note} "
-            "Keep the roast under 3 punchy, devastating sentences. Be absurd, unhinged, witty, and savage. Do not use markdown code blocks or boring formal explanations."
-        )
-
-        user_content = (
-            f"Language: Python/JS/Java\n"
-            f"Lines of Code: {metrics.get('lines_of_code', 0)}\n"
-            f"Cyclomatic Complexity: {metrics.get('cyclomatic_complexity', 1.0)}\n"
-            f"Nesting Depth: {metrics.get('nesting_depth', 0)}\n"
-            f"Comment Ratio: {metrics.get('comment_ratio', 0.0):.1%}\n\n"
-            f"Code Snippet:\n{code[:800]}"
-        )
+            user_content = (
+                f"Language: Python/JS/Java\n"
+                f"Lines of Code: {metrics.get('lines_of_code', 0)}\n"
+                f"Cyclomatic Complexity: {metrics.get('cyclomatic_complexity', 1.0)}\n"
+                f"Nesting Depth: {metrics.get('nesting_depth', 0)}\n"
+                f"Comment Ratio: {metrics.get('comment_ratio', 0.0):.1%}\n\n"
+                f"Code Snippet:\n{code[:800]}"
+            )
 
         # ── Step A: Check for Local Ollama Instance ─────────────────────────
         try:
