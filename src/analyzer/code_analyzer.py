@@ -51,21 +51,43 @@ class CodeAnalyzer:
             except SyntaxError:
                 self.tree = None
 
+    def is_valid_code(self) -> bool:
+        """
+        Check if the input appears to be valid source code rather than plain text.
+        """
+        if self.language == "python" and self.tree is not None:
+            return True
+
+        code_patterns = [
+            r"\bdef\s+\w+", r"\bclass\s+\w+", r"\bimport\s+\w+", r"\bfrom\s+\w+\s+import",
+            r"\bfunction\s*\w*", r"\bconst\s+\w+", r"\blet\s+\w+", r"\bvar\s+\w+",
+            r"\bpublic\s+(?:static\s+)?\w+", r"\bprivate\s+\w+", r"\bprotected\s+\w+",
+            r"\bif\s*\(", r"\bfor\s*\(", r"\bwhile\s*\(", r"\breturn\b",
+            r"\bprint\s*\(", r"\bconsole\.log\s*\(", r"\bSystem\.out\.print",
+            r"=>", r"\{.*\}", r"\b[\w_]+\s*=\s*", r"#include", r"\bpackage\s+\w+"
+        ]
+        
+        matches = sum(1 for pattern in code_patterns if re.search(pattern, self.code, re.IGNORECASE))
+        return matches >= 1
+
     # ─── Public API ──────────────────────────────────────────────────────────
 
     def get_metrics(self) -> dict:
         """
         Extract all 8 metrics from the code snippet.
-
-        Returns:
-            dict with keys: lines_of_code, function_count, avg_function_length,
-            cyclomatic_complexity, naming_score, comment_ratio, nesting_depth,
-            duplicate_code_score
         """
+        is_code = self.is_valid_code()
+
         if self.language == "python":
-            return self._python_metrics()
+            metrics = self._python_metrics()
         else:
-            return self._regex_metrics()
+            metrics = self._regex_metrics()
+
+        if not is_code:
+            metrics["_is_plain_text"] = True
+            metrics["_syntax_error"] = True
+
+        return metrics
 
     # ─── Python AST-Based Analysis ───────────────────────────────────────────
 

@@ -167,7 +167,7 @@ ROAST_TEMPLATES = {
         "Looking at this code made my GPU cooling fans spin up out of sheer stress.",
     ],
 
-    # ── Syntax Error ─────────────────────────────────────────────────────
+    # ── Syntax Error / Plain Text ─────────────────────────────────────────────
     "syntax_error": [
         "Your code has a syntax error. I cannot roast what cannot run.",
         "SyntaxError detected. The code roasted itself. My work here is done.",
@@ -175,6 +175,14 @@ ROAST_TEMPLATES = {
         "Your code has syntax errors. It is not just bad code. It is not even code.",
         "This code has syntax errors. You roasted it yourself before I could even try.",
         "Syntax error. My parser walked out on strike.",
+    ],
+
+    "plain_text": [
+        "This is not programming code. You pasted plain English text into a code analyzer. Did you confuse me with your blog?",
+        "I am a code roast engine, not a book reviewer. Paste actual Python, Java, or JavaScript code!",
+        "Zero code constructs found. You pasted an essay into a compiler. Bold strategy.",
+        "This snippet has 0 functions, 0 variables, and 100% prose. Go write some real code!",
+        "Did you paste a LinkedIn post into a code reviewer? I roast source code syntax, not social media captions!",
     ],
 }
 

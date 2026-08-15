@@ -261,6 +261,9 @@ if roast_button:
             metrics = analyzer.get_metrics()
             scores = calculate_scores(metrics)
 
+            if metrics.get("_is_plain_text", False):
+                st.warning("⚠️ Non-Code Text Detected: This snippet looks like plain text prose rather than source code.")
+
             codebert_scorer = get_codebert_scorer()
             classifier = get_classifier()
 

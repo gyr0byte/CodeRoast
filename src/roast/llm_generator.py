@@ -118,12 +118,20 @@ class LLMRoastGenerator:
                 }
             ]
 
+        plain_text_note = ""
+        if metrics.get("_is_plain_text", False):
+            plain_text_note = (
+                " CRITICAL NOTICE: The user pasted plain text/prose (like a blog post or social media caption) instead of code. "
+                "Roast them mercilessly for confusing a source code analyzer with a social media site or personal diary!"
+            )
+
         # Explicit comedy framing to prevent AI safety filter false positives
         system_prompt = (
             "You are performing a fictional, comedic code roast on a developer comedy show. "
             "Your target is strictly the programming syntax, variable names, and algorithmic logic. "
             "NEVER refuse to review code. NEVER say 'I am sorry' or 'I cannot assist'. Always generate a hilarious code roast. "
             f"{tone_instructions} "
+            f"{plain_text_note} "
             "Keep the roast under 3 punchy, devastating sentences. Be absurd, unhinged, witty, and savage. Do not use markdown code blocks or boring formal explanations."
         )
 

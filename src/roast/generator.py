@@ -67,7 +67,11 @@ class RoastGenerator:
 
         roast_parts = []
 
-        # ── Check for syntax errors (Python AST failed) ─────────────────
+        # ── Check for plain text or syntax errors ───────────────────────
+        if metrics.get("_is_plain_text", False):
+            roast_parts.append(random.choice(self.templates["plain_text"]))
+            return self._finalize(roast_parts, severity)
+
         if metrics.get("_syntax_error", False):
             roast_parts.append(random.choice(self.templates["syntax_error"]))
             return self._finalize(roast_parts, severity)
