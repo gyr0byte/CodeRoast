@@ -212,12 +212,66 @@ SEVERITY_MODIFIERS = {
 
 
 # ── Grade Reactions ─────────────────────────────────────────────────────────
-# One-liner reactions shown alongside the letter grade.
+# Lists of one-liner reactions shown alongside the letter grade.
 GRADE_REACTIONS = {
-    "S": "Suspiciously clean. Did you steal this from a Google staff engineer?",
-    "A": "Not bad. I am almost impressed. Almost.",
-    "B": "It works, but so does a duct-taped pipe.",
-    "C": "This grade stands for 'Concerning', which it is.",
-    "D": "Deeply cursed. Please wash your hands after editing this file.",
-    "F": "F stands for Fatal. As in, this code is lethal to anyone reading it.",
+    "S": [
+        "Suspiciously clean. Did you steal this from a Google staff engineer?",
+        "I do not trust this. Running additional security scans...",
+        "Are you a compiler in disguise? Nobody writes code this clean by accident.",
+        "This is so pristine it's making my sarcasm circuits short-circuit.",
+        "S-tier? Either you're a 10x senior architect or you plagiarized Claude 3.5 Sonnet.",
+        "Flawless execution. I'm checking your git history for black magic.",
+        "Clean, modular, documented. Who hurt you into being this competent?",
+        "This code is so clean I could eat off it. I hate that I can't roast this.",
+    ],
+    "A": [
+        "Not bad. I am almost impressed. Almost.",
+        "A-grade work! You actually know what a function is supposed to do.",
+        "Solid structure and clean metrics. Your tech lead might actually approve your PR.",
+        "Pretty good code. I had to dig deep just to find anything to complain about.",
+        "High quality! Keep this up and you might avoid getting replaced by AI next year.",
+        "Respectable. You clearly read a book on software design at least once.",
+        "Above average! A rare moment of competence in a sea of developer chaos.",
+        "Well written. It's clean enough that I don't need a stiff drink after reading it.",
+    ],
+    "B": [
+        "It works, but so does a duct-taped pipe.",
+        "B for 'Barely acceptable'. It gets the job done, but don't show off.",
+        "Not terrible, not great. The median experience of a middle-tier software engineer.",
+        "Average code. Like a microwaved meal—functional, but lacks soul.",
+        "This passes CI/CD, but your future self is going to sigh heavily during maintenance.",
+        "Decent logic holding together with prayers and StackOverflow copy-pastes.",
+        "B-tier effort. You did just enough work to avoid getting fired this sprint.",
+        "It runs without exploding, which is the highest compliment I can offer right now.",
+    ],
+    "C": [
+        "This grade stands for 'Concerning', which it definitely is.",
+        "C for 'Chaos'. Looking at this structure gives me severe anxiety.",
+        "Your code passes like a kidney stone passes—painfully and with much screaming.",
+        "You're walking on thin ice with this complexity. Refactor before it breaks.",
+        "This looks like code written at 3:00 AM on a caffeine overdose.",
+        "Middle of the road dumpster fire. It works until a user presses any unexpected key.",
+        "C-grade code: 50% logic, 50% hope, 0% documentation.",
+        "It functions, but reading it feels like deciphering ancient hieroglyphics.",
+    ],
+    "D": [
+        "Deeply cursed. Please wash your hands after editing this file.",
+        "The 'D' stands for 'Deeply Troubling'. And also 'Disaster'.",
+        "I showed this to other AIs. They are still laughing in binary.",
+        "This isn't code, it's a biohazard warning in text format.",
+        "Your nesting is so deep it requires an OSHA permit for cave exploration.",
+        "This function is one bad input away from starting a server meltdown.",
+        "D-grade effort. Even your compiler was sighing when reading this.",
+        "Looking at this code makes me want to file for worker's comp due to optical damage.",
+    ],
+    "F": [
+        "F is for 'Fatal'. As in, this code is lethal to anyone reading it.",
+        "F is for 'Fire'. As in, set your laptop on fire immediately.",
+        "Absolute catastrophic failure. Delete the file and pretend this never happened.",
+        "This repository belongs sealed in concrete and buried in a salt mine for 10,000 years.",
+        "Format drive D:\\, throw your keyboard in the ocean, and try goat herding.",
+        "I am reporting this snippet to the Cyber Crime Division for psychological warfare.",
+        "F-grade! Even Hello World programs have more architectural integrity than this.",
+        "Your code didn't just fail the review; it uninstalled my respect for humanity.",
+    ],
 }

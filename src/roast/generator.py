@@ -154,7 +154,10 @@ class RoastGenerator:
             A reaction string.
         """
         letter = grade[0] if grade else "F"
-        return GRADE_REACTIONS.get(letter, "No comment.")
+        reactions = GRADE_REACTIONS.get(letter, ["No comment."])
+        if isinstance(reactions, list):
+            return random.choice(reactions)
+        return reactions
 
     def _finalize(self, roast_parts: list, severity: int) -> str:
         """
