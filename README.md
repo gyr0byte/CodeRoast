@@ -27,9 +27,8 @@ It combines real static analysis metrics (lines of code, cyclomatic complexity, 
 - **📊 Real-time Static AST Analysis:** Calculates Cyclomatic Complexity, Nesting Depth, Line Counts, Comment Ratios, Naming Conventions, and Code Duplication scores.
 - **🌲 Lightweight Random Forest Classifier:** Predicts code quality tiers (*Pristine, Acceptable, Questionable, Disaster*) based on NLP code tokenization (`classifier.pkl`, 340 KB).
 - **⚡ PyTorch Sequence LSTM:** Custom PyTorch model trained to score code severity on a 0–10 continuous scale.
-- **🤗 Hugging Face CodeBERT (`microsoft/codebert-base`):** Pre-trained transformer sequence classifier providing deep semantic understanding of code structure.
-- **🤖 Hugging Face Cloud AI LLM (`Qwen/Qwen2.5-Coder-32B-Instruct`):** Generates dynamic, AI roasts via Hugging Face Serverless API (using 0 MB local RAM on free cloud hosting), with automatic fallback to local PyTorch execution.
-- **🎨 Interactive Streamlit Interface:** Features visual grade cards (*S to F*), Plotly sub-metric radar & bar charts, and adjustable roast severity sliders.
+- **🤖 Dynamic AI LLM Roast Engine:** Powered by **Qwen2.5-Coder**. Supports 100% offline, free local execution via **Ollama** (`http://localhost:11434`) as well as multi-tier cloud fallbacks (`32B -> 7B -> 1.5B -> 0.5B`) via Hugging Face Serverless API.
+- **🎨 Interactive Streamlit Interface:** Features side-by-side code input & roast rendering, source-specific UI backgrounds (purple for AI, yellow for templates), visual grade cards (*S to F* with 8 randomized unhinged reactions per grade), Plotly radar charts, and customizable severity sliders.
 
 ---
 

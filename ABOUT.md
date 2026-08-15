@@ -174,24 +174,29 @@ CodeBERT is used for sequence classification (`AutoModelForSequenceClassificatio
 ---
 
 ### 2.5 LLM Roast Generator
-The generator integrates with the Hugging Face serverless Inference API to orchestrate Qwen2.5-Coder.
+The generator (`src/roast/llm_generator.py`) orchestrates Qwen2.5-Coder using a hybrid local/cloud strategy.
 
-#### Endpoint Selection
-We use **`Qwen/Qwen2.5-Coder-32B-Instruct`** as our primary model, with an automatic failover to **`Qwen/Qwen2.5-72B-Instruct`** if rate limits or endpoint downtime occurs. 
+#### 1. Local Ollama Auto-Detection (100% Free & Offline)
+Before sending requests to external services, the engine pings `http://localhost:11434/api/generate`. If a local Ollama instance running `qwen2.5-coder:1.5b` (or another Qwen model) is active, requests are served locally with zero API limits, zero payment requirements, sub-second latency, and 100% privacy. All local Ollama model weights are redirected to `D:\CodeRoast\ollama_models` via the `OLLAMA_MODELS` environment variable to protect system drive capacity.
 
-#### Prompt Engineering
-The system utilizes a structured system prompt configured dynamically according to the user's chosen severity:
+#### 2. Multi-Tiered Cloud Fallback Chain
+If local Ollama is not running, the application queries the Hugging Face Serverless Inference API with an automated multi-model fallback hierarchy to handle rate limits and tier quotas:
+$$\text{Qwen2.5-Coder-32B} \longrightarrow \text{Qwen2.5-Coder-7B} \longrightarrow \text{Qwen2.5-Coder-1.5B} \longrightarrow \text{Qwen2.5-Coder-0.5B}$$
+If all cloud endpoints fail, the app seamlessly falls back to the local rule-based template engine.
+
+#### Prompt Engineering & Unhinged Persona
+The system utilizes a structured, unfiltered system prompt with higher sampling creativity (`temperature = 0.95`):
 ```python
 # System prompt structure
 system_prompt = (
-    "You are CodeRoast, a hilariously honest code reviewer. "
+    "Role: Unhinged, ruthless senior tech lead with ABSOLUTELY ZERO FILTER. "
     f"{tone_instructions} "
     "Keep the roast under 3 concise sentences. Do not use markdown formatting, code blocks, or explanations."
 )
 ```
 
 #### Code Metrics Injection
-To ground the LLM and prevent generic responses, we inject the concrete static metrics alongside the code snippet:
+To ground the LLM and prevent generic responses, concrete static metrics are injected alongside the code snippet:
 ```
 Language: Python
 Lines of Code: 12
@@ -203,20 +208,13 @@ Code Snippet:
 [User's raw code here]
 ```
 
-#### Few-Shot Examples & Dynamic Severity Tuning
-We inject structural few-shot examples into the chat payload so the model matches our comedic style:
-*   **Severity 1 (Gentle):** Light teasing, encouraging final statement.
-*   **Severity 2 (Standard):** Dry senior developer sarcasm.
-*   **Severity 3 (Savage):** Harsh, comparison-based jokes advising code deletion or career changes.
-
-#### Robust Fallback Chain
-If the Hugging Face API rate limits are hit or the user is offline, the app executes a multi-tiered fallback chain:
-$$\text{HF Cloud Qwen LLM} \longrightarrow \text{Local PyTorch LSTM Scorer} \longrightarrow \text{Category-Based Static Templates}$$
+#### Robust Fallback Hierarchy
+$$\text{Local Ollama (Qwen)} \longrightarrow \text{HF Cloud Qwen Multi-Tier} \longrightarrow \text{Rule-Based Templates (40+ Unhinged Roasts)}$$
 
 ---
 
 ### 2.6 Scoring Engine
-The scoring logic in `src/scoring/scorer.py` aggregates the raw AST metrics into four dimensional scores (0 to 100).
+The scoring logic in `src/scoring/scorer.py` aggregates raw AST metrics into four dimensional scores (0 to 100).
 
 | Score Dimension | Metric Input | Formula / Rule |
 | :--- | :--- | :--- |
@@ -228,13 +226,14 @@ The scoring logic in `src/scoring/scorer.py` aggregates the raw AST metrics into
 The final score is the arithmetic mean of these dimensions:
 $$\text{Overall Score} = \frac{\text{Readability} + \text{Efficiency} + \text{Structure} + \text{Creativity}}{4}$$
 
-#### Grade Mapping
-*   **S:** $\ge 90$ — Suspiciously Good
-*   **A:** $\ge 75$ — Actually Decent
-*   **B:** $\ge 60$ — Barely Acceptable
-*   **C:** $\ge 45$ — Concerning
-*   **D:** $\ge 30$ — Deeply Troubling
-*   **F:** $< 30$ — Please Seek Help
+#### Grade Mapping & Randomized Unhinged Reactions
+Each letter grade triggers one of **8 randomized unhinged reaction messages**:
+*   **S:** $\ge 90$ — Suspiciously Good *(8 reactions, e.g., "Are you a compiler in disguise?")*
+*   **A:** $\ge 75$ — Actually Decent *(8 reactions, e.g., "Your tech lead might actually approve your PR.")*
+*   **B:** $\ge 60$ — Barely Acceptable *(8 reactions, e.g., "It works, but so does a duct-taped pipe.")*
+*   **C:** $\ge 45$ — Concerning *(8 reactions, e.g., "Passes like a kidney stone—painfully and with much screaming.")*
+*   **D:** $\ge 30$ — Deeply Troubling *(8 reactions, e.g., "Nesting so deep it requires an OSHA permit for cave exploration.")*
+*   **F:** $< 30$ — Please Seek Help *(8 reactions, e.g., "Format drive D:\, throw your keyboard into the ocean, and try goat herding.")*
 
 ---
 
