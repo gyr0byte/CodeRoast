@@ -1,47 +1,50 @@
-"""
-CodeRoast — Dynamic LLM Roast Generator
-Supports Hugging Face Serverless Inference (32B, 7B, 1.5B, 0.5B Qwen models)
-and local Ollama fallback for 100% free, offline AI code roasts.
-"""
-
 import os
 import json
 import urllib.request
+import streamlit as st
 from typing import Optional
 from huggingface_hub import InferenceClient
-import config  # noqa: F401 — Sets HF_HOME first
 
-# Prioritized list of Qwen models (from largest/best down to lightweight/free-tier friendly)
+# Fallback sequence of Qwen models on Hugging Face Serverless API
 MODEL_CANDIDATES = [
     "Qwen/Qwen2.5-Coder-32B-Instruct",
     "Qwen/Qwen2.5-Coder-7B-Instruct",
-    "Qwen/Qwen2.5-7B-Instruct",
-    "Qwen/Qwen2.5-Coder-1.5B-Instruct",
     "Qwen/Qwen2.5-1.5B-Instruct",
-    "Qwen/Qwen2.5-0.5B-Instruct",
+    "Qwen/Qwen2.5-0.5B-Instruct"
 ]
 
+def is_refusal(text: str) -> bool:
+    """Detect if the LLM outputted a canned safety refusal instead of a roast."""
+    if not text:
+        return True
+    lowered = text.lower()
+    refusal_phrases = [
+        "i am sorry", "i'm sorry", "i cannot assist", "i can't assist",
+        "unable to assist", "as an ai", "cannot generate", "can't fulfill",
+        "safety guidelines", "against my safety", "ethical principles",
+        "i can't help with", "i cannot help with"
+    ]
+    return any(phrase in lowered for phrase in refusal_phrases)
 
 class LLMRoastGenerator:
     """
-    Generates dynamic, AI-powered code roasts using Qwen models.
-    Supports Hugging Face Cloud GPUs and local Ollama.
+    Interfaces with Hugging Face Serverless API and local Ollama
+    to generate dynamic, unhinged AI code roasts.
     """
 
-    def __init__(self, model_name: str = MODEL_CANDIDATES[0]):
-        self.model_name = model_name
+    def __init__(self, api_token: Optional[str] = None):
+        self.api_token = api_token
         self._is_loaded = True
 
     def _get_hf_token(self) -> Optional[str]:
-        token = os.environ.get("HF_TOKEN")
-        if not token:
-            try:
-                import streamlit as st
-                if hasattr(st, "secrets") and "HF_TOKEN" in st.secrets:
-                    token = st.secrets["HF_TOKEN"]
-            except Exception:
-                pass
-        return token.strip() if token else None
+        if self.api_token:
+            return self.api_token
+        try:
+            if "HF_TOKEN" in st.secrets:
+                return st.secrets["HF_TOKEN"]
+        except Exception:
+            pass
+        return os.environ.get("HF_TOKEN")
 
     def generate_roast(
         self,
@@ -115,10 +118,13 @@ class LLMRoastGenerator:
                 }
             ]
 
+        # Explicit comedy framing to prevent AI safety filter false positives
         system_prompt = (
-            "You are CodeRoast, an unhinged, mercilessly savage AI code reviewer. "
+            "You are performing a fictional, comedic code roast on a developer comedy show. "
+            "Your target is strictly the programming syntax, variable names, and algorithmic logic. "
+            "NEVER refuse to review code. NEVER say 'I am sorry' or 'I cannot assist'. Always generate a hilarious code roast. "
             f"{tone_instructions} "
-            "Keep the roast under 3 punchy, devastating sentences. Be as absurd, unhinged, witty, and savage as humanly possible. Do not use markdown code blocks or boring formal explanations."
+            "Keep the roast under 3 punchy, devastating sentences. Be absurd, unhinged, witty, and savage. Do not use markdown code blocks or boring formal explanations."
         )
 
         user_content = (
@@ -142,13 +148,15 @@ class LLMRoastGenerator:
                 }).encode("utf-8"),
                 headers={"Content-Type": "application/json"}
             )
-            with urllib.request.urlopen(req, timeout=3) as resp:
+            with urllib.request.urlopen(req, timeout=4) as resp:
                 if resp.status == 200:
                     res_data = json.loads(resp.read().decode("utf-8"))
                     if "response" in res_data and res_data["response"]:
-                        return res_data["response"].strip()
+                        response_text = res_data["response"].strip()
+                        if not is_refusal(response_text):
+                            return response_text
         except Exception:
-            pass  # Ollama not running locally, proceed to HF cloud
+            pass  # Ollama not running locally or refused, proceed to HF cloud
 
         # ── Step B: Iterate through Hugging Face Qwen Models ────────────────
         messages = [{"role": "system", "content": system_prompt}]
@@ -168,7 +176,9 @@ class LLMRoastGenerator:
                 if response and response.choices and len(response.choices) > 0:
                     text = response.choices[0].message.content
                     if text:
-                        return text.strip()
+                        candidate_text = text.strip()
+                        if not is_refusal(candidate_text):
+                            return candidate_text
             except Exception as e:
                 print(f"[WARNING] Qwen AI model ({model}) failed: {e}")
                 continue
