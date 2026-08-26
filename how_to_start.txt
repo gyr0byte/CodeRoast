@@ -1,3 +1,0 @@
-cd D:\CodeRoast
-Start-Process ollama -ArgumentList "serve" -WindowStyle Hidden
-venv_gpu\Scripts\streamlit run app.py
