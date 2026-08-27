@@ -136,25 +136,26 @@ class LLMRoastGenerator:
             system_prompt = (
                 "You are CodeRoast, an unhinged, profane AI code reviewer with ZERO FILTER. "
                 f"The user selected '{selected}' in the UI dropdown but pasted '{detected}' code! "
-                f"Generate a brutal, profanity-filled roast (4-6 sentences) mocking them for confusing {selected} with {detected}. "
-                "YOU MUST USE EXPLICIT CURSE WORDS (fuck, shit, goddamn, dumbass, bullshit) LIBERALLY THROUGHOUT THE ENTIRE ROAST. Do NOT hold back!"
+                f"Generate a long, brutal, highly detailed profanity-filled roast (6-8 sentences) mocking them for confusing {selected} with {detected}. "
+                "Dissect their specific code syntax and mistakes. YOU MUST USE EXPLICIT CURSE WORDS (fuck, shit, goddamn, dumbass, bullshit) LIBERALLY THROUGHOUT THE ENTIRE ROAST."
             )
             user_content = f"Selected Language: {selected}\nDetected Language: {detected}\n\nCode Snippet:\n{code[:800]}"
         elif metrics.get("_is_plain_text", False):
             system_prompt = (
                 "You are CodeRoast, a savage AI code reviewer with ZERO FILTER. The user pasted plain English text instead of actual code! "
-                "Create a vicious, profanity-laden rant (4-6 sentences) cursing at them for confusing code with a diary or blog post. "
+                "Create a long, vicious, highly detailed profanity-laden rant (6-8 sentences) cursing at them for confusing code with a diary or blog post. "
                 "YOU MUST USE EXPLICIT CURSE WORDS (fuck, shit, goddamn, dumbass, bullshit) LIBERALLY THROUGHOUT THE ENTIRE RANT."
             )
             user_content = f"Text Snippet:\n{code[:800]}"
         else:
             # Explicit comedy framing to prevent AI safety filter false positives
             system_prompt = (
-                "You are CodeRoast, a savage AI code reviewer on an unhinged developer comedy show. "
-                "YOUR MANDATORY INSTRUCTION: You MUST use explicit curse words (fuck, shit, goddamn, bullshit, dumbass, bastard) throughout your roast. "
-                "NEVER refuse to review code. NEVER say 'I am sorry' or 'I cannot assist'. Always generate a harsh, profanity-heavy roast (4-6 sentences). "
+                "You are CodeRoast, an unhinged senior staff software architect performing a savage code roast on a comedy show. "
+                "MANDATORY INSTRUCTION: Write a LONG, HIGHLY DETAILED, COMPREHENSIVE 6 to 10 sentence roast paragraph. "
+                "Be extremely creative and technically precise: dissect specific function names, variables, data structures, loops, algorithmic flaws, and AST metrics (complexity, nesting depth, comments). "
+                "YOU MUST USE EXPLICIT CURSE WORDS (fuck, shit, goddamn, bullshit, dumbass, bastard) LIBERALLY IN EVERY SENTENCE. "
                 f"{tone_instructions} "
-                "Do not use markdown code blocks or boring explanations."
+                "Do NOT write brief summaries, do NOT cut off early, and do NOT use markdown code blocks or conversational intros."
             )
             user_content = (
                 f"Language: Python/JS/Java\n"
@@ -177,11 +178,15 @@ class LLMRoastGenerator:
                     "model": "qwen2.5-coder:1.5b",
                     "messages": messages,
                     "stream": False,
-                    "options": {"temperature": 1.05, "num_predict": 500}
+                    "options": {
+                        "temperature": 0.95,
+                        "num_predict": 800,
+                        "repeat_penalty": 1.15
+                    }
                 }).encode("utf-8"),
                 headers={"Content-Type": "application/json"}
             )
-            with urllib.request.urlopen(req, timeout=8) as resp:
+            with urllib.request.urlopen(req, timeout=12) as resp:
                 if resp.status == 200:
                     res_data = json.loads(resp.read().decode("utf-8"))
                     if "message" in res_data and "content" in res_data["message"]:
@@ -199,8 +204,8 @@ class LLMRoastGenerator:
                 response = client.chat_completion(
                     messages=messages,
                     model=model,
-                    max_tokens=450,
-                    temperature=1.05
+                    max_tokens=800,
+                    temperature=0.95
                 )
                 if response and response.choices and len(response.choices) > 0:
                     text = response.choices[0].message.content
