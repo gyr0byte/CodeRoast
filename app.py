@@ -238,7 +238,7 @@ with col1:
 
     use_ai_llm = st.checkbox(
         "🤖 Enable Dynamic AI Roast (Qwen2.5-Coder LLM)",
-        value=False,
+        value=True,
         help="Generates brand-new, unique AI code roasts using a local LLM instead of templates."
     )
 
