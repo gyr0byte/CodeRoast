@@ -68,7 +68,21 @@ class LLMRoastGenerator:
                 return st.secrets["GEMINI_API_KEY"]
         except Exception:
             pass
-        return os.environ.get("GEMINI_API_KEY")
+        if os.environ.get("GEMINI_API_KEY"):
+            return os.environ.get("GEMINI_API_KEY")
+        try:
+            # Check for .env file in project root
+            root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+            env_file = os.path.join(root_dir, ".env")
+            if os.path.exists(env_file):
+                with open(env_file, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line.startswith("GEMINI_API_KEY=") or line.startswith("GEMINI_KEY="):
+                            return line.split("=", 1)[1].strip().strip('"').strip("'")
+        except Exception:
+            pass
+        return None
 
     def _call_gemini_api(self, prompt: str, gemini_key: str) -> Optional[str]:
         """Calls Google Gemini 1.5 Flash REST API (100% Free Tier)."""
@@ -254,12 +268,14 @@ class LLMRoastGenerator:
                 f"Code Snippet:\n{code[:800]}"
             )
 
-        # ── Step 0: Try Free Google Gemini 1.5 Flash API First (High Fluency) ─
-        if g_key:
+        # ── Route Selection ─────────────────────────────────────────────────
+        # Romanized Nepali -> Exclusively Gemini Flash API (Fallback to Qwen/Templates if API key absent)
+        # English -> Exclusively Qwen AI (Ollama / HuggingFace)
+        if is_nepali and g_key:
             gemini_prompt = f"{system_prompt}\n\n{user_content}"
             gemini_result = self._call_gemini_api(gemini_prompt, g_key)
             if gemini_result:
-                return self._ensure_profane_unhinged_roast(gemini_result, metrics, is_nepali=is_nepali)
+                return self._ensure_profane_unhinged_roast(gemini_result, metrics, is_nepali=True)
 
         messages = [{"role": "system", "content": system_prompt}]
         messages.extend(few_shot_examples)
