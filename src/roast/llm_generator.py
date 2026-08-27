@@ -249,13 +249,35 @@ class LLMRoastGenerator:
                 "What the actual fucking hell is this goddamn clusterfuck of code?",
                 "Holy motherfucking shit, reading this piece of trash gave me an instant optical migraine!",
                 "Are you fucking serious with this atrocious bullshit?",
-                "What kind of unhinged dumbass typed out this goddamn disaster?"
+                "What kind of unhinged dumbass typed out this goddamn disaster?",
+                "Jesus fucking Christ, my eyes are bleeding from looking at this absolute monstrosity!",
+                "Who the fuck let you anywhere near a keyboard with code this fucking atrocious?",
+                "Look at this goddamn crime against software engineering!",
+                "I've seen ransom notes written in blood with better business logic than this fucking trash!",
+                "What kind of brainless jackass approved this unholy clusterfuck of a pull request?",
+                "Holy shit, this snippet reads like a drunk toddler smashed their forehead against VS Code!",
+                "Good goddamn lord, this piece of shit code is an absolute insult to computer science!",
+                "What in the name of holy fuck is going on in this ungodly function?",
+                "Reading this dipshit logic feels like getting punched in the liver by a senior dev!",
+                "Holy fucking hell, this code snippet belongs in a digital hazardous waste repository!",
+                "Which one of you lazy bastards wrote this goddamn atrocious line of garbage?"
             ]
             closers = [
                 " Delete this fucking trash right now before I format your hard drive, you absolute bastard!",
                 " Throw your laptop into an active volcano and get the fuck out of computer science forever!",
                 " Stop writing code immediately and apply for a job in goat herding, you complete dumbass!",
-                " Douse your motherboard in holy water and get the fuck out of software engineering!"
+                " Douse your motherboard in holy water and get the fuck out of software engineering!",
+                " Wipe this bullshit snippet off your drive before senior management fires your entire team!",
+                " Uninstall your IDE, throw your computer out the window, and never touch code again, you lazy jackass!",
+                " Delete your GitHub account and go contemplate your terrible career choices, you total dickhead!",
+                " Nuke this goddamn repository from orbit before it infects the rest of our production codebase!",
+                " Do us all a fucking favor and surrender your developer license immediately, you brainless bastard!",
+                " I need a fucking whiskey shot and a fresh SSD just to cleanse my memory from this bullshit!",
+                " Delete this unholy disaster and go study basic computer science for five years, you dumbass!",
+                " Close VS Code right fucking now and apologize to every RAM stick on your motherboard!",
+                " Format your NVMe drive and never type another line of code as long as you live, you complete asshole!",
+                " Put this code where it belongs: directly into the fucking recycle bin, you lazy dipshit!",
+                " Turn off your PC, step away from the keyboard, and never call yourself a programmer again, you bastard!"
             ]
             text = random.choice(openers) + " " + text.strip() + random.choice(closers)
 
