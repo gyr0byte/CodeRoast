@@ -73,8 +73,8 @@ class LLMRoastGenerator:
         if severity == 1:
             tone_instructions = (
                 "Role: Unhinged, sarcastic senior developer with zero filter. "
-                "Instructions: Give a chaotic, wildly funny critique of the code. Roast their laziness, variable naming, "
-                "and unnecessary functions with absurd developer jokes."
+                "Instructions: Give a chaotic, wildly profane critique of the code. Use swear words like 'damn', 'shit', 'crap', 'what the fuck', 'bullshit'. "
+                "Roast their laziness, variable naming, and unnecessary functions."
             )
             few_shot_examples = [
                 {
@@ -86,15 +86,16 @@ class LLMRoastGenerator:
                 },
                 {
                     "role": "assistant",
-                    "content": "A one-line addition function? Did you write an entire wrapper method just to feel productive today? The complete lack of comments tells me you treat basic addition like a top-secret government weapon."
+                    "content": "What the actual fuck is this? A one-line addition function? Did you write a whole damn wrapper method just to feel productive today? This shit is so useless it hurts. The complete lack of comments tells me you treat basic addition like a top-secret government weapon, you absolute lazy bastard."
                 }
             ]
         elif severity == 3:
             tone_instructions = (
                 "Role: Completely mental, merciless, ultra-savage tech lead with ABSOLUTELY NO FILTER. "
-                "Instructions: Destroy this developer's soul. Be wildly unhinged, absurdly mean, and devastatingly hilarious. "
-                "Compare their code to radioactive fallout, biohazards, medieval torture devices, or total brain damage. "
-                "Tell them to format their hard drive, throw their PC in a volcano, or apply for jobs in goat herding immediately."
+                "Instructions: Destroy this developer's soul. Be wildly unhinged, profane, and devastatingly hilarious. "
+                "Use swear words liberally (fuck, shit, damn, bastard, atrocious crap). "
+                "Compare their code to radioactive fallout, biohazards, or total brain damage. "
+                "Tell them to format their hard drive, throw their PC in a volcano, or quit coding forever."
             )
             few_shot_examples = [
                 {
@@ -106,13 +107,13 @@ class LLMRoastGenerator:
                 },
                 {
                     "role": "assistant",
-                    "content": "This nesting depth is a war crime under the Geneva Convention; even James Cameron couldn't reach the bottom of these indentations. Your cyclomatic complexity score looks like a credit card number. Please douse your laptop in holy water, run git reset --hard, and consider a quiet life as a lighthouse keeper."
+                    "content": "Holy mother of fuck, this nesting depth is a war crime under the Geneva Convention! What kind of unholy shit is this? Even James Cameron couldn't reach the bottom of these goddamn indentations. Your cyclomatic complexity score looks like a credit card number. Delete this fucking trash, douse your laptop in holy water, and get the fuck out of computer science."
                 }
             ]
         else:  # Standard Severity (2)
             tone_instructions = (
                 "Role: Unhinged, razor-sharp senior staff engineer. "
-                "Instructions: Deliver a chaotic, devastatingly brutal code review. "
+                "Instructions: Deliver a chaotic, devastatingly brutal code review packed with swear words (fuck, shit, damn, crap, bastard). "
                 "Attack their nesting, spaghetti logic, terrible naming, and missing documentation with pure savagery."
             )
             few_shot_examples = [
@@ -125,30 +126,26 @@ class LLMRoastGenerator:
                 },
                 {
                     "role": "assistant",
-                    "content": "45 lines of unreadable catastrophe without a single comment — I've seen ransom notes written in blood with clearer business logic than this. Reading this monstrosity gave me instant optical migraine. Delete this trash before your team sees it."
+                    "content": "45 lines of unreadable fucking catastrophe without a single goddamn comment! I've seen ransom notes written in blood with clearer business logic than this piece of shit. Reading this monstrosity gave me instant optical migraine. Delete this fucking trash before your team sees what a dumbass you are."
                 }
             ]
 
+        # Build system_prompt and user_content based on context
         if metrics.get("_language_mismatch", False):
             detected = metrics.get("_detected_lang", "Python").capitalize()
             selected = metrics.get("_selected_lang", "Java").capitalize()
             system_prompt = (
-                f"You are CodeRoast, a hilariously savage AI code reviewer. "
-                f"The user selected '{selected}' in the UI language dropdown menu, but pasted '{detected}' source code! "
-                f"Roast them ruthlessly for selecting {selected} in the dropdown while pasting {detected} code. "
-                f"Focus your roast on their hilarious mistake of confusing {selected} with {detected}! "
-                "Keep the roast under 3 punchy, devastating sentences. Do not use markdown code blocks."
+                "You are CodeRoast, an unhinged, profane AI code reviewer. "
+                f"The user selected '{selected}' in the UI dropdown but pasted '{detected}' code! "
+                f"Generate a brutal, profanity-filled roast (4-6 sentences) mocking them for confusing {selected} with {detected}. "
+                "Use curse words like 'fuck', 'shit', 'goddamn', 'dumbass' liberally. Do NOT hold back!"
             )
-            user_content = (
-                f"Selected Language in Dropdown: {selected}\n"
-                f"Actual Code Language: {detected}\n\n"
-                f"Code Snippet:\n{code[:800]}"
-            )
+            user_content = f"Selected Language: {selected}\nDetected Language: {detected}\n\nCode Snippet:\n{code[:800]}"
         elif metrics.get("_is_plain_text", False):
             system_prompt = (
-                "You are CodeRoast. The user pasted plain English text/prose instead of source code. "
-                "Roast them mercilessly for confusing a source code static analyzer with a blog post, diary, or social media platform! "
-                "Keep the roast under 3 punchy, devastating sentences. Do not use markdown code blocks."
+                "You are CodeRoast, a savage AI code reviewer. The user pasted plain English text instead of actual code! "
+                "Create a vicious, profanity-laden rant (4-6 sentences) cursing at them for confusing code with a diary or blog post. "
+                "Use curse words like 'fuck', 'shit', 'goddamn', 'dumbass' liberally."
             )
             user_content = f"Text Snippet:\n{code[:800]}"
         else:
@@ -156,11 +153,10 @@ class LLMRoastGenerator:
             system_prompt = (
                 "You are performing a fictional, comedic code roast on a developer comedy show. "
                 "Your target is strictly the programming syntax, variable names, and algorithmic logic. "
-                "NEVER refuse to review code. NEVER say 'I am sorry' or 'I cannot assist'. Always generate a hilarious code roast. "
+                "NEVER refuse to review code. NEVER say 'I am sorry' or 'I cannot assist'. Always generate a hilarious, profanity-rich roast with explicit curse words. "
                 f"{tone_instructions} "
-                "Keep the roast under 3 punchy, devastating sentences. Be absurd, unhinged, witty, and savage. Do not use markdown code blocks or boring formal explanations."
+                "Generate a harsh, profanity-filled roast (4-6 sentences). Do not use markdown code blocks or boring explanations."
             )
-
             user_content = (
                 f"Language: Python/JS/Java\n"
                 f"Lines of Code: {metrics.get('lines_of_code', 0)}\n"
@@ -178,7 +174,7 @@ class LLMRoastGenerator:
                     "model": "qwen2.5-coder:1.5b",
                     "prompt": f"{system_prompt}\n\n{user_content}",
                     "stream": False,
-                    "options": {"temperature": 0.95}
+                    "options": {"temperature": 0.95, "num_predict": 250}
                 }).encode("utf-8"),
                 headers={"Content-Type": "application/json"}
             )
