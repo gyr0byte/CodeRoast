@@ -4,14 +4,15 @@
 [![Framework](https://img.shields.io/badge/Streamlit-1.61.1-FF4B4B.svg)](https://streamlit.io/)
 [![Deep Learning](https://img.shields.io/badge/PyTorch-Sequence%20LSTM-EE4C2C.svg)](https://pytorch.org/)
 [![Transformers](https://img.shields.io/badge/Hugging%20Face-CodeBERT%20%26%20Qwen2.5--Coder-yellow.svg)](https://huggingface.co/)
+[![Gemini Engine](https://img.shields.io/badge/Google%20Gemini-Flash%20Multi--Model%20Fallback-4285F4.svg)](https://ai.google.dev/)
 [![Live App](https://img.shields.io/badge/Streamlit%20Cloud-Live%20Demo-brightgreen.svg)](https://coderoast.streamlit.app)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 > *"Your code has been reviewed. The results are not pretty."*
 
-**CodeRoast** is an end-to-end Machine Learning, NLP, and Deep Learning powered web application that performs real-time static code quality analysis and generates brutally honest — and hilariously savage — code roasts.
+**CodeRoast** is an end-to-end Machine Learning, NLP, and Deep Learning powered web application that performs real-time static code quality analysis and generates brutally honest — and hilariously savage — code roasts in both **English** and **Romanized Nepali**.
 
-It combines real static analysis metrics (lines of code, cyclomatic complexity, nesting depth, duplication, naming scores) with machine learning classification models and open-source Large Language Models (LLMs) to deliver feedback that is both technically spot-on and entertainingly savage.
+It combines real static analysis metrics (lines of code, cyclomatic complexity, nesting depth, duplication, naming scores) with machine learning classification models, local GPU LLMs (Qwen2.5-Coder via Ollama), and Google Gemini multi-model API chains to deliver code reviews that are technically accurate, culturally rich, and entertainingly savage.
 
 ---
 
@@ -24,11 +25,17 @@ It combines real static analysis metrics (lines of code, cyclomatic complexity, 
 ## 🚀 Key Features
 
 - **🌐 Multi-Language Analysis:** Supports **Python**, **Java**, and **JavaScript** code snippets.
-- **📊 Real-time Static AST Analysis:** Calculates Cyclomatic Complexity, Nesting Depth, Line Counts, Comment Ratios, Naming Conventions, and Code Duplication scores.
+- **📊 Real-Time Static AST Analysis:** Calculates Cyclomatic Complexity, Nesting Depth, Line Counts, Comment Ratios, Naming Conventions, and Code Duplication scores.
 - **🌲 Lightweight Random Forest Classifier:** Predicts code quality tiers (*Pristine, Acceptable, Questionable, Disaster*) based on NLP code tokenization (`classifier.pkl`, 340 KB).
 - **⚡ PyTorch Sequence LSTM:** Custom PyTorch model trained to score code severity on a 0–10 continuous scale.
-- **🤖 Dynamic AI LLM Roast Engine:** Powered by **Qwen2.5-Coder**. Supports 100% offline, free local execution via **Ollama** (`http://localhost:11434`) as well as multi-tier cloud fallbacks (`32B -> 7B -> 1.5B -> 0.5B`) via Hugging Face Serverless API.
-- **🎨 Interactive Streamlit Interface:** Features side-by-side code input & roast rendering, source-specific UI backgrounds (purple for AI, yellow for templates), visual grade cards (*S to F* with 8 randomized unhinged reactions per grade), Plotly radar charts, and customizable severity sliders.
+- **🇳🇵 Romanized Nepali AI Engine (Gemini Multi-Model Fallback):**
+  - Powered by a 4-model Google Gemini fallback chain (`gemini-2.5-flash` → `gemini-flash-lite-latest` → `gemini-3.5-flash-lite` → `gemini-3.1-flash-lite`).
+  - **Sub-4-Second Speed**: Lite model optimization delivers fast (~3.7s) 800+ character Romanized Nepali roasts.
+  - **Dynamic Theme System**: Combines 5 personality tones, 8 cultural theme pools (Balen Shah dozers, TU exam delays, Nagdhunga jam, NTC 3G, Selroti, etc.), and clean authentic Nepali slangs for **420+ unique roast variations**.
+  - **High Daily Capacity**: ~4,520 free AI roasts/day.
+- **🤖 English AI Engine (Local Qwen2.5-Coder via Ollama):**
+  - 100% offline local GPU inference via **Ollama** (`qwen2.5-coder:1.5b`) with cloud API fallbacks.
+- **🎨 Interactive Streamlit Interface:** Features side-by-side code input & roast rendering, source-specific UI backgrounds, visual grade cards (*S to F* with randomized unhinged reactions per grade), Plotly radar charts, and customizable severity sliders.
 
 ---
 
@@ -58,8 +65,10 @@ It combines real static analysis metrics (lines of code, cyclomatic complexity, 
                                             │
                                             ▼
                                ┌──────────────────────────┐
-                               │ Dynamic AI Roast Engine  │
-                               │ (HF Cloud API / Local)   │
+                               │ Hybrid AI Roast Engine   │
+                               ├──────────────────────────┤
+                               │ 🇳🇵 Nepali: Gemini Chain  │
+                               │ 🇬🇧 English: Local Qwen  │
                                └────────────┬─────────────┘
                                             │
                                             ▼
@@ -75,10 +84,11 @@ It combines real static analysis metrics (lines of code, cyclomatic complexity, 
 ```text
 CodeRoast/
 ├── app.py                      # Main Streamlit Dashboard Application
-├── config.py                   # Global configuration & HF cache isolation
-├── requirements.txt            # Project dependencies
-├── documentation.md            # Technical Interview Preparation Guide
+├── config.py                   # Global configuration & HF/Gemini API keys
+├── how_to_start.md             # PowerShell Quick-Start & Service Setup Guide
+├── ABOUT.md                    # In-depth Technical Documentation & Architecture Manual
 ├── CodeRoast_Project_Plan.md   # Project Specification & Architecture Plan
+├── requirements.txt            # Project dependencies
 ├── data/
 │   ├── scrape_github.py        # GitHub API repository scraper
 │   ├── preprocess_dataset.py   # Dataset feature extractor & cleaning
@@ -105,40 +115,32 @@ CodeRoast/
     │   └── train.py            # Training pipeline orchestrator
     ├── roast/
     │   ├── generator.py        # Hybrid Roast Generator
-    │   ├── llm_generator.py    # HF Serverless API + Local LLM generator
-    │   └── templates.py        # Curated template roasts
+    │   ├── llm_generator.py    # Multi-model Gemini & Local Qwen LLM generator
+    │   └── templates.py        # Curated template roasts (English & Nepali)
     └── scoring/
         └── scorer.py           # Multi-dimensional scoring engine
 ```
 
 ---
 
-## 🛠️ Installation & Local Setup
+## 🛠️ Quick Start & Local Setup
 
-### 1. Clone Repository & Create Virtual Environment
+### 1. PowerShell One-Liner (Fast Launch)
+
 ```powershell
-git clone https://github.com/gyr0byte/CodeRoast.git
-cd CodeRoast
-
-python -m venv venv
-venv\Scripts\activate
+Set-Location D:\CodeRoast; Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned; $env:OLLAMA_MODELS = "D:\CodeRoast\ollama_models"; if (-not (Get-Process -Name ollama -ErrorAction SilentlyContinue)) { Start-Process -FilePath "D:\Ollama\ollama.exe" -ArgumentList "serve" -WindowStyle Hidden }; & .\venv_gpu\Scripts\streamlit.exe run app.py
 ```
 
-### 2. Install Dependencies
+### 2. Manual Step-by-Step
+
+Refer to [how_to_start.md](how_to_start.md) for full step-by-step instructions.
+
 ```powershell
-# Install PyTorch
-pip install torch --index-url https://download.pytorch.org/whl/cpu
+# Activate Python Virtual Environment
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
+& .\venv_gpu\Scripts\Activate.ps1
 
-# Install remaining dependencies
-pip install -r requirements.txt
-```
-
----
-
-## 💻 Running the Application
-
-Launch the Streamlit web dashboard:
-```powershell
+# Run Streamlit App
 streamlit run app.py
 ```
 
@@ -151,9 +153,9 @@ Open your browser to `http://localhost:8501`.
 To host on **Streamlit Cloud** with full dynamic AI roasts:
 1. Connect your repository to [share.streamlit.io](https://share.streamlit.io/).
 2. Set main file path to `app.py`.
-3. *(Optional)* Add a free Hugging Face User Access Token in **App Settings -> Secrets**:
+3. Add your **Google Gemini API Key** in **App Settings -> Secrets**:
    ```toml
-   HF_TOKEN = "hf_xxxxxxxxxxxxxxxxxxxxxxxx"
+   GEMINI_API_KEY = "AIzaSy..."
    ```
 
 ---

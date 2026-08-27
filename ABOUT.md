@@ -173,30 +173,33 @@ CodeBERT is used for sequence classification (`AutoModelForSequenceClassificatio
 
 ---
 
-### 2.5 LLM Roast Generator
-The generator (`src/roast/llm_generator.py`) orchestrates Qwen2.5-Coder using a hybrid local/cloud strategy.
+### 2.5 Dual-Engine LLM Roast Architecture
 
-#### 1. Local Ollama Auto-Detection (100% Free & Offline)
-Before sending requests to external services, the engine pings `http://localhost:11434/api/generate`. If a local Ollama instance running `qwen2.5-coder:1.5b` (or another Qwen model) is active, requests are served locally with zero API limits, zero payment requirements, sub-second latency, and 100% privacy. All local Ollama model weights are redirected to `D:\CodeRoast\ollama_models` via the `OLLAMA_MODELS` environment variable to protect system drive capacity.
+The roast generation pipeline (`src/roast/llm_generator.py`) operates a **dual-engine architecture** tailored for high speed, daily scale (~4,500+ requests/day), and dynamic cultural creativity across both **English** and **Romanized Nepali**.
 
-#### 2. Multi-Tiered Cloud Fallback Chain
-If local Ollama is not running, the application queries the Hugging Face Serverless Inference API with an automated multi-model fallback hierarchy to handle rate limits and tier quotas:
-$$\text{Qwen2.5-Coder-32B} \longrightarrow \text{Qwen2.5-Coder-7B} \longrightarrow \text{Qwen2.5-Coder-1.5B} \longrightarrow \text{Qwen2.5-Coder-0.5B}$$
-If all cloud endpoints fail, the app seamlessly falls back to the local rule-based template engine.
+#### 1. 🇳🇵 Romanized Nepali Engine: Google Gemini Multi-Model Fallback Chain
+For Romanized Nepali roasts, CodeRoast executes a 4-tier Google Gemini model priority chain to bypass individual model rate limits (`429`) and server overload (`503`):
 
-#### Prompt Engineering & Unhinged Persona
-The system utilizes a structured, unfiltered system prompt with higher sampling creativity (`temperature = 0.95`):
-```python
-# System prompt structure
-system_prompt = (
-    "Role: Unhinged, ruthless senior tech lead with ABSOLUTELY ZERO FILTER. "
-    f"{tone_instructions} "
-    "Keep the roast under 3 concise sentences. Do not use markdown formatting, code blocks, or explanations."
-)
-```
+$$\text{gemini-2.5-flash} \longrightarrow \text{gemini-flash-lite-latest} \longrightarrow \text{gemini-3.5-flash-lite} \longrightarrow \text{gemini-3.1-flash-lite}$$
+
+*   **Instant Error Circuit Breaker:** Catches HTTP `429` (Quota Exceeded) and `503` (Service Unavailable) immediately, skipping to the next model in sub-100ms.
+*   **Short Response Rejection:** Enforces a minimum character length check. Any AI output under 100 characters is rejected as "lazy", automatically triggering model switching.
+*   **Sub-4-Second Speed:** Lite models reduce generation latency from 40–60s down to **~3.7 seconds per roast**.
+
+#### Dynamic Theme Picker Architecture (420+ Unique Combinations)
+To eliminate prompt repetition, every Nepali request dynamically samples and stitches together:
+*   **5 Personality Tones:** *Frustrated 2am Senior Dev*, *Sarcastic Uncle at Dashain*, *Kathmandu Twitter Troll*, *LOD Standup Comic*, *Gaming Streamer*.
+*   **8 Cultural Theme Pools:** *Kathmandu Traffic & Scooters*, *Nepalese Politics & Feud*, *Student Struggles & TU Exam Delays*, *Nepalese Food & Cuisine*, *Balen Shah Dozer Culture*, *Nepalese Sports & Rajesh Hamal*, *Daily Life / Pathao / Nagdhunga*, *Internet / RONB / Meme Nepal*.
+*   **Clean Authentic Nepali Slangs:** Rotates natural developer slangs (`kukur`, `gadha`, `dimag navako`, `harami`, `khate`, `pakhe`, `bheda`, `hawa`, `lafada`, `pasa`, `kaathe`, `jhyaap`, `boka`, `gidi`, `chappar`, `tori`, `baal xaina`, `hait`). Strictly excludes explicit sexual profanities (`muji`, `lado`, `bhalu`, `chikne`, `kando`, `radi`).
+
+#### 2. 🇬🇧 English Engine: Local Qwen2.5-Coder via Ollama
+For English roasts, the application uses local GPU acceleration:
+*   **Local Ollama Auto-Detection:** Queries `http://localhost:11434/api/generate` running `qwen2.5-coder:1.5b`.
+*   **Multi-Tier Cloud Fallback:** If Ollama is offline, queries Hugging Face Serverless API (`Qwen2.5-Coder-32B` $\rightarrow$ `7B` $\rightarrow$ `1.5B` $\rightarrow$ `0.5B`).
+*   **Static Template Fallback:** If all cloud and local endpoints fail, gracefully falls back to curated rule-based templates (`src/roast/templates.py`).
 
 #### Code Metrics Injection
-To ground the LLM and prevent generic responses, concrete static metrics are injected alongside the code snippet:
+Static code metrics are dynamically injected alongside the snippet to ensure technical context:
 ```
 Language: Python
 Lines of Code: 12
@@ -209,7 +212,7 @@ Code Snippet:
 ```
 
 #### Robust Fallback Hierarchy
-$$\text{Local Ollama (Qwen)} \longrightarrow \text{HF Cloud Qwen Multi-Tier} \longrightarrow \text{Rule-Based Templates (40+ Unhinged Roasts)}$$
+$$\text{Local Qwen / Gemini Chain} \longrightarrow \text{HF Cloud Qwen Multi-Tier} \longrightarrow \text{Rule-Based Templates}$$
 
 ---
 
