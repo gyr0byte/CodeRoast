@@ -166,33 +166,33 @@ class LLMRoastGenerator:
                 f"Code Snippet:\n{code[:800]}"
             )
 
-        # ── Step A: Check for Local Ollama Instance ─────────────────────────
+        messages = [{"role": "system", "content": system_prompt}]
+        messages.extend(few_shot_examples)
+        messages.append({"role": "user", "content": user_content})
+
+        # ── Step A: Check for Local Ollama Instance via /api/chat ChatML ───
         try:
             req = urllib.request.Request(
-                "http://localhost:11434/api/generate",
+                "http://localhost:11434/api/chat",
                 data=json.dumps({
                     "model": "qwen2.5-coder:1.5b",
-                    "prompt": f"{system_prompt}\n\n{user_content}",
+                    "messages": messages,
                     "stream": False,
-                    "options": {"temperature": 0.95, "num_predict": 250}
+                    "options": {"temperature": 1.05, "num_predict": 500}
                 }).encode("utf-8"),
                 headers={"Content-Type": "application/json"}
             )
-            with urllib.request.urlopen(req, timeout=4) as resp:
+            with urllib.request.urlopen(req, timeout=8) as resp:
                 if resp.status == 200:
                     res_data = json.loads(resp.read().decode("utf-8"))
-                    if "response" in res_data and res_data["response"]:
-                        response_text = res_data["response"].strip()
+                    if "message" in res_data and "content" in res_data["message"]:
+                        response_text = res_data["message"]["content"].strip()
                         if not is_refusal(response_text):
                             return response_text
         except Exception:
             pass  # Ollama not running locally or refused, proceed to HF cloud
 
         # ── Step B: Iterate through Hugging Face Qwen Models ────────────────
-        messages = [{"role": "system", "content": system_prompt}]
-        messages.extend(few_shot_examples)
-        messages.append({"role": "user", "content": user_content})
-
         client = InferenceClient(token=token if token else None)
 
         for model in MODEL_CANDIDATES:
@@ -200,8 +200,8 @@ class LLMRoastGenerator:
                 response = client.chat_completion(
                     messages=messages,
                     model=model,
-                    max_tokens=150,
-                    temperature=0.95
+                    max_tokens=450,
+                    temperature=1.05
                 )
                 if response and response.choices and len(response.choices) > 0:
                     text = response.choices[0].message.content
@@ -230,46 +230,46 @@ class LLMRoastGenerator:
         system_prompt = (
             f"You are CodeRoast AI. The user's code was assigned a Letter Grade of '{grade}'. "
             f"Generate a single, hilarious, unhinged one-liner reaction (1 short sentence) specifically reacting to receiving grade '{letter}'. "
-            "Do not write explanations, markdown, or multiple sentences. Make it sharp, funny, and punchy!"
+            "Use curse words like 'fuck', 'shit', 'damn', 'crap' liberally. Do not write explanations or markdown."
         )
         
         user_content = f"Letter Grade: {grade}\nCode Snippet:\n{code[:300]}"
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_content}
+        ]
 
-        # Try Ollama first
+        # Try Ollama /api/chat first
         try:
             req = urllib.request.Request(
-                "http://localhost:11434/api/generate",
+                "http://localhost:11434/api/chat",
                 data=json.dumps({
                     "model": "qwen2.5-coder:1.5b",
-                    "prompt": f"{system_prompt}\n\n{user_content}",
+                    "messages": messages,
                     "stream": False,
-                    "options": {"temperature": 0.9}
+                    "options": {"temperature": 1.0}
                 }).encode("utf-8"),
                 headers={"Content-Type": "application/json"}
             )
-            with urllib.request.urlopen(req, timeout=3) as resp:
+            with urllib.request.urlopen(req, timeout=4) as resp:
                 if resp.status == 200:
                     res_data = json.loads(resp.read().decode("utf-8"))
-                    if "response" in res_data and res_data["response"]:
-                        text = res_data["response"].strip()
+                    if "message" in res_data and "content" in res_data["message"]:
+                        text = res_data["message"]["content"].strip()
                         if not is_refusal(text):
                             return text
         except Exception:
             pass
 
         # Try Hugging Face models next
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_content}
-        ]
         client = InferenceClient(token=token if token else None)
         for model in MODEL_CANDIDATES:
             try:
                 response = client.chat_completion(
                     messages=messages,
                     model=model,
-                    max_tokens=60,
-                    temperature=0.9
+                    max_tokens=100,
+                    temperature=1.0
                 )
                 if response and response.choices and len(response.choices) > 0:
                     text = response.choices[0].message.content
