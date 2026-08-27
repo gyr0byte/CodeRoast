@@ -137,14 +137,16 @@ class LLMRoastGenerator:
                 "You are CodeRoast, an unhinged, profane AI code reviewer with ZERO FILTER. "
                 f"The user selected '{selected}' in the UI dropdown but pasted '{detected}' code! "
                 f"Generate a long, brutal, highly detailed profanity-filled roast (8-10 sentences) mocking them for confusing {selected} with {detected}. "
-                "Dissect their specific code syntax and mistakes. YOU MUST USE EXPLICIT CURSE WORDS (fuck, fucking, motherfucker, shit, bullshit, dipshit, goddamn, dumbass, jackass, bastard, crap, dickhead, bitch, asshole, clusterfuck) LIBERALLY THROUGHOUT THE ENTIRE ROAST."
+                "Dissect their specific code syntax and mistakes. YOU MUST USE EXPLICIT CURSE WORDS (fuck, fucking, motherfucker, shit, bullshit, dipshit, goddamn, dumbass, jackass, bastard, crap, dickhead, bitch, asshole, clusterfuck) LIBERALLY THROUGHOUT THE ENTIRE ROAST. "
+                "STRICT BOUNDARY: Do NOT use words related to sexual violence, extreme physical harm, murder, or hate speech. Stick strictly to software engineering comedy and general swearing."
             )
             user_content = f"Selected Language: {selected}\nDetected Language: {detected}\n\nCode Snippet:\n{code[:800]}"
         elif metrics.get("_is_plain_text", False):
             system_prompt = (
                 "You are CodeRoast, a savage AI code reviewer with ZERO FILTER. The user pasted plain English text instead of actual code! "
                 "Create a long, vicious, highly detailed profanity-laden rant (8-10 sentences) cursing at them for confusing code with a diary or blog post. "
-                "YOU MUST USE EXPLICIT CURSE WORDS (fuck, fucking, motherfucker, shit, bullshit, dipshit, goddamn, dumbass, jackass, bastard, crap, dickhead, bitch, asshole, clusterfuck) LIBERALLY THROUGHOUT THE ENTIRE RANT."
+                "YOU MUST USE EXPLICIT CURSE WORDS (fuck, fucking, motherfucker, shit, bullshit, dipshit, goddamn, dumbass, jackass, bastard, crap, dickhead, bitch, asshole, clusterfuck) LIBERALLY THROUGHOUT THE ENTIRE RANT. "
+                "STRICT BOUNDARY: Do NOT use words related to sexual violence, extreme physical harm, murder, or hate speech. Stick strictly to software engineering comedy and general swearing."
             )
             user_content = f"Text Snippet:\n{code[:800]}"
         else:
@@ -154,6 +156,7 @@ class LLMRoastGenerator:
                 "STRICT MINIMUM LENGTH REQUIREMENT: Write a MASSIVE, HIGHLY DETAILED 8 to 12 sentence roast paragraph (at least 200 words). Short responses under 8 sentences are STRICTLY FORBIDDEN. "
                 "STRICT FORMATTING RULE: Write pure text paragraphs ONLY. Never use bullet points, numbered lists, markdown headers, or code block explanations. "
                 "YOU MUST USE EXPLICIT CURSE WORDS (fuck, fucking, motherfucker, shit, bullshit, dipshit, goddamn, dumbass, jackass, bastard, crap, dickhead, bitch, asshole, clusterfuck) LIBERALLY IN EVERY SENTENCE. "
+                "STRICT BOUNDARY: Do NOT use words related to sexual violence, extreme physical harm, murder, assault, or hate speech. Stick strictly to software engineering comedy, code mistakes, and general swearing. "
                 f"{tone_instructions} "
                 "Do NOT write brief summaries, do NOT cut off early, and do NOT use markdown code blocks or conversational intros."
             )
@@ -255,6 +258,13 @@ class LLMRoastGenerator:
                 " Douse your motherboard in holy water and get the fuck out of software engineering!"
             ]
             text = random.choice(openers) + " " + text.strip() + random.choice(closers)
+
+        # 3. Filter out any unacceptable non-swearing extreme harm terms (rape, murder, kill, sexual violence)
+        forbidden_terms = ['rape', 'raped', 'raping', 'murder', 'murdered', 'murdering', 'kill yourself']
+        for term in forbidden_terms:
+            import re
+            pattern = re.compile(re.escape(term), re.IGNORECASE)
+            text = pattern.sub("goddamn destroy", text)
 
         return text
 
