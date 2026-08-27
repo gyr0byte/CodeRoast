@@ -5,6 +5,7 @@ Combines metrics and severity to produce dynamic, template-based roasts.
 
 import random
 import re
+from typing import Optional
 from src.roast.templates import (
     ROAST_TEMPLATES,
     SEVERITY_MODIFIERS,

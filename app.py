@@ -223,16 +223,25 @@ with col1:
         label_visibility="collapsed",
     )
 
-    row1, row2, row3 = st.columns([2, 2, 3])
+    row1_col1, row1_col2, row1_col3 = st.columns([1.5, 2.2, 2.3])
 
-    with row1:
+    with row1_col1:
         language = st.selectbox(
-            "Language",
+            "Code Language",
             ["Python", "Java", "JavaScript"],
-            label_visibility="collapsed",
+            label_visibility="visible",
         )
 
-    with row2:
+    with row1_col2:
+        roast_language = st.selectbox(
+            "Roast Output Language",
+            ["🇬🇧 English", "🇳🇵 Roman Nepali (रोमन नेपाली)"],
+            index=0,
+            label_visibility="visible",
+        )
+        target_lang = "roman_nepali" if "Nepali" in roast_language else "english"
+
+    with row1_col3:
         severity = st.slider(
             "Roast Severity",
             min_value=1,
@@ -241,34 +250,28 @@ with col1:
             help="1 = Gentle Nudge, 2 = Standard Roast, 3 = No Mercy",
         )
 
-    # ── Sidebar Settings ──────────────────────────────────────────────────────
-    st.sidebar.markdown("### 🌐 Roast Settings")
-    roast_language = st.sidebar.radio(
-        "Roast Language Mode",
-        ["🇬🇧 English", "🇳🇵 Romanized Nepali (रोमन नेपाली)"],
-        index=0
-    )
-    target_lang = "roman_nepali" if "Nepali" in roast_language else "english"
+    row2_col1, row2_col2 = st.columns([2.5, 2])
 
-    with st.sidebar.expander("🔑 Free Cloud AI Key (Optional)", expanded=False):
-        st.markdown("[Get Free Gemini API Key](https://aistudio.google.com/app/apikey)")
-        user_gemini_key = st.text_input(
-            "Gemini API Key",
-            type="password",
-            help="1,500 free roasts/day using Google Gemini Flash API!"
+    with row2_col1:
+        use_ai_llm = st.checkbox(
+            "🤖 Enable Dynamic AI Roast (Qwen2.5 / Gemini Flash)",
+            value=True,
+            help="Generates brand-new, unique AI code roasts using Gemini Flash or local Qwen LLM."
         )
 
-    use_ai_llm = st.checkbox(
-        "🤖 Enable Dynamic AI Roast (Qwen2.5 / Gemini Flash)",
-        value=True,
-        help="Generates brand-new, unique AI code roasts using Gemini Flash or local Qwen LLM."
-    )
-
-    with row3:
+    with row2_col2:
         roast_button = st.button(
             "🔥 Roast My Code",
             type="primary",
             width="stretch",
+        )
+
+    with st.expander("🔑 Optional Free Gemini API Key (1,500 Cloud Roasts/Day)", expanded=False):
+        st.markdown("[Click here to get a 100% Free Gemini API Key](https://aistudio.google.com/app/apikey)")
+        user_gemini_key = st.text_input(
+            "Paste your Gemini API Key here:",
+            type="password",
+            help="1,500 free roasts/day using Google Gemini Flash API!"
         )
 
 # Execute analysis if the roast button is clicked
