@@ -192,7 +192,7 @@ class LLMRoastGenerator:
                     if "message" in res_data and "content" in res_data["message"]:
                         response_text = res_data["message"]["content"].strip()
                         if not is_refusal(response_text):
-                            return response_text
+                            return self._ensure_profane_unhinged_roast(response_text, metrics)
         except Exception:
             pass  # Ollama not running locally or refused, proceed to HF cloud
 
@@ -212,12 +212,51 @@ class LLMRoastGenerator:
                     if text:
                         candidate_text = text.strip()
                         if not is_refusal(candidate_text):
-                            return candidate_text
+                            return self._ensure_profane_unhinged_roast(candidate_text, metrics)
             except Exception as e:
                 print(f"[WARNING] Qwen AI model ({model}) failed: {e}")
                 continue
 
         return None
+
+    def _ensure_profane_unhinged_roast(self, text: str, metrics: dict) -> str:
+        """
+        Strips accidental code blocks and dynamically ensures explicit profanity
+        without repeating fixed static metric paragraphs.
+        """
+        import random
+
+        profanities = [
+            'fuck', 'fucking', 'motherfucker', 'shit', 'bullshit', 'dipshit',
+            'goddamn', 'dumbass', 'jackass', 'bastard', 'crap', 'dickhead',
+            'bitch', 'asshole', 'clusterfuck'
+        ]
+
+        # 1. Strip markdown code blocks if model accidentally generated code
+        if '```' in text:
+            parts = text.split('```')
+            text = parts[0].strip()
+            if len(parts) > 2 and parts[2].strip():
+                text += ' ' + parts[2].strip()
+
+        # 2. Dynamic profanity check & non-repetitive injection if model slipped into polite mode
+        has_profanity = any(p in text.lower() for p in profanities)
+        if not has_profanity:
+            openers = [
+                "What the actual fucking hell is this goddamn clusterfuck of code?",
+                "Holy motherfucking shit, reading this piece of trash gave me an instant optical migraine!",
+                "Are you fucking serious with this atrocious bullshit?",
+                "What kind of unhinged dumbass typed out this goddamn disaster?"
+            ]
+            closers = [
+                " Delete this fucking trash right now before I format your hard drive, you absolute bastard!",
+                " Throw your laptop into an active volcano and get the fuck out of computer science forever!",
+                " Stop writing code immediately and apply for a job in goat herding, you complete dumbass!",
+                " Douse your motherboard in holy water and get the fuck out of software engineering!"
+            ]
+            text = random.choice(openers) + " " + text.strip() + random.choice(closers)
+
+        return text
 
     def generate_grade_reaction(
         self,
