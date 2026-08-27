@@ -236,10 +236,27 @@ with col1:
             help="1 = Gentle Nudge, 2 = Standard Roast, 3 = No Mercy",
         )
 
+    # ── Sidebar Settings ──────────────────────────────────────────────────────
+    st.sidebar.markdown("### 🌐 Roast Settings")
+    roast_language = st.sidebar.radio(
+        "Roast Language Mode",
+        ["🇬🇧 English", "🇳🇵 Romanized Nepali (रोमन नेपाली)"],
+        index=0
+    )
+    target_lang = "roman_nepali" if "Nepali" in roast_language else "english"
+
+    with st.sidebar.expander("🔑 Free Cloud AI Key (Optional)", expanded=False):
+        st.markdown("[Get Free Gemini API Key](https://aistudio.google.com/app/apikey)")
+        user_gemini_key = st.text_input(
+            "Gemini API Key",
+            type="password",
+            help="1,500 free roasts/day using Google Gemini Flash API!"
+        )
+
     use_ai_llm = st.checkbox(
-        "🤖 Enable Dynamic AI Roast (Qwen2.5-Coder LLM)",
+        "🤖 Enable Dynamic AI Roast (Qwen2.5 / Gemini Flash)",
         value=True,
-        help="Generates brand-new, unique AI code roasts using a local LLM instead of templates."
+        help="Generates brand-new, unique AI code roasts using Gemini Flash or local Qwen LLM."
     )
 
     with row3:
@@ -293,7 +310,8 @@ if roast_button:
 
         # 2. Roast Generation
         if use_ai_llm:
-            with st.spinner("🤖 Generating Unhinged Roast from Qwen AI (Qwen2.5-Coder)..."):
+            sp_msg = "🇳🇵 Generating Romanized Nepali AI Roast..." if target_lang == "roman_nepali" else "🤖 Generating Unhinged Roast from Qwen / Gemini AI..."
+            with st.spinner(sp_msg):
                 if roast_generator.llm_generator is None:
                     from src.roast.llm_generator import LLMRoastGenerator
                     roast_generator.llm_generator = LLMRoastGenerator()
@@ -303,7 +321,9 @@ if roast_button:
                     quality_level=quality_level,
                     severity=severity,
                     code=code_input,
-                    use_llm=True
+                    use_llm=True,
+                    language=target_lang,
+                    gemini_key=user_gemini_key if user_gemini_key else None
                 )
         else:
             roast_text = roast_generator.generate_roast(
@@ -311,7 +331,9 @@ if roast_button:
                 quality_level=quality_level,
                 severity=severity,
                 code=code_input,
-                use_llm=False
+                use_llm=False,
+                language=target_lang,
+                gemini_key=user_gemini_key if user_gemini_key else None
             )
 
         grade_reaction = roast_generator.get_grade_reaction(
@@ -343,10 +365,16 @@ if "has_results" in st.session_state and st.session_state["has_results"]:
 with col2:
     if has_results:
         # Determine background color style
-        if roast_text.startswith("🤖") or "Qwen" in roast_text or "[Qwen" in roast_text:
-            # Qwen roast: Distinct purple gradient
+        if roast_text.startswith("🤖") or "Qwen" in roast_text or "Gemini" in roast_text or "[Qwen" in roast_text:
+            # AI LLM roast: Distinct purple gradient
             roast_style = "background: linear-gradient(135deg, #4c1d95 0%, #1e1b4b 100%); border-left: 5px solid #a78bfa; box-shadow: 0 4px 20px rgba(167, 139, 250, 0.15);"
-            clean_roast_text = roast_text.replace("🤖 [Qwen2.5-Coder AI Roast]: ", "").replace("🤖 AI Roast: ", "").replace("🤖 ", "")
+            clean_roast_text = (
+                roast_text
+                .replace("🤖 [Gemini Flash AI Roast]: ", "")
+                .replace("🤖 [Qwen2.5-Coder AI Roast]: ", "")
+                .replace("🤖 AI Roast: ", "")
+                .replace("🤖 ", "")
+            )
         else:
             # Template roast: Distinct yellow/amber gradient
             roast_style = "background: linear-gradient(135deg, #78350f 0%, #1c1917 100%); border-left: 5px solid #fbbf24; box-shadow: 0 4px 20px rgba(251, 191, 36, 0.15);"
