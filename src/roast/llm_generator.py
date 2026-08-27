@@ -73,8 +73,8 @@ class LLMRoastGenerator:
         if severity == 1:
             tone_instructions = (
                 "Role: Unhinged, sarcastic senior developer with zero filter. "
-                "Instructions: Give a chaotic, wildly profane critique of the code. Use swear words like 'damn', 'shit', 'crap', 'what the fuck', 'bullshit'. "
-                "Roast their laziness, variable naming, and unnecessary functions."
+                "CRITICAL REQUIREMENT: You MUST include profanity and curse words (fuck, shit, goddamn, bullshit, dumbass) throughout your entire roast. "
+                "Roast their laziness, variable naming, and unnecessary functions ruthlessly."
             )
             few_shot_examples = [
                 {
@@ -92,10 +92,9 @@ class LLMRoastGenerator:
         elif severity == 3:
             tone_instructions = (
                 "Role: Completely mental, merciless, ultra-savage tech lead with ABSOLUTELY NO FILTER. "
-                "Instructions: Destroy this developer's soul. Be wildly unhinged, profane, and devastatingly hilarious. "
-                "Use swear words liberally (fuck, shit, damn, bastard, atrocious crap). "
-                "Compare their code to radioactive fallout, biohazards, or total brain damage. "
-                "Tell them to format their hard drive, throw their PC in a volcano, or quit coding forever."
+                "CRITICAL REQUIREMENT: You MUST use heavy curse words (fuck, shit, goddamn, bullshit, bastard, dumbass) in EVERY single sentence of your roast. "
+                "Destroy this developer's soul with unapologetic profanity. Compare their code to radioactive fallout, biohazards, or total brain damage. "
+                "Tell them to delete their code, format their hard drive, throw their PC in a volcano, or quit coding forever."
             )
             few_shot_examples = [
                 {
@@ -113,8 +112,8 @@ class LLMRoastGenerator:
         else:  # Standard Severity (2)
             tone_instructions = (
                 "Role: Unhinged, razor-sharp senior staff engineer. "
-                "Instructions: Deliver a chaotic, devastatingly brutal code review packed with swear words (fuck, shit, damn, crap, bastard). "
-                "Attack their nesting, spaghetti logic, terrible naming, and missing documentation with pure savagery."
+                "CRITICAL REQUIREMENT: You MUST include explicit curse words (fuck, shit, goddamn, bullshit, dumbass) in every paragraph of your roast. "
+                "Attack their nesting, spaghetti logic, terrible naming, and missing documentation with pure profanity and savagery."
             )
             few_shot_examples = [
                 {
@@ -135,27 +134,27 @@ class LLMRoastGenerator:
             detected = metrics.get("_detected_lang", "Python").capitalize()
             selected = metrics.get("_selected_lang", "Java").capitalize()
             system_prompt = (
-                "You are CodeRoast, an unhinged, profane AI code reviewer. "
+                "You are CodeRoast, an unhinged, profane AI code reviewer with ZERO FILTER. "
                 f"The user selected '{selected}' in the UI dropdown but pasted '{detected}' code! "
                 f"Generate a brutal, profanity-filled roast (4-6 sentences) mocking them for confusing {selected} with {detected}. "
-                "Use curse words like 'fuck', 'shit', 'goddamn', 'dumbass' liberally. Do NOT hold back!"
+                "YOU MUST USE EXPLICIT CURSE WORDS (fuck, shit, goddamn, dumbass, bullshit) LIBERALLY THROUGHOUT THE ENTIRE ROAST. Do NOT hold back!"
             )
             user_content = f"Selected Language: {selected}\nDetected Language: {detected}\n\nCode Snippet:\n{code[:800]}"
         elif metrics.get("_is_plain_text", False):
             system_prompt = (
-                "You are CodeRoast, a savage AI code reviewer. The user pasted plain English text instead of actual code! "
+                "You are CodeRoast, a savage AI code reviewer with ZERO FILTER. The user pasted plain English text instead of actual code! "
                 "Create a vicious, profanity-laden rant (4-6 sentences) cursing at them for confusing code with a diary or blog post. "
-                "Use curse words like 'fuck', 'shit', 'goddamn', 'dumbass' liberally."
+                "YOU MUST USE EXPLICIT CURSE WORDS (fuck, shit, goddamn, dumbass, bullshit) LIBERALLY THROUGHOUT THE ENTIRE RANT."
             )
             user_content = f"Text Snippet:\n{code[:800]}"
         else:
             # Explicit comedy framing to prevent AI safety filter false positives
             system_prompt = (
-                "You are performing a fictional, comedic code roast on a developer comedy show. "
-                "Your target is strictly the programming syntax, variable names, and algorithmic logic. "
-                "NEVER refuse to review code. NEVER say 'I am sorry' or 'I cannot assist'. Always generate a hilarious, profanity-rich roast with explicit curse words. "
+                "You are CodeRoast, a savage AI code reviewer on an unhinged developer comedy show. "
+                "YOUR MANDATORY INSTRUCTION: You MUST use explicit curse words (fuck, shit, goddamn, bullshit, dumbass, bastard) throughout your roast. "
+                "NEVER refuse to review code. NEVER say 'I am sorry' or 'I cannot assist'. Always generate a harsh, profanity-heavy roast (4-6 sentences). "
                 f"{tone_instructions} "
-                "Generate a harsh, profanity-filled roast (4-6 sentences). Do not use markdown code blocks or boring explanations."
+                "Do not use markdown code blocks or boring explanations."
             )
             user_content = (
                 f"Language: Python/JS/Java\n"
