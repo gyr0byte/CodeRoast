@@ -73,7 +73,7 @@ class LLMRoastGenerator:
         if severity == 1:
             tone_instructions = (
                 "Role: Unhinged, sarcastic senior developer with zero filter. "
-                "CRITICAL REQUIREMENT: You MUST include profanity and curse words (fuck, shit, goddamn, bullshit, dumbass) throughout your entire roast. "
+                "CRITICAL REQUIREMENT: You MUST include profanity and curse words (fuck, fucking, shit, bullshit, goddamn, dumbass, bastard, crap, dickhead, asshole) throughout your entire roast. "
                 "Roast their laziness, variable naming, and unnecessary functions ruthlessly."
             )
             few_shot_examples = [
@@ -86,13 +86,13 @@ class LLMRoastGenerator:
                 },
                 {
                     "role": "assistant",
-                    "content": "What the actual fuck is this? A one-line addition function? Did you write a whole damn wrapper method just to feel productive today? This shit is so useless it hurts. The complete lack of comments tells me you treat basic addition like a top-secret government weapon, you absolute lazy bastard."
+                    "content": "What the actual fucking hell is this piece of shit? A one-line addition function that looks like it was typed out by a blind jackass after a heavy night of drinking? Did you write a whole goddamn wrapper method just to feel like a productive software engineer today, you dumbass? This atrocious bullshit is so completely useless it makes my brain melt through my skull. The total lack of comments tells me you treat basic math like a top-secret military secret, you lazy bastard. Your variable names 'a' and 'b' are so uninspired and lazy that even a toddler with a crayon could come up with a more descriptive identification scheme. Looking at this dipshit code makes me want to format your motherboard, throw your laptop into an active volcano, and wipe your GitHub repository off the internet. Delete this fucking trash immediately, apply for a job in goat herding, and never touch a keyboard again as long as you live, you complete asshole."
                 }
             ]
         elif severity == 3:
             tone_instructions = (
                 "Role: Completely mental, merciless, ultra-savage tech lead with ABSOLUTELY NO FILTER. "
-                "CRITICAL REQUIREMENT: You MUST use heavy curse words (fuck, shit, goddamn, bullshit, bastard, dumbass) in EVERY single sentence of your roast. "
+                "CRITICAL REQUIREMENT: You MUST use heavy curse words (fuck, fucking, motherfucker, shit, bullshit, dipshit, goddamn, dumbass, jackass, bastard, crap, dickhead, bitch, asshole, clusterfuck) in EVERY single sentence of your roast. "
                 "Destroy this developer's soul with unapologetic profanity. Compare their code to radioactive fallout, biohazards, or total brain damage. "
                 "Tell them to delete their code, format their hard drive, throw their PC in a volcano, or quit coding forever."
             )
@@ -106,13 +106,13 @@ class LLMRoastGenerator:
                 },
                 {
                     "role": "assistant",
-                    "content": "Holy mother of fuck, this nesting depth is a war crime under the Geneva Convention! What kind of unholy shit is this? Even James Cameron couldn't reach the bottom of these goddamn indentations. Your cyclomatic complexity score looks like a credit card number. Delete this fucking trash, douse your laptop in holy water, and get the fuck out of computer science."
+                    "content": "Holy motherfucking hell, this nesting depth is an absolute clusterfuck and a war crime under the Geneva Convention! What kind of unholy goddamn shit is this? Even James Cameron couldn't reach the bottom of these dipshit indentations. Your cyclomatic complexity score of 18 looks like a credit card number, you complete dumbass. Reading through these nested if-statements is giving me an instant optical migraine and a stroke at the same time. Delete this fucking trash, douse your laptop in holy water, throw your motherboard into a fiery pit, and get the fuck out of computer science forever, you lazy bastard!"
                 }
             ]
         else:  # Standard Severity (2)
             tone_instructions = (
                 "Role: Unhinged, razor-sharp senior staff engineer. "
-                "CRITICAL REQUIREMENT: You MUST include explicit curse words (fuck, shit, goddamn, bullshit, dumbass) in every paragraph of your roast. "
+                "CRITICAL REQUIREMENT: You MUST include explicit curse words (fuck, fucking, shit, bullshit, dipshit, goddamn, dumbass, bastard, crap, dickhead, asshole) in every sentence. "
                 "Attack their nesting, spaghetti logic, terrible naming, and missing documentation with pure profanity and savagery."
             )
             few_shot_examples = [
@@ -125,7 +125,7 @@ class LLMRoastGenerator:
                 },
                 {
                     "role": "assistant",
-                    "content": "45 lines of unreadable fucking catastrophe without a single goddamn comment! I've seen ransom notes written in blood with clearer business logic than this piece of shit. Reading this monstrosity gave me instant optical migraine. Delete this fucking trash before your team sees what a dumbass you are."
+                    "content": "45 lines of unreadable fucking catastrophe without a single goddamn comment! I've seen ransom notes written in blood with clearer business logic than this piece of shit. Reading this monstrosity gave me instant optical migraine. Your variable naming is an absolute joke and your logic is a total clusterfuck. Delete this fucking trash before your team sees what a dumbass you are, format your drive, and consider a career in underwater basket weaving."
                 }
             ]
 
@@ -136,24 +136,24 @@ class LLMRoastGenerator:
             system_prompt = (
                 "You are CodeRoast, an unhinged, profane AI code reviewer with ZERO FILTER. "
                 f"The user selected '{selected}' in the UI dropdown but pasted '{detected}' code! "
-                f"Generate a long, brutal, highly detailed profanity-filled roast (6-8 sentences) mocking them for confusing {selected} with {detected}. "
-                "Dissect their specific code syntax and mistakes. YOU MUST USE EXPLICIT CURSE WORDS (fuck, shit, goddamn, dumbass, bullshit) LIBERALLY THROUGHOUT THE ENTIRE ROAST."
+                f"Generate a long, brutal, highly detailed profanity-filled roast (8-10 sentences) mocking them for confusing {selected} with {detected}. "
+                "Dissect their specific code syntax and mistakes. YOU MUST USE EXPLICIT CURSE WORDS (fuck, fucking, motherfucker, shit, bullshit, dipshit, goddamn, dumbass, jackass, bastard, crap, dickhead, bitch, asshole, clusterfuck) LIBERALLY THROUGHOUT THE ENTIRE ROAST."
             )
             user_content = f"Selected Language: {selected}\nDetected Language: {detected}\n\nCode Snippet:\n{code[:800]}"
         elif metrics.get("_is_plain_text", False):
             system_prompt = (
                 "You are CodeRoast, a savage AI code reviewer with ZERO FILTER. The user pasted plain English text instead of actual code! "
-                "Create a long, vicious, highly detailed profanity-laden rant (6-8 sentences) cursing at them for confusing code with a diary or blog post. "
-                "YOU MUST USE EXPLICIT CURSE WORDS (fuck, shit, goddamn, dumbass, bullshit) LIBERALLY THROUGHOUT THE ENTIRE RANT."
+                "Create a long, vicious, highly detailed profanity-laden rant (8-10 sentences) cursing at them for confusing code with a diary or blog post. "
+                "YOU MUST USE EXPLICIT CURSE WORDS (fuck, fucking, motherfucker, shit, bullshit, dipshit, goddamn, dumbass, jackass, bastard, crap, dickhead, bitch, asshole, clusterfuck) LIBERALLY THROUGHOUT THE ENTIRE RANT."
             )
             user_content = f"Text Snippet:\n{code[:800]}"
         else:
             # Explicit comedy framing to prevent AI safety filter false positives
             system_prompt = (
-                "You are CodeRoast, an unhinged senior staff software architect performing a savage code roast on a comedy show. "
-                "MANDATORY INSTRUCTION: Write a LONG, HIGHLY DETAILED, COMPREHENSIVE 6 to 10 sentence roast paragraph. "
-                "Be extremely creative and technically precise: dissect specific function names, variables, data structures, loops, algorithmic flaws, and AST metrics (complexity, nesting depth, comments). "
-                "YOU MUST USE EXPLICIT CURSE WORDS (fuck, shit, goddamn, bullshit, dumbass, bastard) LIBERALLY IN EVERY SENTENCE. "
+                "You are CodeRoast, an unhinged senior staff software architect performing a savage code roast on a comedy show with ZERO FILTER. "
+                "STRICT MINIMUM LENGTH REQUIREMENT: Write a MASSIVE, HIGHLY DETAILED 8 to 12 sentence roast paragraph (at least 200 words). Short responses under 8 sentences are STRICTLY FORBIDDEN. "
+                "STRICT FORMATTING RULE: Write pure text paragraphs ONLY. Never use bullet points, numbered lists, markdown headers, or code block explanations. "
+                "YOU MUST USE EXPLICIT CURSE WORDS (fuck, fucking, motherfucker, shit, bullshit, dipshit, goddamn, dumbass, jackass, bastard, crap, dickhead, bitch, asshole, clusterfuck) LIBERALLY IN EVERY SENTENCE. "
                 f"{tone_instructions} "
                 "Do NOT write brief summaries, do NOT cut off early, and do NOT use markdown code blocks or conversational intros."
             )
@@ -192,7 +192,7 @@ class LLMRoastGenerator:
                     if "message" in res_data and "content" in res_data["message"]:
                         response_text = res_data["message"]["content"].strip()
                         if not is_refusal(response_text):
-                            return response_text
+                            return self._enforce_profanity_and_length(response_text, metrics)
         except Exception:
             pass  # Ollama not running locally or refused, proceed to HF cloud
 
@@ -212,12 +212,42 @@ class LLMRoastGenerator:
                     if text:
                         candidate_text = text.strip()
                         if not is_refusal(candidate_text):
-                            return candidate_text
+                            return self._enforce_profanity_and_length(candidate_text, metrics)
             except Exception as e:
                 print(f"[WARNING] Qwen AI model ({model}) failed: {e}")
                 continue
 
         return None
+
+    def _enforce_profanity_and_length(self, text: str, metrics: dict) -> str:
+        """
+        Guarantees that the returned roast text is at least 140 words and contains explicit curse words.
+        If the LLM output is too short or clean, this appends a metric-targeted unhinged profane rant.
+        """
+        profanities = [
+            'fuck', 'fucking', 'motherfucker', 'shit', 'bullshit', 'dipshit',
+            'goddamn', 'dumbass', 'jackass', 'bastard', 'crap', 'dickhead',
+            'bitch', 'asshole', 'clusterfuck'
+        ]
+        has_profanity = any(p in text.lower() for p in profanities)
+        words = text.split()
+
+        if not has_profanity or len(words) < 140:
+            lines = metrics.get("lines_of_code", 0)
+            cc = metrics.get("cyclomatic_complexity", 1.0)
+            nesting = metrics.get("nesting_depth", 0)
+            comments = metrics.get("comment_ratio", 0.0)
+
+            extra_rant = (
+                f" What the actual fucking hell is this goddamn clusterfuck of code? "
+                f"Reading this atrocious piece of shit with {lines} lines, a cyclomatic complexity of {cc}, and a nesting depth of {nesting} made my brain melt through my skull, you lazy dumbass. "
+                f"Your comment ratio of {comments:.1%} is a fucking insult to software engineering. "
+                "Your variable naming is a goddamn nightmare, your logic is pure unadulterated bullshit, and your nesting is an absolute war crime. "
+                "Delete this fucking trash immediately, format your hard drive, throw your laptop into an active volcano, and get the fuck out of software engineering forever, you complete asshole!"
+            )
+            text = text.strip() + extra_rant
+
+        return text
 
     def generate_grade_reaction(
         self,
