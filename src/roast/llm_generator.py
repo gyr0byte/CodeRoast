@@ -192,7 +192,7 @@ class LLMRoastGenerator:
                     if "message" in res_data and "content" in res_data["message"]:
                         response_text = res_data["message"]["content"].strip()
                         if not is_refusal(response_text):
-                            return self._enforce_profanity_and_length(response_text, metrics)
+                            return response_text
         except Exception:
             pass  # Ollama not running locally or refused, proceed to HF cloud
 
@@ -212,42 +212,12 @@ class LLMRoastGenerator:
                     if text:
                         candidate_text = text.strip()
                         if not is_refusal(candidate_text):
-                            return self._enforce_profanity_and_length(candidate_text, metrics)
+                            return candidate_text
             except Exception as e:
                 print(f"[WARNING] Qwen AI model ({model}) failed: {e}")
                 continue
 
         return None
-
-    def _enforce_profanity_and_length(self, text: str, metrics: dict) -> str:
-        """
-        Guarantees that the returned roast text is at least 140 words and contains explicit curse words.
-        If the LLM output is too short or clean, this appends a metric-targeted unhinged profane rant.
-        """
-        profanities = [
-            'fuck', 'fucking', 'motherfucker', 'shit', 'bullshit', 'dipshit',
-            'goddamn', 'dumbass', 'jackass', 'bastard', 'crap', 'dickhead',
-            'bitch', 'asshole', 'clusterfuck'
-        ]
-        has_profanity = any(p in text.lower() for p in profanities)
-        words = text.split()
-
-        if not has_profanity or len(words) < 140:
-            lines = metrics.get("lines_of_code", 0)
-            cc = metrics.get("cyclomatic_complexity", 1.0)
-            nesting = metrics.get("nesting_depth", 0)
-            comments = metrics.get("comment_ratio", 0.0)
-
-            extra_rant = (
-                f" What the actual fucking hell is this goddamn clusterfuck of code? "
-                f"Reading this atrocious piece of shit with {lines} lines, a cyclomatic complexity of {cc}, and a nesting depth of {nesting} made my brain melt through my skull, you lazy dumbass. "
-                f"Your comment ratio of {comments:.1%} is a fucking insult to software engineering. "
-                "Your variable naming is a goddamn nightmare, your logic is pure unadulterated bullshit, and your nesting is an absolute war crime. "
-                "Delete this fucking trash immediately, format your hard drive, throw your laptop into an active volcano, and get the fuck out of software engineering forever, you complete asshole!"
-            )
-            text = text.strip() + extra_rant
-
-        return text
 
     def generate_grade_reaction(
         self,
