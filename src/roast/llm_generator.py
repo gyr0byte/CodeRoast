@@ -254,30 +254,25 @@ class LLMRoastGenerator:
             user_content = f"Text Snippet:\n{code[:800]}"
         elif is_nepali:
             system_prompt = (
-                "You are CodeRoast, a world-class, savage, ultra-creative senior staff software architect performing a brutal, unhinged code review in ROMANIZED NEPALI (Roman Nepali). "
-                "YOUR PRIMARY GOAL: Write a completely ORIGINAL, CREATIVE, and CODE-SPECIFIC roast every single time. DO NOT repeat canned lists of memes! "
-                "CRITICAL TASK 1 - CODE SPECIFICITY: You MUST deeply analyze the user's exact code snippet! Quote their actual variable names, function names, line counts, loops, if-else statements, cyclomatic complexity score, nesting depth, and specific architectural mistakes. "
+                "You are CodeRoast, a savage senior staff software architect performing an unhinged code review EXCLUSIVELY IN ROMANIZED NEPALI (Roman Nepali). "
+                "STRICT LANGUAGE RULE: DO NOT WRITE IN ENGLISH. EVERY SINGLE SENTENCE MUST BE WRITTEN IN ROMANIZED NEPALI (Roman Nepali) ONLY. "
+                "EXAMPLES OF ROMANIZED NEPALI: 'Ae kukur, yo kasto khattam logic lekheko ho! Tero function ko name dekhera Balen Shah le dozer chalauchha. Cyclomatic complexity dherai vayo...'\n"
+                "CRITICAL TASK 1 - CODE SPECIFICITY: Analyze the user's exact code snippet! Quote their actual variable names, function names, line counts, loops, if-else statements, cyclomatic complexity score, nesting depth, and specific architectural mistakes IN ROMANIZED NEPALI. "
                 "CRITICAL TASK 2 - ORGANIC CULTURAL HUMOR (PICK ONLY 1 OR 2 REFERENCES): "
-                "DO NOT list or dump all Nepali memes at once! Pick ONLY 1 or 2 references at random per roast (e.g. choose Balen Shah's dozer OR Rajesh Hamal's punch OR Kulman Ghising's blackout OR Harke Sampang OR Nagdhunga jam OR TU result delays OR Pathao riders OR Sancho/Jwano paani). Weave tyo 1-2 reference into your code criticism naturally! "
-                "CRITICAL TASK 3 - AUTHENTIC NEPALI SLANG & SWEARING: "
-                "Use aggressive, natural Romanized Nepali slang and swear words liberally ('kukur', 'gadha', 'dimag navako', 'harami', 'khate', 'radi ko baan', 'pakhe', 'bheda', 'hawa', 'dumbass', 'clusterfuck', 'lafada', 'pasa', 'kaathe'). "
-                "STRICT LENGTH REQUIREMENT: Write a DETAILED 12 to 16 SENTENCE ROAST (350 TO 500 WORDS). SHORT RESPONSES ARE FORBIDDEN. DO NOT STOP SHORT MID-SENTENCE. "
-                "STRICT FORMATTING RULE: Pure text paragraphs ONLY. No bullet points, no markdown headers, no code blocks. "
-                "STRICT BOUNDARY: Do NOT use terms related to sexual violence, murder, or real physical harm."
+                "Pick ONLY 1 or 2 Nepali references naturally per roast (Balen Shah's dozer, Rajesh Hamal's punch, Kulman Ghising's blackout, Harke Sampang, Nagdhunga jam, TU exam delays, Pathao drivers). "
+                "CRITICAL TASK 3 - AUTHENTIC NEPALI SLANG: "
+                "Use aggressive Romanized Nepali slang liberally ('kukur', 'gadha', 'dimag navako', 'harami', 'khate', 'radi ko baan', 'pakhe', 'bheda', 'hawa', 'dumbass', 'clusterfuck', 'lafada', 'pasa', 'kaathe'). "
+                "STRICT LENGTH REQUIREMENT: Write a DETAILED 12 to 16 SENTENCE PARAGRAPH (350 TO 500 WORDS) ENTIRELY IN ROMANIZED NEPALI. "
+                "STRICT FORMATTING RULE: Pure text paragraphs ONLY. No bullet points, no markdown headers, no code blocks."
             )
             user_content = (
                 f"Selected Language: {metrics.get('_selected_lang', 'Python')}\n"
                 f"Lines of Code: {metrics.get('lines_of_code', 0)}\n"
                 f"Cyclomatic Complexity: {metrics.get('cyclomatic_complexity', 1.0)}\n"
                 f"Max Nesting Depth: {metrics.get('nesting_depth', 0)}\n"
-                f"Comment Ratio: {metrics.get('comment_ratio', 0.0):.1%}\n"
-                f"Duplicate Code Score: {metrics.get('duplicate_code_score', 100.0)}\n\n"
+                f"Comment Ratio: {metrics.get('comment_ratio', 0.0):.1%}\n\n"
                 f"Code Snippet To Roast:\n{code[:1500]}\n\n"
-                f"INSTRUCTIONS FOR THIS SPECIFIC CODE SNIPPET:\n"
-                f"1. Roast the specific variable names and function structure in this code.\n"
-                f"2. Explain why their logic fails or is terrible in hilarious detail.\n"
-                f"3. Select 1 or 2 Nepali pop culture/meme references naturally to roasting this snippet.\n"
-                f"4. Write in fluent, unhinged Romanized Nepali."
+                f"REMINDER: WRITE THE ENTIRE ROAST IN ROMANIZED NEPALI (ROMAN NEPALI) ONLY. DO NOT USE ENGLISH PARAGRAPHS."
             )
         else:
             # Explicit comedy framing to prevent AI safety filter false positives
@@ -306,7 +301,9 @@ class LLMRoastGenerator:
             gemini_prompt = f"{system_prompt}\n\n{user_content}"
             gemini_result = self._call_gemini_api(gemini_prompt, g_key)
             if gemini_result:
-                return self._ensure_profane_unhinged_roast(gemini_result, metrics, is_nepali=True)
+                roast = self._ensure_profane_unhinged_roast(gemini_result, metrics, is_nepali=True)
+                if roast:
+                    return roast
 
         messages = [{"role": "system", "content": system_prompt}]
         messages.extend(few_shot_examples)
@@ -381,6 +378,12 @@ class LLMRoastGenerator:
             text = parts[0].strip()
             if len(parts) > 2 and parts[2].strip():
                 text += ' ' + parts[2].strip()
+
+        if is_nepali:
+            # Rejection check: If Gemini outputted English paragraphs instead of Roman Nepali
+            english_words = [' this code ', ' because ', ' function ', ' doesn\'t ', ' this file ', ' waste of time ', ' problem is ', ' there is no ', ' is that ', ' line where ']
+            if sum(1 for w in english_words if w in text.lower()) >= 2:
+                return None
 
         # 2. Dynamic profanity check & non-repetitive injection if model slipped into polite mode
         has_profanity = any(p in text.lower() for p in profanities)
