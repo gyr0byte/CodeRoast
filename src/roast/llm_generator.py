@@ -383,13 +383,38 @@ class LLMRoastGenerator:
                     "Ae kukur, yo kasto khattam piece of trash code lekheko ho!",
                     "Holy motherfucking shit, kasto radi ko baan ra harami logic lekheko yo!",
                     "Kasto dimag navako gadha developer ho yaar, code dekhera aakha dukhyo!",
-                    "Arey khate dumbass, yo kasto pakhe function ho?"
+                    "Arey khate dumbass, yo kasto pakhe function ho?",
+                    "Oi bheda, tero yo atrocious snippet dekhera Balen Shah le dozer bolayera desk bhatkaidinchha!",
+                    "What the ungodly fuck is this code monstrosity, pasa? Mero dimag nai chakkar aayo!",
+                    "Jesus fucking Christ! Yo snippet ho ki digital biological weapon ho, you brainless gadha?",
+                    "Ae harami, tero code execution TU ko result jastai slow chha, 4 barsa pachi matra output dinchha!",
+                    "Hait! Yo logic dekhera Lagankhel-Ratnapul local bus ko jam ra Nagdhunga chaos ko yaad aayo!",
+                    "Arey dumbass khate, yo code snippet ho ki visual torture session?",
+                    "Ae kaathe pakhe, tero variable naming dekhera NTC ko slow 3G network pani laaj manchha!",
+                    "Holy shit! KP Oli ko gaff ra pani-jahaj ko dream bhanda thulo feku logic lekhechhas, you idiot!",
+                    "Ae radi ko tokeri, yo logic run garda CPU fan speed 100% pugera laptop ma Selroti pakauna milne vayo!",
+                    "Arey pasa, yo code padhda padhdai mero battery percent 100% bata 5% ma jhyap bhayo!",
+                    "What an absolute abominable clusterfuck! Tero code dekhera Kulman Ghising le blackout suru gardinchha!",
+                    "Ae bheda, yo snippet ma logic bhanda dherai unwanted spaces ra bullshit error handling matra chha!",
+                    "Jesus Christ, tero cyclomatic complexity dekhera Fewa Lake ko paani pani tatauchha out of sheer anger!"
                 ]
                 closers = [
                     " Delete gar yo trash immediately ra bheda charna jaa Pokhara tira, you lazy bastard!",
                     " Format tero hard drive ra laptop pokhari ma fyal, you dimag navako gadha!",
                     " VS Code close gar right now ra computer science chhodeera goat herding suru gar, you harami!",
-                    " Stop coding forever, you absolute radi ko tokeri!"
+                    " Stop coding forever, you absolute radi ko tokeri!",
+                    " Nuke yo repository right now before RONB ma 'worst developer arrested' breaking news aauchha!",
+                    " Delete your GitHub account immediately, throw your laptop in Bagmati river, ra Nagarkot ma tour guide ko kaam khoj!",
+                    " Clean up your architecture right fucking now before senior dev le office bata seedhai nikalera bhatkaidinchha!",
+                    " Wipe your SSD with a neodymium magnet right now and never touch a keyboard again, you dumbass khate!",
+                    " Format drive D:\\, throw your laptop into Karnali river, and go herd Yaks in Manang, you hopeless piece of shit!",
+                    " Surrender your engineering degree to Kathmandu Metropolitan City and apologize to every RAM stick on your PC!",
+                    " Close VS Code forever, burn your IT certificate, ra Pokhara ko Fewa Lake ma jump hande, you brainless gadha!",
+                    " Format tero PC immediately ra tero computer teacher ko certificate firta gar, you useless pakhe!",
+                    " Delete this crime against programming right now before your laptop explodes in flame!",
+                    " Sancho ra Jwano ko paani 10 liter piye pani yo code le dieko headache thik hudaina, wipe this repo!",
+                    " Direct trash container ma fyal yo repository and pretend you never touched a computer in your life!",
+                    " Nuke this function, rewrite from scratch, and go herd goats in Mustang, you complete clusterfuck!"
                 ]
             else:
                 openers = [
