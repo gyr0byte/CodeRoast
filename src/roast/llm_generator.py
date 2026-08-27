@@ -85,37 +85,40 @@ class LLMRoastGenerator:
         return None
 
     def _call_gemini_api(self, prompt: str, gemini_key: str) -> Optional[str]:
-        """Calls Google Gemini 1.5 Flash REST API (100% Free Tier)."""
-        try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
-            payload = {
-                "contents": [
-                    {
-                        "parts": [{"text": prompt}]
+        """Calls Google Gemini Flash REST API (100% Free Tier)."""
+        models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+        for m in models:
+            try:
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={gemini_key}"
+                payload = {
+                    "contents": [
+                        {
+                            "parts": [{"text": prompt}]
+                        }
+                    ],
+                    "generationConfig": {
+                        "temperature": 0.95,
+                        "maxOutputTokens": 800
                     }
-                ],
-                "generationConfig": {
-                    "temperature": 0.95,
-                    "maxOutputTokens": 800
                 }
-            }
-            req = urllib.request.Request(
-                url,
-                data=json.dumps(payload).encode("utf-8"),
-                headers={"Content-Type": "application/json"}
-            )
-            with urllib.request.urlopen(req, timeout=12) as resp:
-                if resp.status == 200:
-                    res_data = json.loads(resp.read().decode("utf-8"))
-                    candidates = res_data.get("candidates", [])
-                    if candidates:
-                        parts = candidates[0].get("content", {}).get("parts", [])
-                        if parts and "text" in parts[0]:
-                            text = parts[0]["text"].strip()
-                            if not is_refusal(text):
-                                return text
-        except Exception as e:
-            print(f"[WARNING] Gemini API call failed: {e}")
+                req = urllib.request.Request(
+                    url,
+                    data=json.dumps(payload).encode("utf-8"),
+                    headers={"Content-Type": "application/json"}
+                )
+                with urllib.request.urlopen(req, timeout=12) as resp:
+                    if resp.status == 200:
+                        res_data = json.loads(resp.read().decode("utf-8"))
+                        candidates = res_data.get("candidates", [])
+                        if candidates:
+                            parts = candidates[0].get("content", {}).get("parts", [])
+                            if parts and "text" in parts[0]:
+                                text = parts[0]["text"].strip()
+                                if not is_refusal(text):
+                                    return text
+            except Exception as e:
+                continue
+        print("[WARNING] Gemini API call failed across all model variants.")
         return None
 
     def generate_roast(
