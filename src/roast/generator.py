@@ -10,6 +10,7 @@ from src.roast.templates import (
     ROAST_TEMPLATES,
     SEVERITY_MODIFIERS,
     GRADE_REACTIONS,
+    NEPALI_ROAST_TEMPLATES,
 )
 
 
@@ -84,7 +85,6 @@ class RoastGenerator:
 
         # Static Nepali Fallback Template Matrix
         if is_nepali:
-            from src.roast.templates import NEPALI_ROAST_TEMPLATES
             nepali_list = NEPALI_ROAST_TEMPLATES.get(severity, NEPALI_ROAST_TEMPLATES[2])
             return random.choice(nepali_list)
 

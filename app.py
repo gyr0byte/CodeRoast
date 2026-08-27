@@ -19,12 +19,14 @@ sys.path.insert(0, os.path.dirname(__file__))
 import importlib
 from src.analyzer.code_analyzer import CodeAnalyzer
 from src.scoring.scorer import calculate_scores, get_grade
+import src.roast.templates
 import src.roast.generator
 import src.roast.llm_generator
+importlib.reload(src.roast.templates)
 importlib.reload(src.roast.generator)
 importlib.reload(src.roast.llm_generator)
 from src.roast.generator import RoastGenerator
-from src.roast.templates import GRADE_REACTIONS
+from src.roast.templates import GRADE_REACTIONS, NEPALI_ROAST_TEMPLATES
 
 # ─── Page Config ─────────────────────────────────────────────────────────────
 
