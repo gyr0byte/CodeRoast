@@ -87,20 +87,18 @@ class LLMRoastGenerator:
         return None
 
     def _call_gemini_api(self, prompt: str, gemini_key: str) -> Optional[str]:
-        """Calls Google Gemini Flash REST API (100% Free Tier)."""
-        models = ["gemini-2.5-flash", "gemini-3.5-flash", "gemini-3.6-flash"]
-        for m in models:
+        """Calls Google Gemini Flash REST API with automatic model fallback."""
+        import time as _time
+
+        def _try_model(model_name: str, timeout: int = 45) -> Optional[str]:
+            """Attempt a single Gemini API call. Returns text, '__SKIP__', or None."""
             try:
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={gemini_key}"
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={gemini_key}"
                 payload = {
-                    "contents": [
-                        {
-                            "parts": [{"text": prompt}]
-                        }
-                    ],
+                    "contents": [{"parts": [{"text": prompt}]}],
                     "generationConfig": {
                         "temperature": 0.95,
-                        "maxOutputTokens": 3500
+                        "maxOutputTokens": 1500
                     }
                 }
                 req = urllib.request.Request(
@@ -108,7 +106,7 @@ class LLMRoastGenerator:
                     data=json.dumps(payload).encode("utf-8"),
                     headers={"Content-Type": "application/json"}
                 )
-                with urllib.request.urlopen(req, timeout=25) as resp:
+                with urllib.request.urlopen(req, timeout=timeout) as resp:
                     if resp.status == 200:
                         res_data = json.loads(resp.read().decode("utf-8"))
                         candidates = res_data.get("candidates", [])
@@ -117,24 +115,44 @@ class LLMRoastGenerator:
                             if parts and "text" in parts[0]:
                                 text = parts[0]["text"].strip()
                                 if not is_refusal(text):
-                                    # Ensure sentence ends cleanly
                                     if not text.endswith(('.', '!', '?')):
-                                        # Trim trailing incomplete word/comma if cut off
                                         last_punct = max(text.rfind('.'), text.rfind('!'), text.rfind('?'))
                                         if last_punct > 50:
                                             text = text[:last_punct + 1]
                                         else:
                                             text += " Delete gar yo trash code right now, you dimag navako gadha!"
+                                    # Reject too-short responses (model was lazy)
+                                    if len(text) < 100:
+                                        print(f"[WARNING] Gemini {model_name} gave too-short response ({len(text)} chars), trying next.")
+                                        return None
                                     return text
             except urllib.error.HTTPError as e:
-                if e.code == 429:
-                    print(f"[WARNING] Gemini API Rate Limit Hit (429: Too Many Requests) on model {m}.")
+                if e.code in (429, 503):
+                    print(f"[WARNING] Gemini {e.code} on {model_name} — skipping to next model.")
+                    return "__SKIP__"
                 else:
-                    print(f"[WARNING] Gemini API HTTP Error {e.code} on model {m}: {e.reason}")
-                continue
+                    print(f"[WARNING] Gemini HTTP {e.code} on {model_name}: {e.reason}")
             except Exception as e:
-                print(f"[WARNING] Gemini API Error on model {m}: {e}")
+                print(f"[WARNING] Gemini Error on {model_name}: {e}")
+            return None
+
+        # Model priority: 2.5-flash (best quality, often rate-limited) -> fast lite models as fallbacks
+        # Lite models respond in ~3s vs 40s+ for full 3.5/3.6-flash models.
+        # Each model has its OWN daily quota (20/day free tier).
+        best_result = None
+        for model in ["gemini-2.5-flash", "gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"]:
+            result = _try_model(model, timeout=30)
+            if result == "__SKIP__":
                 continue
+            if result is not None:
+                if best_result is None or len(result) > len(best_result):
+                    best_result = result
+                    if len(best_result) >= 200:
+                        return best_result  # Good enough, return immediately
+
+        if best_result:
+            return best_result
+
         print("[WARNING] Gemini API call failed across all model variants.")
         return None
 
@@ -254,25 +272,28 @@ class LLMRoastGenerator:
             user_content = f"Text Snippet:\n{code[:800]}"
         elif is_nepali:
             system_prompt = (
-                "You are CodeRoast, a savage senior staff software architect performing an unhinged code review EXCLUSIVELY IN ROMANIZED NEPALI (Roman Nepali). "
-                "STRICT LANGUAGE RULE: DO NOT WRITE IN ENGLISH. EVERY SINGLE SENTENCE MUST BE WRITTEN IN ROMANIZED NEPALI (Roman Nepali) ONLY. "
-                "EXAMPLES OF ROMANIZED NEPALI: 'Ae kukur, yo kasto khattam logic lekheko ho! Tero function ko name dekhera Balen Shah le dozer chalauchha. Cyclomatic complexity dherai vayo...'\n"
-                "CRITICAL TASK 1 - CODE SPECIFICITY: Analyze the user's exact code snippet! Quote their actual variable names, function names, line counts, loops, if-else statements, cyclomatic complexity score, nesting depth, and specific architectural mistakes IN ROMANIZED NEPALI. "
-                "CRITICAL TASK 2 - ORGANIC CULTURAL HUMOR (PICK ONLY 1 OR 2 REFERENCES): "
-                "Pick ONLY 1 or 2 Nepali references naturally per roast (Balen Shah's dozer, Rajesh Hamal's punch, Kulman Ghising's blackout, Harke Sampang, Nagdhunga jam, TU exam delays, Pathao drivers). "
-                "CRITICAL TASK 3 - AUTHENTIC NEPALI SLANG: "
-                "Use aggressive Romanized Nepali slang liberally ('kukur', 'gadha', 'dimag navako', 'harami', 'khate', 'radi ko baan', 'pakhe', 'bheda', 'hawa', 'dumbass', 'clusterfuck', 'lafada', 'pasa', 'kaathe'). "
-                "STRICT LENGTH REQUIREMENT: Write a DETAILED 12 to 16 SENTENCE PARAGRAPH (350 TO 500 WORDS) ENTIRELY IN ROMANIZED NEPALI. "
-                "STRICT FORMATTING RULE: Pure text paragraphs ONLY. No bullet points, no markdown headers, no code blocks."
+                "You are CodeRoast, a savage Nepali senior developer roasting code EXCLUSIVELY IN ROMANIZED NEPALI. "
+                "RULES: (1) EVERY sentence in Romanized Nepali ONLY — NO English. "
+                "(2) Quote actual variable names, function names, logic flaws from the code. "
+                "(3) Use 1-2 Nepali references: Balen Shah dozer, Rajesh Hamal punch, Kulman Ghising blackout, Nagdhunga jam, TU exam delays, Pathao/InDrive. "
+                "(4) Use slang: kukur, gadha, dimag navako, harami, khate, radi ko baan, pakhe, bheda, hawa, lafada, pasa, kaathe. "
+                "(5) MINIMUM 8 sentences, pure text paragraphs, no bullets/markdown. "
+                "EXAMPLE OUTPUT STYLE: "
+                "'Ae kukur, tero yo `add` function dekhera mero dimag nai chakkar khayo! Variable name `a` ra `b` rakhne tero dimag ma bhusa matra chha ki kya ho? "
+                "Yo logic ta Nagdhunga ko traffic jam jasto atiyeko chha — sidha aghi badhna sakdaina, hawa developer! "
+                "Comment zero percent chha, documentation ko d pani chhaina, kasto harami coding style ho yo. "
+                "Cyclomatic complexity dekhera ta Rajesh Hamal le pani ek mukka hanera tero monitor fyaaldinthyo! "
+                "Tero nesting depth dekhda lagchha TU ko exam result jastai 4 barsa lagne chha output auna. "
+                "Delete gar yo khattam code ra bheda charna jaa Pokhara tira, you dimag navako gadha!'"
             )
             user_content = (
-                f"Selected Language: {metrics.get('_selected_lang', 'Python')}\n"
-                f"Lines of Code: {metrics.get('lines_of_code', 0)}\n"
-                f"Cyclomatic Complexity: {metrics.get('cyclomatic_complexity', 1.0)}\n"
-                f"Max Nesting Depth: {metrics.get('nesting_depth', 0)}\n"
-                f"Comment Ratio: {metrics.get('comment_ratio', 0.0):.1%}\n\n"
-                f"Code Snippet To Roast:\n{code[:1500]}\n\n"
-                f"REMINDER: WRITE THE ENTIRE ROAST IN ROMANIZED NEPALI (ROMAN NEPALI) ONLY. DO NOT USE ENGLISH PARAGRAPHS."
+                f"Lang: {metrics.get('_selected_lang', 'Python')}, "
+                f"Lines: {metrics.get('lines_of_code', 0)}, "
+                f"Complexity: {metrics.get('cyclomatic_complexity', 1.0)}, "
+                f"Nesting: {metrics.get('nesting_depth', 0)}, "
+                f"Comments: {metrics.get('comment_ratio', 0.0):.0%}\n\n"
+                f"Code:\n{code[:800]}\n\n"
+                f"ROAST THIS CODE IN ROMANIZED NEPALI ONLY."
             )
         else:
             # Explicit comedy framing to prevent AI safety filter false positives
