@@ -46,7 +46,8 @@ class RoastGenerator:
         code: str = "",
         use_llm: bool = False,
         language: str = "english",
-        gemini_key: Optional[str] = None
+        gemini_key: Optional[str] = None,
+        **kwargs
     ) -> str:
         """
         Generate a roast based on code metrics and quality assessment.
