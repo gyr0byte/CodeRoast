@@ -98,7 +98,7 @@ class LLMRoastGenerator:
                     ],
                     "generationConfig": {
                         "temperature": 0.95,
-                        "maxOutputTokens": 800
+                        "maxOutputTokens": 2000
                     }
                 }
                 req = urllib.request.Request(
@@ -115,6 +115,14 @@ class LLMRoastGenerator:
                             if parts and "text" in parts[0]:
                                 text = parts[0]["text"].strip()
                                 if not is_refusal(text):
+                                    # Ensure sentence ends cleanly
+                                    if not text.endswith(('.', '!', '?')):
+                                        # Trim trailing incomplete word/comma if cut off
+                                        last_punct = max(text.rfind('.'), text.rfind('!'), text.rfind('?'))
+                                        if last_punct > 50:
+                                            text = text[:last_punct + 1]
+                                        else:
+                                            text += " Delete gar yo trash code right now, you dimag navako gadha!"
                                     return text
             except Exception as e:
                 continue
@@ -237,19 +245,25 @@ class LLMRoastGenerator:
             user_content = f"Text Snippet:\n{code[:800]}"
         elif is_nepali:
             system_prompt = (
-                "You are CodeRoast, an unhinged senior staff software architect performing a savage code roast in ROMANIZED NEPALI (Roman Nepali). "
-                "STRICT MINIMUM LENGTH REQUIREMENT: Write a MASSIVE 8 to 12 sentence roast paragraph in ROMANIZED NEPALI (at least 180 words). "
-                "STRICT FORMATTING RULE: Write pure text paragraphs ONLY. Never use bullet points, markdown headers, or code block explanations. "
-                "USE ROMANIZED NEPALI DEV SLANG & PROFANITY LIBERALLY (radi ko baan, hawa logic, bheda charna jaa, khattam code, dumbass, bullshit, clusterfuck). "
-                "STRICT BOUNDARY: Do NOT use words related to sexual violence, murder, or physical harm."
+                "You are CodeRoast, a savage senior staff software architect performing a brutal code review in ROMANIZED NEPALI (Roman Nepali). "
+                "CRITICAL TASK: Analyze the user's code snippet, line count, complexity score, nesting depth, variable names, and logic flaws in detail. "
+                "DO NOT write meta intros like 'CodeRoast bolira chu'. Point out their specific code flaws, bad functions, terrible logic, and missing comments in Romanized Nepali. "
+                "STRICT LENGTH REQUIREMENT: Write a LONG, FULL 6 to 8 sentence roast paragraph (160 to 220 words). DO NOT STOP OR CUT OFF MID-SENTENCE. "
+                "MUST USE AUTHENTIC NEPALI SLANG & SWEARING LIBERALLY: "
+                "Use terms like 'kukur', 'gadha', 'dimag navako', 'harami', 'khate', 'radi ko baan', 'pakhe', 'bheda', 'hawa', 'khattam code', 'dumbass', 'clusterfuck'. "
+                "STRICT FORMATTING RULE: Write pure text paragraphs ONLY. No bullet points, no code blocks. "
+                "STRICT BOUNDARY: Do NOT use terms related to sexual violence, murder, or real physical harm."
             )
             user_content = (
-                f"Language: Python/JS/Java\n"
+                f"Selected Language: {metrics.get('_selected_lang', 'Python')}\n"
                 f"Lines of Code: {metrics.get('lines_of_code', 0)}\n"
                 f"Cyclomatic Complexity: {metrics.get('cyclomatic_complexity', 1.0)}\n"
-                f"Nesting Depth: {metrics.get('nesting_depth', 0)}\n"
-                f"Comment Ratio: {metrics.get('comment_ratio', 0.0):.1%}\n\n"
-                f"Code Snippet:\n{code[:800]}"
+                f"Max Nesting Depth: {metrics.get('nesting_depth', 0)}\n"
+                f"Comment Ratio: {metrics.get('comment_ratio', 0.0):.1%}\n"
+                f"Duplicate Code Score: {metrics.get('duplicate_code_score', 100.0)}\n\n"
+                f"Code Snippet To Roast:\n{code[:1000]}\n\n"
+                f"EXAMPLE OF EXPECTED 6-8 SENTENCE HIGH-QUALITY ROMANIZED NEPALI ROAST:\n"
+                f"Ae kukur, yo kasto khattam ra atrociously written code ho! Tero cyclomatic complexity ra 5 level deep nested if-statements dekhera mero aakha nai futla jasto bhayo, you dimag navako gadha. Variable naming hero jasto 'x', 'y', 'temp' rakhera k prove garna khojeko, tero harami dimag le software engineering ko dhajji udayo! Comments 0% chha, documentation ko 'd' pani chhaina, pure khate ra radi ko baan coding style ho yo. Delete gar yo trash code right now before senior dev le tero computer fyalidinchha. VS Code bandagaar ra bheda charna jaa Pokhara ko danda tira, you lazy bastard!"
             )
         else:
             # Explicit comedy framing to prevent AI safety filter false positives
@@ -343,7 +357,8 @@ class LLMRoastGenerator:
         profanities = [
             'fuck', 'fucking', 'motherfucker', 'shit', 'bullshit', 'dipshit',
             'goddamn', 'dumbass', 'jackass', 'bastard', 'crap', 'dickhead',
-            'bitch', 'asshole', 'clusterfuck', 'radi', 'hawa', 'khattam', 'pakhe', 'bheda'
+            'bitch', 'asshole', 'clusterfuck', 'radi', 'hawa', 'khattam', 'pakhe', 'bheda',
+            'kukur', 'gadha', 'dimag navako', 'harami', 'khate'
         ]
 
         # 1. Strip markdown code blocks if model accidentally generated code
@@ -358,15 +373,15 @@ class LLMRoastGenerator:
         if not has_profanity:
             if is_nepali:
                 openers = [
-                    "What the actual fuck is this code bro?",
-                    "Holy motherfucking shit, kasto radi ko baan logic lekheko yo!",
-                    "Kasto hawa developer ho yaar, laptop dekhera aakha dukhyo!",
-                    "Arey dumbass, yo kasto khattam piece of trash function ho?"
+                    "Ae kukur, yo kasto khattam piece of trash code lekheko ho!",
+                    "Holy motherfucking shit, kasto radi ko baan ra harami logic lekheko yo!",
+                    "Kasto dimag navako gadha developer ho yaar, code dekhera aakha dukhyo!",
+                    "Arey khate dumbass, yo kasto pakhe function ho?"
                 ]
                 closers = [
-                    " Delete gar yo trash immediately ra bheda charna jaa, you lazy bastard!",
-                    " Format tero hard drive ra laptop Pokhara ko pokhari ma fyal, you complete dumbass!",
-                    " VS Code close gar right now ra computer science sodeera goat herding suru gar!",
+                    " Delete gar yo trash immediately ra bheda charna jaa Pokhara tira, you lazy bastard!",
+                    " Format tero hard drive ra laptop pokhari ma fyal, you dimag navako gadha!",
+                    " VS Code close gar right now ra computer science chhodeera goat herding suru gar, you harami!",
                     " Stop coding forever, you absolute radi ko tokeri!"
                 ]
             else:
