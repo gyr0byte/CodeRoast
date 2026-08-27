@@ -1,116 +1,89 @@
-# Start CodeRoast Locally
+# 🚀 How to Start CodeRoast
 
-Use this guide in **PowerShell** after restarting Windows. It starts Ollama, verifies the local Qwen model, and launches the Streamlit app.
+Follow these simple steps in **PowerShell** to start CodeRoast and all required services (Ollama local AI + Streamlit UI).
 
-## 1. Open the Project
+---
+
+## ⚡ Quick Start (One-Liner in PowerShell)
+
+Open PowerShell and paste this command to start everything in 1 step:
+
+```powershell
+Set-Location D:\CodeRoast; Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned; $env:OLLAMA_MODELS = "D:\CodeRoast\ollama_models"; if (-not (Get-Process -Name ollama -ErrorAction SilentlyContinue)) { Start-Process -FilePath "D:\Ollama\ollama.exe" -ArgumentList "serve" -WindowStyle Hidden }; & .\venv_gpu\Scripts\streamlit.exe run app.py
+```
+
+---
+
+## 📖 Step-by-Step Instructions
+
+### Step 1: Open the Project Directory
 
 ```powershell
 Set-Location D:\CodeRoast
 ```
 
-## 2. Activate the Python Environment
+### Step 2: Activate the Virtual Environment
 
-CodeRoast uses the `venv_gpu` environment:
-
-```powershell
-& .\venv_gpu\Scripts\Activate.ps1
-```
-
-If PowerShell blocks the activation script, allow it for the current terminal session and try again:
+CodeRoast uses the GPU-enabled Python environment `venv_gpu`:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
 & .\venv_gpu\Scripts\Activate.ps1
 ```
 
-## 3. Configure Ollama's Model Directory
+### Step 3: Set Ollama Model Path & Start Ollama
 
-The Qwen model is stored on the D: drive inside this project:
+Configure the local model storage path (D: drive) and start the Ollama server in the background:
 
 ```powershell
 $env:OLLAMA_MODELS = "D:\CodeRoast\ollama_models"
-```
 
-## 4. Start Ollama
-
-Start Ollama only when it is not already running:
-
-```powershell
 if (-not (Get-Process -Name ollama -ErrorAction SilentlyContinue)) {
-    Start-Process -FilePath "D:\Ollama\ollama.exe" `
-        -ArgumentList "serve" -WindowStyle Hidden
+    Start-Process -FilePath "D:\Ollama\ollama.exe" -ArgumentList "serve" -WindowStyle Hidden
 }
 ```
 
-> Do not run a second `ollama serve` if Ollama is already running. A port-in-use error means the existing Ollama process is already using port `11434`.
+### Step 4: Verify Ollama & Qwen Model (Optional)
 
-## 5. Verify Ollama
-
-Check that the Ollama API is responding:
-
-```powershell
-Invoke-RestMethod -Uri "http://localhost:11434/api/tags" -Method Get
-```
-
-List the installed models:
+Check if Ollama is running and has the `qwen2.5-coder:1.5b` model ready:
 
 ```powershell
 & "D:\Ollama\ollama.exe" list
 ```
 
-The output should include:
+*(If missing, pull it once: `& "D:\Ollama\ollama.exe" pull qwen2.5-coder:1.5b`)*
 
-```text
-qwen2.5-coder:1.5b
-```
+### Step 5: Launch the CodeRoast Web App
 
-If the model is missing, download it once:
-
-```powershell
-& "D:\Ollama\ollama.exe" pull qwen2.5-coder:1.5b
-```
-
-The `OLLAMA_MODELS` environment variable from step 3 ensures the model is downloaded to the project directory.
-
-## 6. Test Local Qwen Inference (Optional)
-
-Run a quick request before starting the app:
-
-```powershell
-$body = @{
-    model = "qwen2.5-coder:1.5b"
-    prompt = "Reply with exactly: CodeRoast local Qwen is working."
-    stream = $false
-} | ConvertTo-Json
-
-Invoke-RestMethod -Uri "http://localhost:11434/api/generate" `
-    -Method Post -ContentType "application/json" -Body $body
-```
-
-The response should contain:
-
-```text
-CodeRoast local Qwen is working.
-```
-
-## 7. Start the CodeRoast App
+Run Streamlit to open the CodeRoast user interface:
 
 ```powershell
 & .\venv_gpu\Scripts\streamlit.exe run app.py
 ```
 
-Open the app in your browser:
+Once started, open your web browser at:
+👉 **[http://localhost:8501](http://localhost:8501)**
 
-<http://localhost:8501>
+---
 
-In the app, enable **Dynamic AI Roast** to use the local Qwen model through Ollama. If it is disabled, CodeRoast uses its template-based roast generator instead.
+## 🧠 AI Model Routing Overview
 
-## Stop the App
+| Roast Mode | AI Model Used | Source / Backend |
+|---|---|---|
+| 🇳🇵 **Romanized Nepali** | **Gemini Multi-Model Fallback** (`2.5-flash` → `flash-lite-latest` → `3.5-flash-lite` → `3.1-flash-lite`) | Google Gemini REST API (`GEMINI_API_KEY` in `.env`) |
+| 🇬🇧 **English Roast** | **Qwen 2.5 Coder 1.5B** | Local GPU via Ollama (`http://localhost:11434`) |
+| 🅰️ **Letter Grade & Reaction** | **Qwen 2.5 Coder 1.5B** | Local GPU via Ollama |
 
-In the terminal running Streamlit, press `Ctrl+C`.
+---
 
-To stop Ollama as well:
+## 🛑 How to Stop Everything
+
+### Stop Streamlit App
+Press `Ctrl + C` in the PowerShell window running Streamlit.
+
+### Stop Ollama & Python Processes (Complete Shutdown)
+To completely stop Ollama server and any running background AI tasks:
 
 ```powershell
-Stop-Process -Name ollama
+Stop-Process -Name ollama, python, streamlit -ErrorAction SilentlyContinue
 ```
