@@ -88,7 +88,7 @@ class LLMRoastGenerator:
 
     def _call_gemini_api(self, prompt: str, gemini_key: str) -> Optional[str]:
         """Calls Google Gemini Flash REST API (100% Free Tier)."""
-        models = ["gemini-2.5-flash", "gemini-flash-latest"]
+        models = ["gemini-2.5-flash", "gemini-3.5-flash", "gemini-3.6-flash"]
         for m in models:
             try:
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={gemini_key}"
@@ -108,7 +108,7 @@ class LLMRoastGenerator:
                     data=json.dumps(payload).encode("utf-8"),
                     headers={"Content-Type": "application/json"}
                 )
-                with urllib.request.urlopen(req, timeout=35) as resp:
+                with urllib.request.urlopen(req, timeout=25) as resp:
                     if resp.status == 200:
                         res_data = json.loads(resp.read().decode("utf-8"))
                         candidates = res_data.get("candidates", [])
