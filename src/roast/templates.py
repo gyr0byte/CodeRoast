@@ -295,24 +295,15 @@ GRADE_REACTIONS = {
 # ── Nepali Roasting Templates (Romanized Nepali) ───────────────────────────
 NEPALI_ROAST_TEMPLATES = {
     1: [
-        "Kasto hawa code lekheko bro? Function ko naam dekhera Ratnapul ko conductor pani risaucha.",
-        "Arey yaar, simple ek line ko logic ko lagi yeti dherai natak kina gareko, KP Oli ko gaff jastai, dumbass?",
-        "Code ta chalchha, tara kasto khattam variable naming ho yo! InDrive driver le location nabhete jastai chha.",
-        "Bheda jasto jpt code lekhera mahanta dekhaye jasto garchha, thikka mathi bata jadaen.",
-        "Yo code dekhera tero senior engineer le Balen Shah ko dozer bolayera desk nai bhatkaidinchha!",
+        "Ae bro, kasto hawa code lekheko yo? Function ko naam dekhera Ratnapul ko conductor pani risaucha. Simple ek line ko logic ko lagi yeti dherai natak kina gareko, KP Oli ko gaff jastai, dumbass? Code ta chalchha, tara kasto khattam variable naming ho, InDrive driver le location nabhete jastai memory address harauchha. Yo code dekhera tero senior engineer le Balen Shah ko dozer bolayera desk bhatkaidinchha, dhyan de bro!",
+        "Kasto pakhe developer ho yaar, zero documentation ra nested if-else ko goddamn jungle banayechhas! Bheda jasto jpt code lekhera mahanta dekhaye jasto garchha. Sancho ra Jwano ko paani le pani yo headache thik garna sakdaina. Code clear gar right now before team lead sees this trash!",
     ],
     2: [
-        "What the actual fuck is this code? Kasto radi ko baan logic lekheko, mero dimag chakkar aayo!",
-        "Comment euta pani chhaina, nested loop le garda Nagdhunga ko traffic jam bhanda wosrt vayo! Delete gar yo trash!",
-        "Kasto pakhe developer ho yaar, zero documentation ra nested if-else ko goddamn jungle banayechhas!",
-        "Tero code execution TU ko result jastai slow chha, 4 barsa pachi matra output dinchha. Direct recycle bin ma hal!",
-        "Cyclomatic complexity high chha, logic bullshit chha. CS ko certificate fyalera bheda charna jaa Pokhara ko danda tira!",
+        "What the actual fuck is this code, you dimag navako gadha? Kasto radi ko baan logic lekheko, mero dimag nai chakkar aayo! Comment euta pani chhaina, nested loop le garda Nagdhunga ko traffic jam bhanda worst vayo! Tero code execution TU ko result jastai slow chha, 4 barsa pachi matra output dinchha, direct recycle bin ma hal! Cyclomatic complexity high chha, logic bullshit chha, CS ko certificate fyalera bheda charna jaa Pokhara ko danda tira!",
+        "Holy motherfucking shit, kasto harami ra khattam code structure ho yo! Ratnapul ko local bus ko crowd jasto nested logic thuparechhas, hait kasto lafada ho. Variable naming hero jasto 'x', 'y', 'temp' rakhera k prove garna khojeko? Format tero hard drive immediately ra VS Code bandagaar!",
     ],
     3: [
-        "Holy motherfucking shit! Balen Shah le dozer chalayera bhatkaidine khalko illegal nesting structure banayechhas, you dimag navako gadha!",
-        "Yo nesting depth ra complexity dekhera Rajesh Hamal (Maha-Nayak) le pani ek mukka hanera monitor fyalchha! Format tero PC immediately!",
-        "Kasto ungodly clusterfuck code lekheko bro! Kulman Ghising le pani tero code dekhera load-shedding blackout suru gardinchha!",
-        "Tero code dekhera RONB (Routine of Nepal Banda) ma breaking news aauchha: 'Software industry ma kaddak khate code lekhne developer arrest'!",
-        "Nuke yo repository right fucking now! Hard drive format garera laptop Pokhara ko Fewa Lake ma fyal, you harami radi ko baan!",
+        "Holy motherfucking shit! Balen Shah le dozer chalayera bhatkaidine khalko illegal nesting structure banayechhas, you dimag navako gadha! Yo nesting depth ra complexity dekhera Rajesh Hamal (Maha-Nayak) le pani ek mukka hanera monitor fyalchha! Kulman Ghising le pani tero code dekhera load-shedding blackout suru gardinchha out of sheer disgust. Tero code dekhera RONB (Routine of Nepal Banda) ma breaking news aauchha: 'Software industry ma kaddak khate code lekhne developer arrest'! Nuke yo repository right fucking now, hard drive format garera laptop Pokhara ko Fewa Lake ma fyal, you harami radi ko baan!",
+        "Ae kukur, yo kasto atrocious clusterfuck ho! KP Oli ko gaff ra pani-jahaj ko dream bhanda thulo feku logic lekhechhas. Function execution 10 barsa pachi TU result aaye jastai matra complete hunchha. InDrive driver le location nabhete jastai tero pointer logic lost chha. Stop coding forever, close VS Code right now, ra computer science chhodeera goat herding suru gar, you absolute radi ko tokeri!",
     ],
 }

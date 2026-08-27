@@ -106,7 +106,7 @@ class LLMRoastGenerator:
                     data=json.dumps(payload).encode("utf-8"),
                     headers={"Content-Type": "application/json"}
                 )
-                with urllib.request.urlopen(req, timeout=12) as resp:
+                with urllib.request.urlopen(req, timeout=25) as resp:
                     if resp.status == 200:
                         res_data = json.loads(resp.read().decode("utf-8"))
                         candidates = res_data.get("candidates", [])
@@ -245,14 +245,14 @@ class LLMRoastGenerator:
             user_content = f"Text Snippet:\n{code[:800]}"
         elif is_nepali:
             system_prompt = (
-                "You are CodeRoast, a savage senior staff software architect performing a brutal code review in ROMANIZED NEPALI (Roman Nepali). "
+                "You are CodeRoast, a savage, unhinged senior staff software architect performing a brutal code review in ROMANIZED NEPALI (Roman Nepali). "
                 "CRITICAL TASK: Analyze the user's code snippet, line count, complexity score, nesting depth, variable names, and logic flaws in detail. "
-                "DO NOT write meta intros like 'CodeRoast bolira chu'. Point out their specific code flaws, bad functions, terrible logic, and missing comments in Romanized Nepali. "
-                "STRICT LENGTH REQUIREMENT: Write a LONG, FULL 6 to 8 sentence roast paragraph (160 to 220 words). DO NOT STOP OR CUT OFF MID-SENTENCE. "
-                "MUST USE NEPALI PUBLIC FIGURES & POP CULTURE MEMES: "
-                "Incorporate hilarious references to Balen Shah (dozer bhatkaidine), Rajesh Hamal (Maha-Nayak ek mukka), KP Oli (pani jahaj / gaff), Kulman Ghising (load-shedding blackout), RONB (Routine of Nepal Banda breaking news), Nagdhunga traffic jam, TU exam result delay, and Pathao/InDrive drivers! "
+                "DO NOT write meta intros like 'CodeRoast bolira chu'. Point out their specific code flaws, bad functions, terrible logic, missing comments, and atrocious architecture in Romanized Nepali. "
+                "STRICT MINIMUM LENGTH REQUIREMENT: Write a MASSIVE 10 to 15 SENTENCE ROAST PARAGRAPH (AT LEAST 300 TO 400 WORDS). SHORT RESPONSES ARE STRICTLY FORBIDDEN. DO NOT STOP SHORT OR CUT OFF MID-SENTENCE. "
+                "MUST USE NEPALI PUBLIC FIGURES & POP CULTURE MEMES LIBERALLY: "
+                "Incorporate hilarious, epic references to Balen Shah (dozer bhatkaidine), Rajesh Hamal (Maha-Nayak ek mukka), KP Oli (pani jahaj / gaff / ukalo-oralo), Kulman Ghising (load-shedding blackout), RONB (Routine of Nepal Banda breaking news), Nagdhunga traffic jam, TU exam result delay (4 barsa lagne), Pathao/InDrive drivers, and Sancho/Jwano paani! "
                 "MUST USE AUTHENTIC NEPALI SLANG & SWEARING LIBERALLY: "
-                "Use terms like 'kukur', 'gadha', 'dimag navako', 'harami', 'khate', 'radi ko baan', 'pakhe', 'bheda', 'hawa', 'khattam code', 'dumbass', 'clusterfuck', 'baal xaina', 'hait', 'lafada'. "
+                "Use terms like 'kukur', 'gadha', 'dimag navako', 'harami', 'khate', 'radi ko baan', 'pakhe', 'bheda', 'hawa', 'khattam code', 'dumbass', 'clusterfuck', 'baal xaina', 'hait', 'lafada', 'chappar'. "
                 "STRICT FORMATTING RULE: Write pure text paragraphs ONLY. No bullet points, no code blocks. "
                 "STRICT BOUNDARY: Do NOT use terms related to sexual violence, murder, or real physical harm."
             )
@@ -263,9 +263,9 @@ class LLMRoastGenerator:
                 f"Max Nesting Depth: {metrics.get('nesting_depth', 0)}\n"
                 f"Comment Ratio: {metrics.get('comment_ratio', 0.0):.1%}\n"
                 f"Duplicate Code Score: {metrics.get('duplicate_code_score', 100.0)}\n\n"
-                f"Code Snippet To Roast:\n{code[:1000]}\n\n"
-                f"EXAMPLE OF EXPECTED 6-8 SENTENCE HIGH-QUALITY NEPALI MEME ROAST:\n"
-                f"Ae kukur, yo kasto khattam ra atrociously written code ho, Balen Shah le dozer chalayera bhatkaidine khalko illegal nesting structure banayechhas! Tero cyclomatic complexity ra 5 level deep nested if-statements dekhera Rajesh Hamal le pani ek mukka hanera monitor fyalchha, you dimag navako gadha. Variable naming hero jasto 'x', 'y', 'temp' rakhera k prove garna khojeko, KP Oli ko gaff ra pani-jahaj ko dream bhanda thulo feku logic ho yo! Nagdhunga ko traffic jam jasto infinite loop le garda Kulman Ghising le pani tero code dekhera load-shedding suru garcha. Comments 0% chha, documentation ko 'd' pani chhaina, pure khate ra radi ko baan coding style ho yo. Delete gar yo trash code right now, RONB ma breaking news auna bhanda agadi, ra bheda charna jaa Pokhara ko danda tira, you lazy bastard!"
+                f"Code Snippet To Roast:\n{code[:1200]}\n\n"
+                f"EXAMPLE OF EXPECTED MASSIVE 10-15 SENTENCE (300+ WORDS) ROMANIZED NEPALI MEME ROAST:\n"
+                f"Ae kukur, yo kasto khattam ra atrociously written code ho, Balen Shah le dozer chalayera bhatkaidine khalko illegal nesting structure banayechhas! Tero cyclomatic complexity ra 5 level deep nested if-statements dekhera Rajesh Hamal (Maha-Nayak) le pani ek mukka hanera monitor fyalchha, you dimag navako gadha. Variable naming hero jasto 'x', 'y', 'temp' rakhera k prove garna khojeko, KP Oli ko gaff ra pani-jahaj ko dream bhanda thulo feku logic ho yo! Nagdhunga ko traffic jam jasto infinite loop le garda Kulman Ghising le pani tero code dekhera load-shedding blackout suru gardinchha. Tero code execution TU ko result jastai slow chha, 4 barsa pachi matra output dinchha, you lazy bastard. InDrive driver le location nabhete jastai tero pointer logic le pani memory address bhetna sakdaina. Comments 0% chha, documentation ko 'd' pani chhaina, pure khate ra radi ko baan coding style ho yo. Yo headache thik garna Sancho ra Jwano ko paani le pani sakdaina, tero laptop kasko haat ma pareko ho. Ratnapul ko local bus ko crowd jasto nested logic thuparechhas, hait kasto lafada ho! Delete gar yo trash code right now, RONB ma breaking news 'software industry ma kaddak khate code lekhne developer arrest' auna bhanda agadi. Format tero hard drive immediately, VS Code close gar, ra bheda charna jaa Pokhara ko danda tira, you absolute radi ko tokeri!"
             )
         else:
             # Explicit comedy framing to prevent AI safety filter false positives
