@@ -295,15 +295,18 @@ class LLMRoastGenerator:
             )
 
         # ── Route Selection ─────────────────────────────────────────────────
-        # Romanized Nepali -> Exclusively Gemini Flash API (Fallback to Qwen/Templates if API key absent)
+        # Romanized Nepali -> Exclusively Gemini Flash API (Fallback to NEPALI_ROAST_TEMPLATES if API fails/absent)
         # English -> Exclusively Qwen AI (Ollama / HuggingFace)
-        if is_nepali and g_key:
-            gemini_prompt = f"{system_prompt}\n\n{user_content}"
-            gemini_result = self._call_gemini_api(gemini_prompt, g_key)
-            if gemini_result:
-                roast = self._ensure_profane_unhinged_roast(gemini_result, metrics, is_nepali=True)
-                if roast:
-                    return roast
+        if is_nepali:
+            if g_key:
+                gemini_prompt = f"{system_prompt}\n\n{user_content}"
+                gemini_result = self._call_gemini_api(gemini_prompt, g_key)
+                if gemini_result:
+                    roast = self._ensure_profane_unhinged_roast(gemini_result, metrics, is_nepali=True)
+                    if roast:
+                        return roast
+            # Return None to trigger curated NEPALI_ROAST_TEMPLATES fallback instead of Qwen pseudo-Nepali gibberish
+            return None
 
         messages = [{"role": "system", "content": system_prompt}]
         messages.extend(few_shot_examples)
