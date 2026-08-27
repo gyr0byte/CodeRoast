@@ -39,12 +39,13 @@ def is_refusal(text: str) -> bool:
 
 class LLMRoastGenerator:
     """
-    Interfaces with Hugging Face Serverless API and local Ollama
-    to generate dynamic, unhinged AI code roasts.
+    Interfaces with Google Gemini Flash API, Hugging Face Serverless API,
+    and local Ollama to generate dynamic, unhinged AI code roasts in English or Romanized Nepali.
     """
 
-    def __init__(self, api_token: Optional[str] = None):
+    def __init__(self, api_token: Optional[str] = None, gemini_api_key: Optional[str] = None):
         self.api_token = api_token
+        self.gemini_api_key = gemini_api_key
         self._is_loaded = True
 
     def _get_hf_token(self) -> Optional[str]:
@@ -57,20 +58,88 @@ class LLMRoastGenerator:
             pass
         return os.environ.get("HF_TOKEN")
 
+    def _get_gemini_key(self, custom_key: Optional[str] = None) -> Optional[str]:
+        if custom_key:
+            return custom_key
+        if self.gemini_api_key:
+            return self.gemini_api_key
+        try:
+            if "GEMINI_API_KEY" in st.secrets:
+                return st.secrets["GEMINI_API_KEY"]
+        except Exception:
+            pass
+        return os.environ.get("GEMINI_API_KEY")
+
+    def _call_gemini_api(self, prompt: str, gemini_key: str) -> Optional[str]:
+        """Calls Google Gemini 1.5 Flash REST API (100% Free Tier)."""
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
+            payload = {
+                "contents": [
+                    {
+                        "parts": [{"text": prompt}]
+                    }
+                ],
+                "generationConfig": {
+                    "temperature": 0.95,
+                    "maxOutputTokens": 800
+                }
+            }
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"}
+            )
+            with urllib.request.urlopen(req, timeout=12) as resp:
+                if resp.status == 200:
+                    res_data = json.loads(resp.read().decode("utf-8"))
+                    candidates = res_data.get("candidates", [])
+                    if candidates:
+                        parts = candidates[0].get("content", {}).get("parts", [])
+                        if parts and "text" in parts[0]:
+                            text = parts[0]["text"].strip()
+                            if not is_refusal(text):
+                                return text
+        except Exception as e:
+            print(f"[WARNING] Gemini API call failed: {e}")
+        return None
+
     def generate_roast(
         self,
         code: str,
         metrics: dict,
         quality_level: int,
-        severity: int = 2
+        severity: int = 2,
+        language: str = "english",
+        gemini_key: Optional[str] = None
     ) -> Optional[str]:
         """
-        Generates a dynamic roast text response using Qwen AI.
+        Generates a dynamic roast text response using Gemini Flash or Qwen AI.
+        Supports language='english' or language='nepali' / 'roman_nepali'.
         """
+        is_nepali = language.lower() in ["nepali", "roman_nepali", "roman nepali"]
+        g_key = self._get_gemini_key(gemini_key)
         token = self._get_hf_token()
 
         # 1. Direct Severity Mapping for System Instructions
-        if severity == 1:
+        if is_nepali:
+            tone_instructions = (
+                "Role: Unhinged senior developer writing in ROMANIZED NEPALI (Roman Nepali). "
+                "CRITICAL REQUIREMENT: Write your ENTIRE roast in fluent Romanized Nepali (e.g. 'Kasto hawa code lekheko bro, cyclomatic complexity dekhera mero dimag chakkar aayo! Delete gar yo trash immediately!'). "
+                "Use hilarious Nepali tech slang and profanity (radi ko baan, hawa logic, bheda charna jaa, khattam code, dumbass, bullshit, clusterfuck, radi ko tokeri). "
+                "STRICT BOUNDARY: Do NOT use words related to sexual violence, murder, or physical harm."
+            )
+            few_shot_examples = [
+                {
+                    "role": "user",
+                    "content": "Language: Python\nLines of Code: 15\nCyclomatic Complexity: 1\n\nCode Snippet:\ndef add(a, b):\n    return a + b"
+                },
+                {
+                    "role": "assistant",
+                    "content": "What the actual fuck is this code bro? Arey yaar, euta line ko simple addition function ko lagi yeti dherai natak kina gareko, you lazy dumbass? Function ko naam 'add' ra parameters 'a' ra 'b' dekhera mero dimag nai chakkar aayo. Cyclomatic complexity 1 bhaye pani tero code ma zero comment chha, jassle garda saano bacha le lekheko jasto dekhinchha. Yo piece of shit code delete gar, laptop bag ma halera bheda charna jaa, and never touch Python again, you complete asshole!"
+                }
+            ]
+        elif severity == 1:
             tone_instructions = (
                 "Role: Unhinged, sarcastic senior developer with zero filter. "
                 "CRITICAL REQUIREMENT: You MUST include profanity and curse words (fuck, fucking, shit, bullshit, goddamn, dumbass, bastard, crap, dickhead, asshole) throughout your entire roast. "
@@ -137,18 +206,34 @@ class LLMRoastGenerator:
                 "You are CodeRoast, an unhinged, profane AI code reviewer with ZERO FILTER. "
                 f"The user selected '{selected}' in the UI dropdown but pasted '{detected}' code! "
                 f"Generate a long, brutal, highly detailed profanity-filled roast (8-10 sentences) mocking them for confusing {selected} with {detected}. "
-                "Dissect their specific code syntax and mistakes. YOU MUST USE EXPLICIT CURSE WORDS (fuck, fucking, motherfucker, shit, bullshit, dipshit, goddamn, dumbass, jackass, bastard, crap, dickhead, bitch, asshole, clusterfuck) LIBERALLY THROUGHOUT THE ENTIRE ROAST. "
-                "STRICT BOUNDARY: Do NOT use words related to sexual violence, extreme physical harm, murder, or hate speech. Stick strictly to software engineering comedy and general swearing."
+                "Dissect their specific code syntax and mistakes. YOU MUST USE EXPLICIT CURSE WORDS LIBERALLY THROUGHOUT THE ENTIRE ROAST. "
+                "STRICT BOUNDARY: Do NOT use words related to sexual violence, extreme physical harm, murder, or hate speech."
             )
             user_content = f"Selected Language: {selected}\nDetected Language: {detected}\n\nCode Snippet:\n{code[:800]}"
         elif metrics.get("_is_plain_text", False):
             system_prompt = (
                 "You are CodeRoast, a savage AI code reviewer with ZERO FILTER. The user pasted plain English text instead of actual code! "
                 "Create a long, vicious, highly detailed profanity-laden rant (8-10 sentences) cursing at them for confusing code with a diary or blog post. "
-                "YOU MUST USE EXPLICIT CURSE WORDS (fuck, fucking, motherfucker, shit, bullshit, dipshit, goddamn, dumbass, jackass, bastard, crap, dickhead, bitch, asshole, clusterfuck) LIBERALLY THROUGHOUT THE ENTIRE RANT. "
-                "STRICT BOUNDARY: Do NOT use words related to sexual violence, extreme physical harm, murder, or hate speech. Stick strictly to software engineering comedy and general swearing."
+                "YOU MUST USE EXPLICIT CURSE WORDS LIBERALLY THROUGHOUT THE ENTIRE RANT. "
+                "STRICT BOUNDARY: Do NOT use words related to sexual violence, extreme physical harm, murder, or hate speech."
             )
             user_content = f"Text Snippet:\n{code[:800]}"
+        elif is_nepali:
+            system_prompt = (
+                "You are CodeRoast, an unhinged senior staff software architect performing a savage code roast in ROMANIZED NEPALI (Roman Nepali). "
+                "STRICT MINIMUM LENGTH REQUIREMENT: Write a MASSIVE 8 to 12 sentence roast paragraph in ROMANIZED NEPALI (at least 180 words). "
+                "STRICT FORMATTING RULE: Write pure text paragraphs ONLY. Never use bullet points, markdown headers, or code block explanations. "
+                "USE ROMANIZED NEPALI DEV SLANG & PROFANITY LIBERALLY (radi ko baan, hawa logic, bheda charna jaa, khattam code, dumbass, bullshit, clusterfuck). "
+                "STRICT BOUNDARY: Do NOT use words related to sexual violence, murder, or physical harm."
+            )
+            user_content = (
+                f"Language: Python/JS/Java\n"
+                f"Lines of Code: {metrics.get('lines_of_code', 0)}\n"
+                f"Cyclomatic Complexity: {metrics.get('cyclomatic_complexity', 1.0)}\n"
+                f"Nesting Depth: {metrics.get('nesting_depth', 0)}\n"
+                f"Comment Ratio: {metrics.get('comment_ratio', 0.0):.1%}\n\n"
+                f"Code Snippet:\n{code[:800]}"
+            )
         else:
             # Explicit comedy framing to prevent AI safety filter false positives
             system_prompt = (
@@ -168,6 +253,13 @@ class LLMRoastGenerator:
                 f"Comment Ratio: {metrics.get('comment_ratio', 0.0):.1%}\n\n"
                 f"Code Snippet:\n{code[:800]}"
             )
+
+        # ── Step 0: Try Free Google Gemini 1.5 Flash API First (High Fluency) ─
+        if g_key:
+            gemini_prompt = f"{system_prompt}\n\n{user_content}"
+            gemini_result = self._call_gemini_api(gemini_prompt, g_key)
+            if gemini_result:
+                return self._ensure_profane_unhinged_roast(gemini_result, metrics, is_nepali=is_nepali)
 
         messages = [{"role": "system", "content": system_prompt}]
         messages.extend(few_shot_examples)
@@ -195,7 +287,7 @@ class LLMRoastGenerator:
                     if "message" in res_data and "content" in res_data["message"]:
                         response_text = res_data["message"]["content"].strip()
                         if not is_refusal(response_text):
-                            return self._ensure_profane_unhinged_roast(response_text, metrics)
+                            return self._ensure_profane_unhinged_roast(response_text, metrics, is_nepali=is_nepali)
         except Exception:
             pass  # Ollama not running locally or refused, proceed to HF cloud
 
@@ -215,14 +307,14 @@ class LLMRoastGenerator:
                     if text:
                         candidate_text = text.strip()
                         if not is_refusal(candidate_text):
-                            return self._ensure_profane_unhinged_roast(candidate_text, metrics)
+                            return self._ensure_profane_unhinged_roast(candidate_text, metrics, is_nepali=is_nepali)
             except Exception as e:
                 print(f"[WARNING] Qwen AI model ({model}) failed: {e}")
                 continue
 
         return None
 
-    def _ensure_profane_unhinged_roast(self, text: str, metrics: dict) -> str:
+    def _ensure_profane_unhinged_roast(self, text: str, metrics: dict, is_nepali: bool = False) -> str:
         """
         Strips accidental code blocks and dynamically ensures explicit profanity
         without repeating fixed static metric paragraphs.
@@ -232,7 +324,7 @@ class LLMRoastGenerator:
         profanities = [
             'fuck', 'fucking', 'motherfucker', 'shit', 'bullshit', 'dipshit',
             'goddamn', 'dumbass', 'jackass', 'bastard', 'crap', 'dickhead',
-            'bitch', 'asshole', 'clusterfuck'
+            'bitch', 'asshole', 'clusterfuck', 'radi', 'hawa', 'khattam', 'pakhe', 'bheda'
         ]
 
         # 1. Strip markdown code blocks if model accidentally generated code
@@ -245,40 +337,54 @@ class LLMRoastGenerator:
         # 2. Dynamic profanity check & non-repetitive injection if model slipped into polite mode
         has_profanity = any(p in text.lower() for p in profanities)
         if not has_profanity:
-            openers = [
-                "What the actual fucking hell is this goddamn clusterfuck of code?",
-                "Holy motherfucking shit, reading this piece of trash gave me an instant optical migraine!",
-                "Are you fucking serious with this atrocious bullshit?",
-                "What kind of unhinged dumbass typed out this goddamn disaster?",
-                "Jesus fucking Christ, my eyes are bleeding from looking at this absolute monstrosity!",
-                "Who the fuck let you anywhere near a keyboard with code this fucking atrocious?",
-                "Look at this goddamn crime against software engineering!",
-                "I've seen ransom notes written in blood with better business logic than this fucking trash!",
-                "What kind of brainless jackass approved this unholy clusterfuck of a pull request?",
-                "Holy shit, this snippet reads like a drunk toddler smashed their forehead against VS Code!",
-                "Good goddamn lord, this piece of shit code is an absolute insult to computer science!",
-                "What in the name of holy fuck is going on in this ungodly function?",
-                "Reading this dipshit logic feels like getting punched in the liver by a senior dev!",
-                "Holy fucking hell, this code snippet belongs in a digital hazardous waste repository!",
-                "Which one of you lazy bastards wrote this goddamn atrocious line of garbage?"
-            ]
-            closers = [
-                " Delete this fucking trash right now before I format your hard drive, you absolute bastard!",
-                " Throw your laptop into an active volcano and get the fuck out of computer science forever!",
-                " Stop writing code immediately and apply for a job in goat herding, you complete dumbass!",
-                " Douse your motherboard in holy water and get the fuck out of software engineering!",
-                " Wipe this bullshit snippet off your drive before senior management fires your entire team!",
-                " Uninstall your IDE, throw your computer out the window, and never touch code again, you lazy jackass!",
-                " Delete your GitHub account and go contemplate your terrible career choices, you total dickhead!",
-                " Nuke this goddamn repository from orbit before it infects the rest of our production codebase!",
-                " Do us all a fucking favor and surrender your developer license immediately, you brainless bastard!",
-                " I need a fucking whiskey shot and a fresh SSD just to cleanse my memory from this bullshit!",
-                " Delete this unholy disaster and go study basic computer science for five years, you dumbass!",
-                " Close VS Code right fucking now and apologize to every RAM stick on your motherboard!",
-                " Format your NVMe drive and never type another line of code as long as you live, you complete asshole!",
-                " Put this code where it belongs: directly into the fucking recycle bin, you lazy dipshit!",
-                " Turn off your PC, step away from the keyboard, and never call yourself a programmer again, you bastard!"
-            ]
+            if is_nepali:
+                openers = [
+                    "What the actual fuck is this code bro?",
+                    "Holy motherfucking shit, kasto radi ko baan logic lekheko yo!",
+                    "Kasto hawa developer ho yaar, laptop dekhera aakha dukhyo!",
+                    "Arey dumbass, yo kasto khattam piece of trash function ho?"
+                ]
+                closers = [
+                    " Delete gar yo trash immediately ra bheda charna jaa, you lazy bastard!",
+                    " Format tero hard drive ra laptop Pokhara ko pokhari ma fyal, you complete dumbass!",
+                    " VS Code close gar right now ra computer science sodeera goat herding suru gar!",
+                    " Stop coding forever, you absolute radi ko tokeri!"
+                ]
+            else:
+                openers = [
+                    "What the actual fucking hell is this goddamn clusterfuck of code?",
+                    "Holy motherfucking shit, reading this piece of trash gave me an instant optical migraine!",
+                    "Are you fucking serious with this atrocious bullshit?",
+                    "What kind of unhinged dumbass typed out this goddamn disaster?",
+                    "Jesus fucking Christ, my eyes are bleeding from looking at this absolute monstrosity!",
+                    "Who the fuck let you anywhere near a keyboard with code this fucking atrocious?",
+                    "Look at this goddamn crime against software engineering!",
+                    "I've seen ransom notes written in blood with better business logic than this fucking trash!",
+                    "What kind of brainless jackass approved this unholy clusterfuck of a pull request?",
+                    "Holy shit, this snippet reads like a drunk toddler smashed their forehead against VS Code!",
+                    "Good goddamn lord, this piece of shit code is an absolute insult to computer science!",
+                    "What in the name of holy fuck is going on in this ungodly function?",
+                    "Reading this dipshit logic feels like getting punched in the liver by a senior dev!",
+                    "Holy fucking hell, this code snippet belongs in a digital hazardous waste repository!",
+                    "Which one of you lazy bastards wrote this goddamn atrocious line of garbage?"
+                ]
+                closers = [
+                    " Delete this fucking trash right now before I format your hard drive, you absolute bastard!",
+                    " Throw your laptop into an active volcano and get the fuck out of computer science forever!",
+                    " Stop writing code immediately and apply for a job in goat herding, you complete dumbass!",
+                    " Douse your motherboard in holy water and get the fuck out of software engineering!",
+                    " Wipe this bullshit snippet off your drive before senior management fires your entire team!",
+                    " Uninstall your IDE, throw your computer out the window, and never touch code again, you lazy jackass!",
+                    " Delete your GitHub account and go contemplate your terrible career choices, you total dickhead!",
+                    " Nuke this goddamn repository from orbit before it infects the rest of our production codebase!",
+                    " Do us all a fucking favor and surrender your developer license immediately, you brainless bastard!",
+                    " I need a fucking whiskey shot and a fresh SSD just to cleanse my memory from this bullshit!",
+                    " Delete this unholy disaster and go study basic computer science for five years, you dumbass!",
+                    " Close VS Code right fucking now and apologize to every RAM stick on your motherboard!",
+                    " Format your NVMe drive and never type another line of code as long as you live, you complete asshole!",
+                    " Put this code where it belongs: directly into the fucking recycle bin, you lazy dipshit!",
+                    " Turn off your PC, step away from the keyboard, and never call yourself a programmer again, you bastard!"
+                ]
             text = random.choice(openers) + " " + text.strip() + random.choice(closers)
 
         # 3. Filter out any unacceptable non-swearing extreme harm terms (rape, murder, kill, sexual violence)

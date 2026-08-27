@@ -44,7 +44,9 @@ class RoastGenerator:
         quality_level: int,
         severity: int = 2,
         code: str = "",
-        use_llm: bool = False
+        use_llm: bool = False,
+        language: str = "english",
+        gemini_key: Optional[str] = None
     ) -> str:
         """
         Generate a roast based on code metrics and quality assessment.
@@ -55,16 +57,34 @@ class RoastGenerator:
             severity: 1 (Gentle), 2 (Standard), 3 (No Mercy)
             code: Original code string for LLM generation
             use_llm: Whether to attempt dynamic LLM text generation
+            language: "english" or "roman_nepali"
+            gemini_key: Optional Google Gemini API key for free cloud LLM generation
 
         Returns:
             A string containing the complete roast.
         """
+        is_nepali = language.lower() in ["nepali", "roman_nepali", "roman nepali"]
+
         # Try dynamic LLM generation first if requested
         if use_llm and self.llm_generator is not None and code:
             from src.roast.llm_generator import is_refusal
-            ai_roast = self.llm_generator.generate_roast(code, metrics, quality_level, severity)
+            ai_roast = self.llm_generator.generate_roast(
+                code=code,
+                metrics=metrics,
+                quality_level=quality_level,
+                severity=severity,
+                language=language,
+                gemini_key=gemini_key
+            )
             if ai_roast and not is_refusal(ai_roast):
-                return f"🤖 [Qwen2.5-Coder AI Roast]: {ai_roast}"
+                tag = "🤖 [Gemini Flash AI Roast]: " if gemini_key else "🤖 [Qwen2.5-Coder AI Roast]: "
+                return f"{tag}{ai_roast}"
+
+        # Static Nepali Fallback Template Matrix
+        if is_nepali:
+            from src.roast.templates import NEPALI_ROAST_TEMPLATES
+            nepali_list = NEPALI_ROAST_TEMPLATES.get(severity, NEPALI_ROAST_TEMPLATES[2])
+            return random.choice(nepali_list)
 
         roast_parts = []
 

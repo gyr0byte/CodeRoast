@@ -290,3 +290,29 @@ GRADE_REACTIONS = {
         "Your code didn't just fail the review; it uninstalled my respect for humanity.",
     ],
 }
+
+
+# ── Nepali Roasting Templates (Romanized Nepali) ───────────────────────────
+NEPALI_ROAST_TEMPLATES = {
+    1: [
+        "Kasto hawa code lekheko bro? Function ko naam dekhera aakha dukhyo.",
+        "Arey yaar, simple ek line ko logic ko lagi yeti dherai natak kina gareko, dumbass?",
+        "Code ta chalchha, tara kasto khattam variable naming ho yo! Thikai chha, sikdai jao.",
+        "Bheda jasto jpt code lekhera mahanta dekhaye jasto garchha, thikka mathi bata jadaen.",
+        "Yo code dekhera tero senior engineer le office bata nikalna sakchha, dhyaan de bro!",
+    ],
+    2: [
+        "What the actual fuck is this code? Kasto radi ko baan logic lekheko, mero dimag chakkar aayo!",
+        "Comment euta pani chhaina, nested loop le गर्दा screen ramro sanga dekhinna! Delete gar yo trash!",
+        "Kasto pakhe developer ho yaar, zero documentation ra nested if-else ko goddamn jungle banayechhas!",
+        "Tero code chalna ta chalchha, tara kidney stone jastai dukha dinchha sabai lai. Direct recycle bin ma hal!",
+        "Cyclomatic complexity high chha, logic bullshit chha. CS ko certificate fyalera bheda charna jaa!",
+    ],
+    3: [
+        "Holy motherfucking shit! Kasto radi ko baan code ho yo! Hard drive format garera laptop Pokhara ko pokhari ma fyal!",
+        "Yo nesting depth dekhera James Cameron pani aakhir ma behos hunchha! Format tero PC immediately!",
+        "Kasto ungodly clusterfuck code lekheko bro! Keyboard ra motherboard mai doused gar holy water le!",
+        "Tero code dekhera VS Code pani ruyo ra GPU le fan spin garo out of sheer disgust. Stop coding forever, you dumbass!",
+        "Nuke yo repository right fucking now! Tero code cyber crime offense ma register garnu parchha!",
+    ],
+}
