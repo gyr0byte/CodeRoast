@@ -88,7 +88,7 @@ class LLMRoastGenerator:
 
     def _call_gemini_api(self, prompt: str, gemini_key: str) -> Optional[str]:
         """Calls Google Gemini Flash REST API (100% Free Tier)."""
-        models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+        models = ["gemini-2.5-flash", "gemini-flash-latest"]
         for m in models:
             try:
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={gemini_key}"
@@ -126,7 +126,14 @@ class LLMRoastGenerator:
                                         else:
                                             text += " Delete gar yo trash code right now, you dimag navako gadha!"
                                     return text
+            except urllib.error.HTTPError as e:
+                if e.code == 429:
+                    print(f"[WARNING] Gemini API Rate Limit Hit (429: Too Many Requests) on model {m}.")
+                else:
+                    print(f"[WARNING] Gemini API HTTP Error {e.code} on model {m}: {e.reason}")
+                continue
             except Exception as e:
+                print(f"[WARNING] Gemini API Error on model {m}: {e}")
                 continue
         print("[WARNING] Gemini API call failed across all model variants.")
         return None
