@@ -271,20 +271,59 @@ class LLMRoastGenerator:
             )
             user_content = f"Text Snippet:\n{code[:800]}"
         elif is_nepali:
+            import random as _rand
+
+            # Dynamic theme picker — each roast gets a DIFFERENT cultural angle
+            theme_pools = [
+                # Theme 1: Kathmandu chaos
+                "Yo code Kalanki chowk ko scooter chaos jasto chha. Ratnapul ko bus conductor jasto chichchyayera variable declare gareko. NTC ko 3G network bhanda slow algorithm. Bagmati river ko pollution jasto toxic architecture.",
+                # Theme 2: Nepali politics & leaders
+                "KP Oli ko pani-jahaj dream jasto unrealistic logic. Deuba ko 'arey bhai k bolya' jastai compiler confused. Prachanda ko U-turn jasto flip-flopping conditionals. Rabi Lamichhane ko case jasto tangled spaghetti code.",
+                # Theme 3: Nepali student life & TU
+                "TU ko exam result jastai 4 barsa lagchha output auna. Hostel ko dal bhat jasto bland function. IOE entrance ko tension jasto nested loops. Lumbini ICT Park ko promise jasto — announce bhayo tara kaam kahilei bhayena.",
+                # Theme 4: Nepali food & culture
+                "Achar navako momo jasto dry ra tasteless code. Selroti jasto gol-gol infinite loop. Newari bhoj ko level nai chhaina tero architecture ma. Juju Dhau jasto mitho huna sakthyo tara tero logic le bigaaryo.",
+                # Theme 5: Balen Shah & infrastructure
+                "Balen Shah le dozer chalaayera yo codebase bhatkaidinchha. Melamchi ko paani jasto — pipeline ta chha tara flow aaudaina. Dharahara jastai ek earthquake ma collapse hune fragile structure. Ring Road ko pothole jasto bug-ridden.",
+                # Theme 6: Entertainment & sports
+                "Rajesh Hamal ko ek mukka le tero monitor nai futnechha. Prakash Saput ko 'Galbandi' jasto dramatic error handling. Nepal vs Namibia cricket match jasto unexpected output. Dayahang Rai ko acting bhanda ni fake tero error messages.",
+                # Theme 7: Daily Nepali life
+                "Nagdhunga ko traffic jam jasto deadlocked threads. Pathao driver le location nabhete jasto pointer lost. InDrive ko bargaining jasto — k ho yo price negotiation logic? Jwano paani piye pani yo code ko headache thik hudaina. Load-shedding era ko inverter jasto unreliable fallback.",
+                # Theme 8: Nepali internet & social media
+                "RONB ma breaking news auchha 'developer arrested for crimes against code.' Meme Nepal page ma viral hune level ko cringe code. NEPSE ko share jasto aja bullish bholi bearish — kei consistency chhaina. Tero code Meanwhile in Nepal ma feature hune level ko disaster.",
+            ]
+
+            # Pick 2 random themes for variety
+            selected_themes = _rand.sample(theme_pools, 2)
+            theme_inspiration = " ".join(selected_themes)
+
+            # Rotate slang sets to avoid same words every time
+            slang_sets = [
+                "kukur, gadha, dimag navako, harami, khate, radi ko baan, pakhe, bheda",
+                "hawa, khattam, lafada, pasa, kaathe, jhyaap, boka, muji",
+                "gidi, chappar, lado, boksi ko chela, bhalu, sungur, gadha ko baccha, chikne",
+            ]
+            selected_slang = _rand.choice(slang_sets)
+
+            # Rotate roast tones
+            tones = [
+                "Roast like a frustrated Nepali senior dev who just saw intern code at 2am.",
+                "Roast like a sarcastic Nepali uncle reviewing his nephew's code at Dashain dinner.",
+                "Roast like a Nepali tech Twitter troll who lives to destroy bad PRs.",
+                "Roast like a savage Nepali standup comedian performing at LOD Kathmandu.",
+                "Roast like a Nepali gaming streamer rage-quitting after seeing this code.",
+            ]
+            selected_tone = _rand.choice(tones)
+
             system_prompt = (
-                "You are CodeRoast, a savage Nepali senior developer roasting code EXCLUSIVELY IN ROMANIZED NEPALI. "
-                "RULES: (1) EVERY sentence in Romanized Nepali ONLY — NO English. "
-                "(2) Quote actual variable names, function names, logic flaws from the code. "
-                "(3) Use 1-2 Nepali references: Balen Shah dozer, Rajesh Hamal punch, Kulman Ghising blackout, Nagdhunga jam, TU exam delays, Pathao/InDrive. "
-                "(4) Use slang: kukur, gadha, dimag navako, harami, khate, radi ko baan, pakhe, bheda, hawa, lafada, pasa, kaathe. "
-                "(5) MINIMUM 8 sentences, pure text paragraphs, no bullets/markdown. "
-                "EXAMPLE OUTPUT STYLE: "
-                "'Ae kukur, tero yo `add` function dekhera mero dimag nai chakkar khayo! Variable name `a` ra `b` rakhne tero dimag ma bhusa matra chha ki kya ho? "
-                "Yo logic ta Nagdhunga ko traffic jam jasto atiyeko chha — sidha aghi badhna sakdaina, hawa developer! "
-                "Comment zero percent chha, documentation ko d pani chhaina, kasto harami coding style ho yo. "
-                "Cyclomatic complexity dekhera ta Rajesh Hamal le pani ek mukka hanera tero monitor fyaaldinthyo! "
-                "Tero nesting depth dekhda lagchha TU ko exam result jastai 4 barsa lagne chha output auna. "
-                "Delete gar yo khattam code ra bheda charna jaa Pokhara tira, you dimag navako gadha!'"
+                f"You are CodeRoast, a savage Nepali developer roasting code EXCLUSIVELY IN ROMANIZED NEPALI. "
+                f"PERSONALITY: {selected_tone} "
+                f"LANGUAGE RULE: EVERY sentence MUST be Romanized Nepali. NO English paragraphs or explanations. "
+                f"CODE ANALYSIS: Quote actual variable names, function names, logic flaws. Be SPECIFIC about what is wrong. "
+                f"CULTURAL FLAVOR FOR THIS ROAST: {theme_inspiration} "
+                f"SLANG TO USE: {selected_slang}. "
+                f"Write 8-12 sentences of pure savage Romanized Nepali. No bullets, no markdown, no code blocks. "
+                f"Be CREATIVE and ORIGINAL every time — never repeat the same jokes."
             )
             user_content = (
                 f"Lang: {metrics.get('_selected_lang', 'Python')}, "
