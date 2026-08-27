@@ -295,24 +295,24 @@ GRADE_REACTIONS = {
 # ── Nepali Roasting Templates (Romanized Nepali) ───────────────────────────
 NEPALI_ROAST_TEMPLATES = {
     1: [
-        "Kasto hawa code lekheko bro? Function ko naam dekhera aakha dukhyo.",
-        "Arey yaar, simple ek line ko logic ko lagi yeti dherai natak kina gareko, dumbass?",
-        "Code ta chalchha, tara kasto khattam variable naming ho yo! Thikai chha, sikdai jao.",
+        "Kasto hawa code lekheko bro? Function ko naam dekhera Ratnapul ko conductor pani risaucha.",
+        "Arey yaar, simple ek line ko logic ko lagi yeti dherai natak kina gareko, KP Oli ko gaff jastai, dumbass?",
+        "Code ta chalchha, tara kasto khattam variable naming ho yo! InDrive driver le location nabhete jastai chha.",
         "Bheda jasto jpt code lekhera mahanta dekhaye jasto garchha, thikka mathi bata jadaen.",
-        "Yo code dekhera tero senior engineer le office bata nikalna sakchha, dhyaan de bro!",
+        "Yo code dekhera tero senior engineer le Balen Shah ko dozer bolayera desk nai bhatkaidinchha!",
     ],
     2: [
         "What the actual fuck is this code? Kasto radi ko baan logic lekheko, mero dimag chakkar aayo!",
-        "Comment euta pani chhaina, nested loop le गर्दा screen ramro sanga dekhinna! Delete gar yo trash!",
+        "Comment euta pani chhaina, nested loop le garda Nagdhunga ko traffic jam bhanda wosrt vayo! Delete gar yo trash!",
         "Kasto pakhe developer ho yaar, zero documentation ra nested if-else ko goddamn jungle banayechhas!",
-        "Tero code chalna ta chalchha, tara kidney stone jastai dukha dinchha sabai lai. Direct recycle bin ma hal!",
-        "Cyclomatic complexity high chha, logic bullshit chha. CS ko certificate fyalera bheda charna jaa!",
+        "Tero code execution TU ko result jastai slow chha, 4 barsa pachi matra output dinchha. Direct recycle bin ma hal!",
+        "Cyclomatic complexity high chha, logic bullshit chha. CS ko certificate fyalera bheda charna jaa Pokhara ko danda tira!",
     ],
     3: [
-        "Holy motherfucking shit! Kasto radi ko baan code ho yo! Hard drive format garera laptop Pokhara ko pokhari ma fyal!",
-        "Yo nesting depth dekhera James Cameron pani aakhir ma behos hunchha! Format tero PC immediately!",
-        "Kasto ungodly clusterfuck code lekheko bro! Keyboard ra motherboard mai doused gar holy water le!",
-        "Tero code dekhera VS Code pani ruyo ra GPU le fan spin garo out of sheer disgust. Stop coding forever, you dumbass!",
-        "Nuke yo repository right fucking now! Tero code cyber crime offense ma register garnu parchha!",
+        "Holy motherfucking shit! Balen Shah le dozer chalayera bhatkaidine khalko illegal nesting structure banayechhas, you dimag navako gadha!",
+        "Yo nesting depth ra complexity dekhera Rajesh Hamal (Maha-Nayak) le pani ek mukka hanera monitor fyalchha! Format tero PC immediately!",
+        "Kasto ungodly clusterfuck code lekheko bro! Kulman Ghising le pani tero code dekhera load-shedding blackout suru gardinchha!",
+        "Tero code dekhera RONB (Routine of Nepal Banda) ma breaking news aauchha: 'Software industry ma kaddak khate code lekhne developer arrest'!",
+        "Nuke yo repository right fucking now! Hard drive format garera laptop Pokhara ko Fewa Lake ma fyal, you harami radi ko baan!",
     ],
 }

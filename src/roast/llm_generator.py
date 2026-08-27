@@ -249,8 +249,10 @@ class LLMRoastGenerator:
                 "CRITICAL TASK: Analyze the user's code snippet, line count, complexity score, nesting depth, variable names, and logic flaws in detail. "
                 "DO NOT write meta intros like 'CodeRoast bolira chu'. Point out their specific code flaws, bad functions, terrible logic, and missing comments in Romanized Nepali. "
                 "STRICT LENGTH REQUIREMENT: Write a LONG, FULL 6 to 8 sentence roast paragraph (160 to 220 words). DO NOT STOP OR CUT OFF MID-SENTENCE. "
+                "MUST USE NEPALI PUBLIC FIGURES & POP CULTURE MEMES: "
+                "Incorporate hilarious references to Balen Shah (dozer bhatkaidine), Rajesh Hamal (Maha-Nayak ek mukka), KP Oli (pani jahaj / gaff), Kulman Ghising (load-shedding blackout), RONB (Routine of Nepal Banda breaking news), Nagdhunga traffic jam, TU exam result delay, and Pathao/InDrive drivers! "
                 "MUST USE AUTHENTIC NEPALI SLANG & SWEARING LIBERALLY: "
-                "Use terms like 'kukur', 'gadha', 'dimag navako', 'harami', 'khate', 'radi ko baan', 'pakhe', 'bheda', 'hawa', 'khattam code', 'dumbass', 'clusterfuck'. "
+                "Use terms like 'kukur', 'gadha', 'dimag navako', 'harami', 'khate', 'radi ko baan', 'pakhe', 'bheda', 'hawa', 'khattam code', 'dumbass', 'clusterfuck', 'baal xaina', 'hait', 'lafada'. "
                 "STRICT FORMATTING RULE: Write pure text paragraphs ONLY. No bullet points, no code blocks. "
                 "STRICT BOUNDARY: Do NOT use terms related to sexual violence, murder, or real physical harm."
             )
@@ -262,8 +264,8 @@ class LLMRoastGenerator:
                 f"Comment Ratio: {metrics.get('comment_ratio', 0.0):.1%}\n"
                 f"Duplicate Code Score: {metrics.get('duplicate_code_score', 100.0)}\n\n"
                 f"Code Snippet To Roast:\n{code[:1000]}\n\n"
-                f"EXAMPLE OF EXPECTED 6-8 SENTENCE HIGH-QUALITY ROMANIZED NEPALI ROAST:\n"
-                f"Ae kukur, yo kasto khattam ra atrociously written code ho! Tero cyclomatic complexity ra 5 level deep nested if-statements dekhera mero aakha nai futla jasto bhayo, you dimag navako gadha. Variable naming hero jasto 'x', 'y', 'temp' rakhera k prove garna khojeko, tero harami dimag le software engineering ko dhajji udayo! Comments 0% chha, documentation ko 'd' pani chhaina, pure khate ra radi ko baan coding style ho yo. Delete gar yo trash code right now before senior dev le tero computer fyalidinchha. VS Code bandagaar ra bheda charna jaa Pokhara ko danda tira, you lazy bastard!"
+                f"EXAMPLE OF EXPECTED 6-8 SENTENCE HIGH-QUALITY NEPALI MEME ROAST:\n"
+                f"Ae kukur, yo kasto khattam ra atrociously written code ho, Balen Shah le dozer chalayera bhatkaidine khalko illegal nesting structure banayechhas! Tero cyclomatic complexity ra 5 level deep nested if-statements dekhera Rajesh Hamal le pani ek mukka hanera monitor fyalchha, you dimag navako gadha. Variable naming hero jasto 'x', 'y', 'temp' rakhera k prove garna khojeko, KP Oli ko gaff ra pani-jahaj ko dream bhanda thulo feku logic ho yo! Nagdhunga ko traffic jam jasto infinite loop le garda Kulman Ghising le pani tero code dekhera load-shedding suru garcha. Comments 0% chha, documentation ko 'd' pani chhaina, pure khate ra radi ko baan coding style ho yo. Delete gar yo trash code right now, RONB ma breaking news auna bhanda agadi, ra bheda charna jaa Pokhara ko danda tira, you lazy bastard!"
             )
         else:
             # Explicit comedy framing to prevent AI safety filter false positives
