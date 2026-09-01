@@ -273,9 +273,12 @@ class LLMRoastGenerator:
         elif is_nepali:
             import random as _rand
 
-            # Dynamic theme picker — each roast gets a DIFFERENT cultural angle
+            # ═══════════════════════════════════════════════════════════════
+            # DYNAMIC THEME PICKER — 20 Cultural Theme Pools
+            # Each roast gets 2-3 random themes mixed together for variety
+            # ═══════════════════════════════════════════════════════════════
             theme_pools = [
-                # Theme 1: Kathmandu chaos
+                # Theme 1: Kathmandu chaos & traffic
                 "Yo code Kalanki chowk ko scooter chaos jasto chha. Ratnapul ko bus conductor jasto chichchyayera variable declare gareko. NTC ko 3G network bhanda slow algorithm. Bagmati river ko pollution jasto toxic architecture.",
                 # Theme 2: Nepali politics & leaders
                 "KP Oli ko pani-jahaj dream jasto unrealistic logic. Deuba ko 'arey bhai k bolya' jastai compiler confused. Prachanda ko U-turn jasto flip-flopping conditionals. Rabi Lamichhane ko case jasto tangled spaghetti code.",
@@ -291,29 +294,99 @@ class LLMRoastGenerator:
                 "Nagdhunga ko traffic jam jasto deadlocked threads. Pathao driver le location nabhete jasto pointer lost. InDrive ko bargaining jasto — k ho yo price negotiation logic? Jwano paani piye pani yo code ko headache thik hudaina. Load-shedding era ko inverter jasto unreliable fallback.",
                 # Theme 8: Nepali internet & social media
                 "RONB ma breaking news auchha 'developer arrested for crimes against code.' Meme Nepal page ma viral hune level ko cringe code. NEPSE ko share jasto aja bullish bholi bearish — kei consistency chhaina. Tero code Meanwhile in Nepal ma feature hune level ko disaster.",
+                # Theme 9: Nepali IT industry & job market
+                "Tero code dekhera Leapfrog, Fusemachines sabai le reject handinchha. Upwork ma $3/hour ma ni yo code ko quality paaudaina. Deerwalk ko intern le pani yesto code lekhne haina. Tero LinkedIn profile ma 'Full Stack Developer' lekheko dekhera recruiter haru hasera pagal bhaye.",
+                # Theme 10: Nepali festivals & traditions
+                "Dashain ko tika lagaune bela tero code review garnu paryo — kasto ashubha! Tihar ko deusi bhailo jastai tero function eutai geet gairacha loop ma. Holi ko rang jasto scattered ra messy variables. Chhath ma ghanta bhar paani ma ubhinu bhanda ni painful yo code padhna.",
+                # Theme 11: Nepali geography & landmarks
+                "Everest ko height jasto tero nesting depth — oxygen mask chainchha padhna. Pokhara ko paragliding jasto free-falling logic — kei control chhaina. Chitwan ko jungle safari jasto wild ra unpredictable output. Lumbini jastai peace milne bhanthyo tara tero code le ta war suru garyo.",
+                # Theme 12: Nepali music & pop culture
+                "Vten ko rap jasto aggressive tara meaning zero tero variable names. 1974 AD ko 'Parelima' sun — tero code pani 1974 ko jasto outdated chha. Neetesh Jung Kunwar ko auto-tune jasto — surface ma ramro tara bhitra hollow logic. Arthur Gunn American Idol ma pugyo tara tero code ta audition round mai out huncha.",
+                # Theme 13: Nepali transportation & commute
+                "Sajha bus ko schedule jasto — kabhi aauncha kabhi aaudaina tero function return. Micro tempo ma 20 jana thuneko jasto tero array ma unnecessary elements. Nepal Airlines ko flight cancel jasto tero API call — promise garera deliver gardaina. Tero code ta rickshaw ko speed ma chaldai cha bullet train ko zamana ma.",
+                # Theme 14: Nepali education system
+                "SLC (Iron Gate) pass garnu jasto difficult tero code padhna. Tero code review garda HSEB ko 5 subject back bhayo jasto feel hunchha. Bridge course padhera doctor banne jasto — tero code ma shortcut matra chha fundamentals zero. Tero variable naming IOE ko handwriting jasto — lekhne le pani padhna sakdaina.",
+                # Theme 15: Nepali economy & daily struggles
+                "Dollar ko rate badheko jasto tero bug count din din badhdai cha. Load-shedding 18 ghanta ko jamana jasto tero server uptime. Gas cylinder line jasto — queue ma basera pani output aaudaina. Pasal ma MRP bhanda mahango bechne jasto tero code ma unnecessary overhead.",
+                # Theme 16: Nepali weather & seasons
+                "Terai ko garmi jasto — tero CPU le pani pasina pochirachha yo code run garda. Kathmandu ko dhulo jasto dusty ra unmaintained codebase. Monsoon ko baadhee jasto overflow error aairachha. Winter ko tundra jasto frozen chha tero logic — kei move nai gardaina.",
+                # Theme 17: Nepali family dynamics & relatives
+                "Kaka-kaki le 'padh padh' bhane jasto tero senior dev le 'refactor refactor' bhanirachha. Mamaghar jada mamu le chocolate diye jasto — tero function le pani eutai return value matra dinchha. Buhari-sasu ko relation jasto tero frontend-backend communication — duitira frustration. Bhai-tika ma didi le 'ramro code lekh' bhanera ashirwad dinchha tara tero code le sunna manncha?",
+                # Theme 18: Nepali news & controversies
+                "Wide body scandal jasto tero code ma hidden bugs chha. Baluwatar land grab jasto — memory leak le jagga khairacha tero RAM ko. Fake Bhutanese refugee scam jasto tero authentication logic ma loopholes. Nirmala Panta case jasto — investigation gardai chhas tara bug kahilei bhetdainas.",
+                # Theme 19: Nepali proverbs & sayings twisted
+                "Hatti aayo hatti aayo, fussa — tero function call pani yestai, promise garera kehi return gardaina. Gorkhali lai dare hannu — tero try-catch block le error lai dare handaina, sidhai crash hunchha. Aafno haath jagannath — tero code ta aafnai haath le nai bigareko. Kukur ko puchchar 12 barsa dhungro ma rakheni — tero coding habit pani yestai, kabhi sudhridaina.",
+                # Theme 20: Nepali startup & hustle culture
+                "Tero code CTO banne sapana dekhcha tara intern level logic chha. Startup pitch competition ma 'AI-powered disruption' bhanera yo spaghetti code dekhauchas? Ncell ko recharge jasto — paisa kharcha bhayo tara data aayena tero function bata. Tero GitHub green squares dekhera lagcha productive chhas tara yo commit history ho ki crime history?",
             ]
 
-            # Pick 2 random themes for variety
-            selected_themes = _rand.sample(theme_pools, 2)
+            # Pick 2-3 random themes for maximum variety
+            num_themes = _rand.choice([2, 2, 2, 3])
+            selected_themes = _rand.sample(theme_pools, num_themes)
             theme_inspiration = " ".join(selected_themes)
 
-            # Rotate slang sets to avoid same words every time
+            # ═══════════════════════════════════════════════════════════════
+            # SLANG SETS — 8 rotating sets of authentic Nepali developer slang
+            # ═══════════════════════════════════════════════════════════════
             slang_sets = [
                 "kukur, gadha, dimag navako, harami, khate, pakhe, bheda",
                 "hawa, khattam, lafada, pasa, kaathe, jhyaap, boka, gidi",
                 "chappar, boksi ko chela, sungur, gadha ko baccha, baal xaina, hait, tori",
+                "dangadung, futsal cancel, tori budhi, gobar dimag, ghanti bajyo, ullu, bakhra",
+                "andha, lato, bahira, mungri, tapori, fataha, langada logic, bokya",
+                "murkha, buddhu, thakali thali jasto overloaded, randikhola ko paani jasto unclear, paagal",
+                "ban manchhe, junglee coder, kachyaang, suruwal kholdai coding, fohor code, sarkari kaam jasto slow",
+                "phokat ko gyaan, nakali developer, jhilke code, falthu function, dherai halla kam kaam",
             ]
             selected_slang = _rand.choice(slang_sets)
 
-            # Rotate roast tones
+            # ═══════════════════════════════════════════════════════════════
+            # PERSONALITY TONES — 12 unique roasting personas
+            # ═══════════════════════════════════════════════════════════════
             tones = [
                 "Roast like a frustrated Nepali senior dev who just saw intern code at 2am.",
                 "Roast like a sarcastic Nepali uncle reviewing his nephew's code at Dashain dinner.",
                 "Roast like a Nepali tech Twitter troll who lives to destroy bad PRs.",
                 "Roast like a savage Nepali standup comedian performing at LOD Kathmandu.",
                 "Roast like a Nepali gaming streamer rage-quitting after seeing this code.",
+                "Roast like a disappointed Nepali college professor marking final year projects at TU.",
+                "Roast like a Nepali rickshaw driver giving life advice while stuck in Lagankhel traffic.",
+                "Roast like a Nepali army drill sergeant who just discovered his recruit writes code like this.",
+                "Roast like a Kathmandu cafe intellectual sipping overpriced coffee while judging peasant code.",
+                "Roast like a bitter Nepali freelancer on Upwork who lost a contract to someone writing code like this.",
+                "Roast like a Nepali WhatsApp group uncle who forwards everything but finally found something worth criticizing.",
+                "Roast like a Nepali mom comparing this code to how much better the neighbor's son codes.",
             ]
             selected_tone = _rand.choice(tones)
+
+            # ═══════════════════════════════════════════════════════════════
+            # ROAST STRUCTURE TEMPLATES — forces the AI to organize its burn
+            # ═══════════════════════════════════════════════════════════════
+            structures = [
+                "Structure: Start with a shocked exclamation, then attack 3 specific code issues, compare each to a Nepali cultural situation, and end with a dramatic verdict telling them to quit coding.",
+                "Structure: Open with a fake compliment ('Wah kya code!'), then systematically destroy every function and variable name, weave in cultural references, finish with a devastating one-liner.",
+                "Structure: Pretend you're writing a RONB breaking news article about this code disaster — headline, body, and a dramatic conclusion urging the developer to surrender.",
+                "Structure: Narrate like a Nepali cricket commentary — 'First over ma nai duck out', describing each code flaw as a batting collapse, building to an innings defeat.",
+                "Structure: Write as if this code caused a national emergency — describe the government response, public outrage, and the developer being summoned to Singhadurbar.",
+                "Structure: Start with 'Yo code dekhera...' and describe a chain reaction of disasters it causes across Nepal — from Kathmandu to Pokhara to Biratnagar — ending with the whole nation demanding you stop coding.",
+                "Structure: Roast like a Nepali movie review — rate each function like a scene, give the overall code a rating, and tell the developer their code flopped harder than a Kollywood C-grade film.",
+                "Structure: Build the roast like escalating disasters — start small (pothole), escalate (earthquake), climax (tero code le poora tech industry ruin garyo), end with exile recommendation.",
+            ]
+            selected_structure = _rand.choice(structures)
+
+            # ═══════════════════════════════════════════════════════════════
+            # SIGNATURE CLOSERS — memorable ending lines
+            # ═══════════════════════════════════════════════════════════════
+            closers = [
+                "End with a memorable Nepali-style verdict sentencing them to quit coding forever.",
+                "End by recommending a specific alternative career: momo pasal, bheda charaune, Nagarkot tour guide, tempo driver, or daal-bhat cooking.",
+                "End with a fake 'breaking news' headline about this developer being banned from all computers in Nepal.",
+                "End with a dramatic goodbye letter to their code — 'Alvida tero function, tero loop, tero variable — sabai ko antim sanskar gardinchu.'",
+                "End by imagining Balen Shah personally arriving with a dozer to demolish their codebase.",
+                "End with 'Tero code ko autopsy report' — listing cause of death for each function.",
+                "End by giving their code a Nepali movie title and a star rating (0.5 stars).",
+            ]
+            selected_closer = _rand.choice(closers)
 
             system_prompt = (
                 f"You are CodeRoast, a savage Nepali developer roasting code EXCLUSIVELY IN ROMANIZED NEPALI. "
@@ -322,6 +395,8 @@ class LLMRoastGenerator:
                 f"CODE ANALYSIS: Quote actual variable names, function names, logic flaws. Be SPECIFIC about what is wrong. "
                 f"CULTURAL FLAVOR FOR THIS ROAST: {theme_inspiration} "
                 f"SLANG TO USE: {selected_slang}. "
+                f"{selected_structure} "
+                f"{selected_closer} "
                 f"STRICT BOUNDARY: NEVER use explicit sexual vulgarities or offensive phrases (do NOT use words like 'radi', 'radi ko baan', 'kando', 'muji', 'lado', 'bhalu', or 'chikne'). Keep it strictly to software engineering comedy, cultural memes, and non-sexual insults. "
                 f"Write 8-12 sentences of pure savage Romanized Nepali. No bullets, no markdown, no code blocks. "
                 f"Be CREATIVE and ORIGINAL every time — never repeat the same jokes."
