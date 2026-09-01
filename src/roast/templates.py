@@ -191,10 +191,51 @@ ROAST_TEMPLATES = {
         "Pasting {detected} code while selecting {selected} in the UI is a whole new level of goddamn developer incompetency.",
         "Your code is written in {detected}, but you told me it was {selected}. The compiler is fucking laughing at you.",
     ],
+
+    # ── Easter Egg: Hello World ──────────────────────────────────────────
+    "easter_hello_world": [
+        "A 'Hello World' program. Congratulations on solving the coding challenge that literally every tutorial starts with. You must be so proud.",
+        "You submitted a Hello World. This is the programming equivalent of showing up to a marathon and just stretching at the starting line.",
+        "Hello World? That's it? I have more complex logic in my sleep mode. Even my error handler has more depth than this.",
+        "Ah, Hello World — the classic 'I installed Python 30 seconds ago' flex. Bold of you to submit this to a code analyzer.",
+        "You wrote Hello World and asked me to review it. This is like asking Gordon Ramsay to critique a glass of tap water.",
+        "Hello World. The coding equivalent of a participation trophy. Thanks for showing up, I guess.",
+        "Submitting Hello World to CodeRoast is like bringing a butter knife to a sword fight. Adorably pointless.",
+        "Even ChatGPT would be offended if you asked it to review this. Hello World. Two words. Zero effort. Peak developer energy.",
+    ],
+
+    # ── Easter Egg: FizzBuzz ─────────────────────────────────────────────
+    "easter_fizzbuzz": [
+        "FizzBuzz! Congratulations on solving the interview question that filters out 50% of candidates. You are now qualified to breathe near a codebase.",
+        "Ah, FizzBuzz — the developer's rite of passage. You've proven you understand modulo. Your parents must be thrilled.",
+        "You submitted FizzBuzz to a code analyzer. This is the software engineering equivalent of asking a teacher to grade your ABCs in college.",
+        "FizzBuzz detected. I'd roast this, but honestly it's already the punchline to every coding interview joke ever told.",
+        "Classic FizzBuzz. The only algorithm where even the solution feels like an insult to computer science.",
+        "FizzBuzz? Next you'll ask me to review your 'for i in range(10): print(i)' masterpiece. Dream bigger.",
+    ],
+
+    # ── Easter Egg: Empty/Minimal Code ───────────────────────────────────
+    "easter_empty": [
+        "You submitted nothing. Technically, this is the cleanest code I've ever seen. Zero bugs. Zero complexity. Zero value.",
+        "An empty file. The most efficient code ever written — does absolutely nothing, perfectly. Ship it to production.",
+        "Nothing. You gave me nothing. This is the developer equivalent of handing in a blank exam paper and walking out.",
+        "Empty code submitted. This has fewer bugs than 99% of production codebases. You've peaked. Retire now.",
+        "You submitted an empty snippet. I have more content in my loading screen than your entire contribution.",
+        "Blank code. Truly a masterpiece of minimalism. Somewhere, a Silicon Valley startup is calling this 'disruptive architecture'.",
+    ],
+
+    # ── Easter Egg: TODO/Pass Stubs ──────────────────────────────────────
+    "easter_todo": [
+        "Your code is 90% TODO comments and 10% pass statements. Bold strategy — outsource the actual work to your future self.",
+        "I found more TODO comments than actual code. This isn't a program, it's a procrastination manifesto.",
+        "def do_something(): pass. def main(): pass. This isn't code, it's a developer's draft of their resignation letter.",
+        "You wrote 'TODO: implement later' six times. Later never comes. We both know this. Your IDE knows this.",
+        "Your code has more 'pass' statements than a basketball game. At least basketball players eventually score.",
+    ],
 }
 
 
-# ── Severity Modifiers ──────────────────────────────────────────────────────
+
 # These are appended based on severity level to amplify the roast.
 SEVERITY_MODIFIERS = {
     1: [  # Gentle

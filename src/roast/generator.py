@@ -90,6 +90,12 @@ class RoastGenerator:
 
         roast_parts = []
 
+        # ── Easter Egg Detection ────────────────────────────────────────
+        easter_egg = self._detect_easter_egg(code)
+        if easter_egg:
+            roast_parts.append(random.choice(self.templates[easter_egg]))
+            return self._finalize(roast_parts, severity)
+
         # ── Check for language mismatch ─────────────────────────────────
         if metrics.get("_language_mismatch", False):
             detected = metrics.get("_detected_lang", "Python").capitalize()
