@@ -187,16 +187,34 @@ $$\text{gemini-2.5-flash} \longrightarrow \text{gemini-flash-lite-latest} \longr
 *   **Sub-4-Second Speed:** Lite models reduce generation latency from 40–60s down to **~3.7 seconds per roast**.
 
 #### Dynamic Theme Picker Architecture (420+ Unique Combinations)
-To eliminate prompt repetition, every Nepali request dynamically samples and stitches together:
-*   **5 Personality Tones:** *Frustrated 2am Senior Dev*, *Sarcastic Uncle at Dashain*, *Kathmandu Twitter Troll*, *LOD Standup Comic*, *Gaming Streamer*.
-*   **8 Cultural Theme Pools:** *Kathmandu Traffic & Scooters*, *Nepalese Politics & Feud*, *Student Struggles & TU Exam Delays*, *Nepalese Food & Cuisine*, *Balen Shah Dozer Culture*, *Nepalese Sports & Rajesh Hamal*, *Daily Life / Pathao / Nagdhunga*, *Internet / RONB / Meme Nepal*.
-*   **Clean Authentic Nepali Slangs:** Rotates natural developer slangs (`kukur`, `gadha`, `dimag navako`, `harami`, `khate`, `pakhe`, `bheda`, `hawa`, `lafada`, `pasa`, `kaathe`, `jhyaap`, `boka`, `gidi`, `chappar`, `tori`, `baal xaina`, `hait`). Strictly excludes explicit sexual profanities (`muji`, `lado`, `bhalu`, `chikne`, `kando`, `radi`).
+#### 1. 🇳🇵 Romanized Nepali Engine: 4-Tier Gemini Chain & Dynamic Theme System
+To eliminate prompt repetition and deliver maximum variety, every Nepali request dynamically samples and stitches together:
+*   **12 Persona Tones:** *Frustrated 2am Senior Dev*, *Sarcastic Uncle at Dashain*, *Kathmandu Twitter Troll*, *LOD Standup Comic*, *Gaming Streamer*, *TU Exam Invigilator*, *Microbus Conductor*, *Nagdhunga Traffic Cop*, *RONB Admin*, *Balen Shah Assistant*, *Thamel Tour Guide*, *Momo Pasal Owner*.
+*   **20 Cultural Theme Pools:** *Kathmandu Traffic & Scooters*, *Nepalese Politics & Feud*, *Student Struggles & TU Exam Delays*, *Nepalese Food & Cuisine*, *Balen Shah Dozer Culture*, *Nepalese Sports & Rajesh Hamal*, *Daily Life / Pathao / Nagdhunga*, *Internet / RONB / Meme Nepal*, *Loadshedding Nostalgia*, *Loksewa Aspirants*, *Widebody Scam*, *Bheda Charaune*, *Bhatbhateni Billing*, *Australian Visa Waiting*, *Prachanda Speeches*, *Dashain Tika Chaos*, *Nagarkot Sunset*, *NTC 3G Speed*, *Kusum Silk Saree*, *Ratnapark Bus Park*.
+*   **8 Roast Structural Templates:** *Cricket Commentary*, *RONB News Bulletins*, *Autopsy Reports*, *Courtroom Sentencing*, *Momo Order Receipts*, *Movie Trailers*, *Dashain Blessings*, *Jira Ticket Escalations*.
+*   **7 Signature Closers & Clean Authentic Nepali Slangs:** Rotates natural developer slangs (`kukur`, `gadha`, `dimag navako`, `harami`, `khate`, `pakhe`, `bheda`, `hawa`, `lafada`, `pasa`, `kaathe`, `jhyaap`, `boka`, `gidi`, `chappar`, `tori`, `baal xaina`, `hait`). Strictly excludes explicit sexual profanities.
+*   **Resulting Variety:** **15,000+ unique Romanized Nepali roast combinations**.
 
-#### 2. 🇬🇧 English Engine: Local Qwen2.5-Coder via Ollama
-For English roasts, the application uses local GPU acceleration:
+#### 2. 🇬🇧 English Engine: Local Qwen2.5-Coder & Multi-Dimensional Theme System
+For English roasts, the engine applies the same multi-dimensional theme picker architecture:
+*   **12 English Cultural Theme Pools:** Silicon Valley failures (Theranos/Juicero/WeWork), Stack Overflow elitism, r/programminghorror cursed code, FAANG interview disasters, Cyberpunk 2077 bugs, Fyre Festival/Season 8 betrayals, enterprise Jira hell, ChatGPT hallucinations, Startup hustle delusion, Linus Torvalds PR flames, Friday deploy apocalypses, and Y2K/Ariane 5 rocket crashes.
+*   **10 Persona Tones:** Burnt-out FAANG Staff Engineer, Gordon Ramsay in a server room, Reddit Moderator, VC Evaluator, Drunk CS Professor at 2am, LeetCode Hard ELITE, Paged DevOps Engineer, Sarcastic British Tech Journalist, Open Source Maintainer, Sentient AI.
+*   **6 Roast Structures & 6 Signature Closers:** Yielding **15,000+ unique English roast variations**.
 *   **Local Ollama Auto-Detection:** Queries `http://localhost:11434/api/generate` running `qwen2.5-coder:1.5b`.
 *   **Multi-Tier Cloud Fallback:** If Ollama is offline, queries Hugging Face Serverless API (`Qwen2.5-Coder-32B` $\rightarrow$ `7B` $\rightarrow$ `1.5B` $\rightarrow$ `0.5B`).
-*   **Static Template Fallback:** If all cloud and local endpoints fail, gracefully falls back to curated rule-based templates (`src/roast/templates.py`).
+
+#### 3. 🎁 Easter Egg Engine
+Before LLM generation or static templates run, `generator._detect_easter_egg()` scans the raw code string for famous developer tropes:
+*   `Hello World`: Triggers a classic roast mocking beginner effort.
+*   `FizzBuzz`: Mocks corporate whiteboard interview rituals.
+*   `Empty Code`: Mocks submitting blank space.
+*   `TODO / pass` stubs: Mocks submitting unwritten placeholders.
+
+#### 4. 🖼️ Shareable Roast Cards (PNG Generator)
+Implements PIL-based image creation in `app.py` (`generate_roast_card_image`). Generates an 800x450 dark-themed social card containing the grade letter badge, total quality score, language, wrapped roast text, and `coderoast.dev` branding, available via a single-click Streamlit download button.
+
+#### 5. 🏆 Hall of Shame / Leaderboard
+Integrates local persistent JSON storage (`data/leaderboard.json`). Automatically saves and ranks the top 10 worst code submissions by lowest overall score, rendered dynamically in a Streamlit expander UI section.
 
 #### Code Metrics Injection
 Static code metrics are dynamically injected alongside the snippet to ensure technical context:
@@ -212,9 +230,10 @@ Code Snippet:
 ```
 
 #### Robust Fallback Hierarchy
-$$\text{Local Qwen / Gemini Chain} \longrightarrow \text{HF Cloud Qwen Multi-Tier} \longrightarrow \text{Rule-Based Templates}$$
+$$\text{Easter Eggs} \longrightarrow \text{Local Qwen / Gemini Chain} \longrightarrow \text{HF Cloud Qwen Multi-Tier} \longrightarrow \text{Rule-Based Templates}$$
 
 ---
+
 
 ### 2.6 Scoring Engine
 The scoring logic in `src/scoring/scorer.py` aggregates raw AST metrics into four dimensional scores (0 to 100).

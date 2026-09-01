@@ -26,15 +26,18 @@ It combines real static analysis metrics (lines of code, cyclomatic complexity, 
 
 - **🌐 Multi-Language Analysis:** Supports **Python**, **Java**, and **JavaScript** code snippets.
 - **📊 Real-Time Static AST Analysis:** Calculates Cyclomatic Complexity, Nesting Depth, Line Counts, Comment Ratios, Naming Conventions, and Code Duplication scores.
-- **🌲 Lightweight Random Forest Classifier:** Predicts code quality tiers (*Pristine, Acceptable, Questionable, Disaster*) based on NLP code tokenization (`classifier.pkl`, 340 KB).
-- **⚡ PyTorch Sequence LSTM:** Custom PyTorch model trained to score code severity on a 0–10 continuous scale.
+- **🎁 Easter Egg Engine:** Automatic pattern recognition for famous code tropes (`Hello World`, `FizzBuzz`, `Empty Code`, and `TODO/pass` stubs) with custom sarcastic responses.
 - **🇳🇵 Romanized Nepali AI Engine (Gemini Multi-Model Fallback):**
-  - Powered by a 4-model Google Gemini fallback chain (`gemini-2.5-flash` → `gemini-flash-lite-latest` → `gemini-3.5-flash-lite` → `gemini-3.1-flash-lite`).
+  - Powered by a 4-tier Google Gemini fallback chain (`gemini-2.5-flash` → `gemini-flash-lite-latest` → `gemini-3.5-flash-lite` → `gemini-3.1-flash-lite`).
   - **Sub-4-Second Speed**: Lite model optimization delivers fast (~3.7s) 800+ character Romanized Nepali roasts.
-  - **Dynamic Theme System**: Combines 5 personality tones, 8 cultural theme pools (Balen Shah dozers, TU exam delays, Nagdhunga jam, NTC 3G, Selroti, etc.), and clean authentic Nepali slangs for **420+ unique roast variations**.
-  - **High Daily Capacity**: ~4,520 free AI roasts/day.
-- **🤖 English AI Engine (Local Qwen2.5-Coder via Ollama):**
-  - 100% offline local GPU inference via **Ollama** (`qwen2.5-coder:1.5b`) with cloud API fallbacks.
+  - **Massive Combinatorial Theme System**: Combines 20 cultural theme pools (Balen Shah dozers, TU exam delays, Nagdhunga jam, Selroti, Wide body scam, etc.), 8 slang sets, 12 persona tones, 8 roast structures, and 7 signature closers for **15,000+ unique roast permutations**.
+  - **Strict Content Moderation**: Zero sexual vulgarity policy with hard-coded boundaries.
+- **🤖 English AI Engine (Local Qwen2.5-Coder via Ollama & Dynamic Theme Engine):**
+  - Powered by local `qwen2.5-coder:1.5b` with dynamic theme sampling.
+  - **12 Dynamic Cultural Themes**: Silicon Valley failures, Stack Overflow elitism, r/programminghorror, FAANG interview disasters, Cyberpunk 2077 bugs, Fyre Festival, Enterprise Jira hell, ChatGPT hallucination, Startup delusion, Linus Torvalds PR flames, Friday deploy apocalypses, and Y2K.
+  - **10 Tones, 6 Structures, 6 Signature Closers** yielding another **15,000+ unique roast variations**.
+- **🖼️ Shareable Roast Cards (PNG):** One-click PIL image generation (`🖼️ Download Shareable Roast Card (PNG)`) creating styled social media cards with grade badges, quality scores, and wrapped roast text.
+- **🏆 Hall of Shame / Leaderboard:** Persistent JSON tracking (`data/leaderboard.json`) ranking the top worst code snippets ever submitted with a dedicated Streamlit leaderboard UI.
 - **🎨 Interactive Streamlit Interface:** Features side-by-side code input & roast rendering, source-specific UI backgrounds, visual grade cards (*S to F* with randomized unhinged reactions per grade), Plotly radar charts, and customizable severity sliders.
 
 ---
