@@ -299,7 +299,7 @@ class LLMRoastGenerator:
 
             # Rotate slang sets to avoid same words every time
             slang_sets = [
-                "kukur, gadha, dimag navako, harami, khate, radi ko baan, pakhe, bheda",
+                "kukur, gadha, dimag navako, harami, khate, pakhe, bheda",
                 "hawa, khattam, lafada, pasa, kaathe, jhyaap, boka, gidi",
                 "chappar, boksi ko chela, sungur, gadha ko baccha, baal xaina, hait, tori",
             ]
@@ -322,7 +322,7 @@ class LLMRoastGenerator:
                 f"CODE ANALYSIS: Quote actual variable names, function names, logic flaws. Be SPECIFIC about what is wrong. "
                 f"CULTURAL FLAVOR FOR THIS ROAST: {theme_inspiration} "
                 f"SLANG TO USE: {selected_slang}. "
-                f"STRICT BOUNDARY: NEVER use explicit sexual vulgarities (do NOT use words like 'muji', 'lado', 'bhalu', or 'chikne'). Keep it strictly to software engineering comedy, cultural memes, and non-sexual insults. "
+                f"STRICT BOUNDARY: NEVER use explicit sexual vulgarities or offensive phrases (do NOT use words like 'radi', 'radi ko baan', 'kando', 'muji', 'lado', 'bhalu', or 'chikne'). Keep it strictly to software engineering comedy, cultural memes, and non-sexual insults. "
                 f"Write 8-12 sentences of pure savage Romanized Nepali. No bullets, no markdown, no code blocks. "
                 f"Be CREATIVE and ORIGINAL every time — never repeat the same jokes."
             )
