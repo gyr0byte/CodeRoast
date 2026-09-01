@@ -12,6 +12,11 @@ import streamlit as st
 import plotly.graph_objects as go
 import os
 import sys
+import json
+import io
+import base64
+from pathlib import Path
+from PIL import Image, ImageDraw, ImageFont
 
 # Ensure src is importable
 sys.path.insert(0, os.path.dirname(__file__))
@@ -174,6 +179,106 @@ st.markdown(
 # ─── Initialize ──────────────────────────────────────────────────────────────
 
 roast_generator = RoastGenerator()
+
+# ─── Hall of Shame / Leaderboard Helpers ─────────────────────────────────────
+
+LEADERBOARD_FILE = Path(__file__).parent / "data" / "leaderboard.json"
+
+def load_leaderboard():
+    """Load top worst and best submissions from local JSON storage."""
+    if not LEADERBOARD_FILE.exists():
+        return []
+    try:
+        with open(LEADERBOARD_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return []
+
+def save_to_leaderboard(code_snippet: str, language: str, score: float, grade: str, roast_text: str):
+    """Save a roast result to the persistent Hall of Shame leaderboard."""
+    LEADERBOARD_FILE.parent.mkdir(parents=True, exist_ok=True)
+    board = load_leaderboard()
+    
+    # Avoid duplicate exact code entries
+    code_sub = code_snippet[:150].strip()
+    for item in board:
+        if item.get("snippet", "") == code_sub:
+            return
+            
+    board.append({
+        "timestamp": os.getenv("CURRENT_TIME", "2026-09-01"),
+        "language": language,
+        "score": score,
+        "grade": grade,
+        "snippet": code_sub,
+        "roast": roast_text[:180] + ("..." if len(roast_text) > 180 else "")
+    })
+    
+    # Keep top 10 worst code scores
+    board.sort(key=lambda x: x["score"])
+    board = board[:10]
+    
+    try:
+        with open(LEADERBOARD_FILE, "w", encoding="utf-8") as f:
+            json.dump(board, f, indent=2)
+    except Exception:
+        pass
+
+def generate_roast_card_image(grade: str, score: float, language: str, roast: str) -> bytes:
+    """Generate a shareable PIL image card with fire theme, grade, score, and roast text."""
+    width, height = 800, 450
+    img = Image.new("RGB", (width, height), color=(14, 17, 23))
+    draw = ImageDraw.Draw(img)
+    
+    # Header gradient border top
+    for x in range(width):
+        r = int(255 - (x / width) * 100)
+        g = int(75 + (x / width) * 100)
+        draw.line([(x, 0), (x, 8)], fill=(r, g, 0))
+
+    # Try loading default font
+    font_large = ImageFont.load_default()
+    
+    # Outer Card Box
+    draw.rectangle([(20, 20), (width - 20, height - 20)], outline=(255, 75, 75), width=2)
+    
+    # Title
+    draw.text((40, 40), "🔥 CodeRoast - Official Verdict", fill=(255, 140, 0), font=font_large)
+    
+    # Grade & Score
+    grade_str = grade.split(" ")[0] if grade else "F"
+    draw.text((40, 90), f"Grade: {grade_str}", fill=(255, 75, 75), font=font_large)
+    draw.text((200, 90), f"Overall Score: {score}/100", fill=(255, 215, 0), font=font_large)
+    draw.text((450, 90), f"Language: {language}", fill=(170, 170, 170), font=font_large)
+    
+    draw.line([(40, 130), (width - 40, 130)], fill=(51, 51, 51), width=1)
+    
+    # Roast Text Wrapping
+    clean_r = roast.replace("🤖 [Gemini Flash AI Roast]: ", "").replace("🤖 [Qwen2.5-Coder AI Roast]: ", "").replace("🤖 ", "")
+    words = clean_r.split()
+    lines = []
+    curr_line = ""
+    for w in words:
+        if len(curr_line + " " + w) > 70:
+            lines.append(curr_line)
+            curr_line = w
+        else:
+            curr_line += " " + w if curr_line else w
+    if curr_line:
+        lines.append(curr_line)
+        
+    # Draw up to 8 lines
+    y = 150
+    for line in lines[:8]:
+        draw.text((40, y), line, fill=(220, 220, 220), font=font_large)
+        y += 24
+        
+    # Footer
+    draw.text((40, height - 45), "Share your pain on GitHub/Twitter | coderoast.dev 🔥", fill=(136, 136, 136), font=font_large)
+    
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return buf.getvalue()
 
 # ─── Lazy Model Loaders ───────────────────────────────────────────────────────
 
