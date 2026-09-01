@@ -1,0 +1,10 @@
+[
+  {
+    "timestamp": "2026-09-01",
+    "language": "Python",
+    "score": 25.0,
+    "grade": "F \u2014 Please Seek Help",
+    "snippet": "def bad(): pass",
+    "roast": "This function is a total disaster."
+  }
+]

@@ -236,17 +236,19 @@ def generate_roast_card_image(grade: str, score: float, language: str, roast: st
         g = int(75 + (x / width) * 100)
         draw.line([(x, 0), (x, 8)], fill=(r, g, 0))
 
-    # Try loading default font
+    # Load font
     font_large = ImageFont.load_default()
     
     # Outer Card Box
     draw.rectangle([(20, 20), (width - 20, height - 20)], outline=(255, 75, 75), width=2)
     
     # Title
-    draw.text((40, 40), "🔥 CodeRoast - Official Verdict", fill=(255, 140, 0), font=font_large)
+    draw.text((40, 40), "CodeRoast - Official Verdict", fill=(255, 140, 0), font=font_large)
     
-    # Grade & Score
-    grade_str = grade.split(" ")[0] if grade else "F"
+    # Grade & Score (Sanitize non-ascii like em dashes)
+    grade_clean = grade.encode("ascii", "ignore").decode("ascii").strip()
+    grade_str = grade_clean.split(" ")[0] if grade_clean else "F"
+    
     draw.text((40, 90), f"Grade: {grade_str}", fill=(255, 75, 75), font=font_large)
     draw.text((200, 90), f"Overall Score: {score}/100", fill=(255, 215, 0), font=font_large)
     draw.text((450, 90), f"Language: {language}", fill=(170, 170, 170), font=font_large)
@@ -254,12 +256,18 @@ def generate_roast_card_image(grade: str, score: float, language: str, roast: st
     draw.line([(40, 130), (width - 40, 130)], fill=(51, 51, 51), width=1)
     
     # Roast Text Wrapping
-    clean_r = roast.replace("🤖 [Gemini Flash AI Roast]: ", "").replace("🤖 [Qwen2.5-Coder AI Roast]: ", "").replace("🤖 ", "")
+    clean_r = (
+        roast.replace("🤖 [Gemini Flash AI Roast]: ", "")
+        .replace("🤖 [Qwen2.5-Coder AI Roast]: ", "")
+        .replace("🤖 ", "")
+        .encode("ascii", "ignore")
+        .decode("ascii")
+    )
     words = clean_r.split()
     lines = []
     curr_line = ""
     for w in words:
-        if len(curr_line + " " + w) > 70:
+        if len(curr_line + " " + w) > 75:
             lines.append(curr_line)
             curr_line = w
         else:
@@ -274,11 +282,12 @@ def generate_roast_card_image(grade: str, score: float, language: str, roast: st
         y += 24
         
     # Footer
-    draw.text((40, height - 45), "Share your pain on GitHub/Twitter | coderoast.dev 🔥", fill=(136, 136, 136), font=font_large)
+    draw.text((40, height - 45), "Share your pain on GitHub/Twitter | coderoast.dev", fill=(136, 136, 136), font=font_large)
     
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     return buf.getvalue()
+
 
 # ─── Lazy Model Loaders ───────────────────────────────────────────────────────
 

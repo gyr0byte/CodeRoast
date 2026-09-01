@@ -68,6 +68,12 @@ class RoastGenerator:
         """
         is_nepali = language.lower() in ["nepali", "roman_nepali", "roman nepali"]
 
+        # ── Easter Egg Detection ────────────────────────────────────────
+        easter_egg = self._detect_easter_egg(code)
+        if easter_egg:
+            roast_parts = [random.choice(self.templates[easter_egg])]
+            return self._finalize(roast_parts, severity)
+
         # Try dynamic LLM generation first if requested
         if use_llm and self.llm_generator is not None and code:
             from src.roast.llm_generator import is_refusal
@@ -89,12 +95,6 @@ class RoastGenerator:
             return random.choice(nepali_list)
 
         roast_parts = []
-
-        # ── Easter Egg Detection ────────────────────────────────────────
-        easter_egg = self._detect_easter_egg(code)
-        if easter_egg:
-            roast_parts.append(random.choice(self.templates[easter_egg]))
-            return self._finalize(roast_parts, severity)
 
         # ── Check for language mismatch ─────────────────────────────────
         if metrics.get("_language_mismatch", False):
@@ -233,7 +233,7 @@ class RoastGenerator:
         return "x"  # Classic bad name
 
     @staticmethod
-    def _detect_easter_egg(code: str) -> str | None:
+    def _detect_easter_egg(code: str) -> Optional[str]:
         """
         Detect famous code patterns that deserve special Easter Egg roasts.
 
@@ -243,35 +243,23 @@ class RoastGenerator:
         if not code or not code.strip():
             return "easter_empty"
 
-        stripped = code.strip().lower()
-        stripped_no_ws = re.sub(r'\s+', '', stripped)
+        lowered = code.lower()
 
-        # Hello World detection (Python/Java/JS variants)
-        hello_patterns = [
-            'print("hello world")', "print('hello world')",
-            'print("hello, world")', "print('hello, world')",
-            'print("helloworld")', "print('helloworld')",
-            'system.out.println("hello world")',
-            'system.out.println("hello, world")',
-            'console.log("hello world")', "console.log('hello world')",
-            'console.log("hello, world")', "console.log('hello, world')",
-        ]
-        for pattern in hello_patterns:
-            if pattern.replace(' ', '') in stripped_no_ws:
-                # Only trigger if the code is very short (< 5 meaningful lines)
-                meaningful_lines = [l for l in code.strip().splitlines() if l.strip() and not l.strip().startswith('#') and not l.strip().startswith('//')]
-                if len(meaningful_lines) <= 5:
-                    return "easter_hello_world"
+        # Hello World detection
+        if "hello" in lowered and "world" in lowered:
+            meaningful = [l for l in code.strip().splitlines() if l.strip() and not l.strip().startswith(("#", "//"))]
+            if len(meaningful) <= 5:
+                return "easter_hello_world"
 
         # FizzBuzz detection
-        if 'fizz' in stripped and 'buzz' in stripped:
+        if "fizz" in lowered and "buzz" in lowered:
             return "easter_fizzbuzz"
 
-        # TODO/pass stub detection (more TODOs + pass than real code)
-        todo_count = stripped.count('todo')
-        pass_count = stripped.count('pass')
-        meaningful_lines = [l for l in code.strip().splitlines() if l.strip() and not l.strip().startswith('#') and not l.strip().startswith('//')]
-        if meaningful_lines and (todo_count + pass_count) >= len(meaningful_lines) * 0.5 and (todo_count + pass_count) >= 3:
+        # TODO / pass stub detection
+        todo_count = lowered.count("todo")
+        pass_count = lowered.count("pass")
+        meaningful = [l for l in code.strip().splitlines() if l.strip() and not l.strip().startswith(("#", "//"))]
+        if meaningful and (todo_count + pass_count) >= 3:
             return "easter_todo"
 
         return None
