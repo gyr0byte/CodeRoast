@@ -231,3 +231,47 @@ class RoastGenerator:
         if bad_names:
             return random.choice(bad_names)
         return "x"  # Classic bad name
+
+    @staticmethod
+    def _detect_easter_egg(code: str) -> str | None:
+        """
+        Detect famous code patterns that deserve special Easter Egg roasts.
+
+        Returns:
+            Template key string if an easter egg is detected, else None.
+        """
+        if not code or not code.strip():
+            return "easter_empty"
+
+        stripped = code.strip().lower()
+        stripped_no_ws = re.sub(r'\s+', '', stripped)
+
+        # Hello World detection (Python/Java/JS variants)
+        hello_patterns = [
+            'print("hello world")', "print('hello world')",
+            'print("hello, world")', "print('hello, world')",
+            'print("helloworld")', "print('helloworld')",
+            'system.out.println("hello world")',
+            'system.out.println("hello, world")',
+            'console.log("hello world")', "console.log('hello world')",
+            'console.log("hello, world")', "console.log('hello, world')",
+        ]
+        for pattern in hello_patterns:
+            if pattern.replace(' ', '') in stripped_no_ws:
+                # Only trigger if the code is very short (< 5 meaningful lines)
+                meaningful_lines = [l for l in code.strip().splitlines() if l.strip() and not l.strip().startswith('#') and not l.strip().startswith('//')]
+                if len(meaningful_lines) <= 5:
+                    return "easter_hello_world"
+
+        # FizzBuzz detection
+        if 'fizz' in stripped and 'buzz' in stripped:
+            return "easter_fizzbuzz"
+
+        # TODO/pass stub detection (more TODOs + pass than real code)
+        todo_count = stripped.count('todo')
+        pass_count = stripped.count('pass')
+        meaningful_lines = [l for l in code.strip().splitlines() if l.strip() and not l.strip().startswith('#') and not l.strip().startswith('//')]
+        if meaningful_lines and (todo_count + pass_count) >= len(meaningful_lines) * 0.5 and (todo_count + pass_count) >= 3:
+            return "easter_todo"
+
+        return None
