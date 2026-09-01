@@ -485,6 +485,15 @@ with col2:
             roast_style = "background: linear-gradient(135deg, #78350f 0%, #1c1917 100%); border-left: 5px solid #fbbf24; box-shadow: 0 4px 20px rgba(251, 191, 36, 0.15);"
             clean_roast_text = roast_text
 
+        # Save to leaderboard (Hall of Shame)
+        save_to_leaderboard(
+            code_snippet=code_input,
+            language=language,
+            score=scores["overall"],
+            grade=scores["grade"],
+            roast_text=clean_roast_text
+        )
+
         st.markdown(f"""
         <div class="roast-box" style="{roast_style}">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
@@ -495,6 +504,22 @@ with col2:
             <em style="color: #888;">— {grade_reaction}</em>
         </div>
         """, unsafe_allow_html=True)
+
+        # Downloadable Shareable Roast Card Button
+        card_img_bytes = generate_roast_card_image(
+            grade=scores["grade"],
+            score=scores["overall"],
+            language=language,
+            roast=clean_roast_text
+        )
+        
+        st.download_button(
+            label="🖼️ Download Shareable Roast Card (PNG)",
+            data=card_img_bytes,
+            file_name=f"coderoast_{scores['grade'].split()[0]}_grade.png",
+            mime="image/png",
+            use_container_width=True
+        )
     else:
         st.markdown("""
         <div style="text-align: center; padding: 80px 20px; color: #555;">
@@ -507,6 +532,7 @@ with col2:
             </p>
         </div>
         """, unsafe_allow_html=True)
+
 
 # Render Scoring System below the pasting code and roasting fields
 if has_results:
@@ -613,6 +639,28 @@ if has_results:
         for i, (name, val) in enumerate(metric_items):
             with metric_cols[i % 4]:
                 st.metric(label=name, value=val)
+
+# ─── Leaderboard / Hall of Shame Section ─────────────────────────────────────
+
+st.markdown("---")
+with st.expander("🏆 Hall of Shame — Top Worst Code Submissions", expanded=False):
+    leaderboard_data = load_leaderboard()
+    if not leaderboard_data:
+        st.info("No entries in the Hall of Shame yet. Submit some atrocious code to claim your spot! 🔥")
+    else:
+        st.caption("Showing top worst code snippets submitted to CodeRoast (ranked by lowest quality score):")
+        for rank, entry in enumerate(leaderboard_data, 1):
+            st.markdown(f"""
+            <div style="background: #111827; border-left: 4px solid #ef4444; padding: 12px 16px; margin: 8px 0; border-radius: 6px;">
+                <div style="display: flex; justify-content: space-between; font-weight: 600;">
+                    <span style="color: #f87171;">#{rank} — {entry.get('grade', 'F')} ({entry.get('score', 0)}/100)</span>
+                    <span style="color: #9ca3af; font-size: 0.85rem;">{entry.get('language', 'Python')}</span>
+                </div>
+                <div style="color: #d1d5db; font-size: 0.9rem; margin-top: 6px; font-style: italic;">
+                    "{entry.get('roast', '')}"
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
 # ─── Footer ──────────────────────────────────────────────────────────────────
 
