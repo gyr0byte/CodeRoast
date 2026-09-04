@@ -548,38 +548,6 @@ st.markdown("""
 
 roast_generator = RoastGenerator()
 
-# ─── Hall of Shame / Leaderboard Helpers ─────────────────────────────────────
-
-LEADERBOARD_FILE = Path(__file__).parent / "data" / "leaderboard.json"
-
-def load_leaderboard():
-    """Load top worst and best submissions from local JSON storage."""
-    if not LEADERBOARD_FILE.exists():
-        return []
-    try:
-        with open(LEADERBOARD_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return []
-
-def save_to_leaderboard(code_snippet: str, language: str, score: float, grade: str, roast_text: str):
-    """Save a roast result to the persistent Hall of Shame leaderboard."""
-    LEADERBOARD_FILE.parent.mkdir(parents=True, exist_ok=True)
-    board = load_leaderboard()
-    board.append({
-        "code": code_snippet[:300],
-        "language": language,
-        "score": score,
-        "grade": grade,
-        "roast": roast_text[:300]
-    })
-    board = sorted(board, key=lambda x: x.get("score", 100))[:10]
-    try:
-        with open(LEADERBOARD_FILE, "w", encoding="utf-8") as f:
-            json.dump(board, f, indent=2)
-    except Exception:
-        pass
-
 @st.cache_resource
 def get_classifier():
     try:
@@ -885,15 +853,6 @@ with col2:
             </div>
             """, unsafe_allow_html=True)
 
-        # Save to leaderboard (Hall of Shame)
-        save_to_leaderboard(
-            code_snippet=code_sub,
-            language=language,
-            score=scores["overall"],
-            grade=scores["grade"],
-            roast_text=clean_roast_text
-        )
-
         # ─── 🔊 Read Aloud Voice Player ─────────────────────────────────────────
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown("##### 🔊 Read Aloud Voice Narration")
@@ -990,28 +949,6 @@ with col2:
         </div>
         """, unsafe_allow_html=True)
 
-
-# ─── Leaderboard / Hall of Shame Section ─────────────────────────────────────
-
-st.markdown("<br><hr>", unsafe_allow_html=True)
-with st.expander("🏆 Hall of Shame — Top Worst Code Submissions", expanded=False):
-    leaderboard_data = load_leaderboard()
-    if not leaderboard_data:
-        st.info("No entries in the Hall of Shame yet. Submit some atrocious code to claim your spot! 🔥")
-    else:
-        st.caption("Showing top worst code snippets submitted to CodeRoast:")
-        for rank, entry in enumerate(leaderboard_data, 1):
-            st.markdown(f"""
-            <div style="background: #0f172a; border-left: 4px solid #ef4444; padding: 12px 16px; margin: 8px 0; border-radius: 6px;">
-                <div style="display: flex; justify-content: space-between; font-weight: 600;">
-                    <span style="color: #f87171;">#{rank} — {entry.get('grade', 'F')} ({entry.get('score', 0)}/100)</span>
-                    <span style="color: #94a3b8; font-size: 0.85rem;">{entry.get('language', 'Python')}</span>
-                </div>
-                <div style="color: #cbd5e1; font-size: 0.9rem; margin-top: 6px; font-style: italic;">
-                    "{entry.get('roast', '')}"
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
 
 # ─── Footer ──────────────────────────────────────────────────────────────────
 
