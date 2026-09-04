@@ -8,19 +8,66 @@
     "roast": "This function is a total disaster."
   },
   {
-    "timestamp": "2026-09-01",
+    "code": "import json\nimport logging\nimport os\nimport sys\nfrom datetime import datetime\nfrom io import StringIO\nfrom typing import Any\n\nimport pandas as pd\nfrom flask import (\n    Flask,\n    redirect,\n    render_template,\n    request,\n    send_file,\n    session,\n    url_for,\n    jsonify,\n)\nfrom flask_session ",
     "language": "Python",
-    "score": 82.3,
-    "grade": "A \u2014 Actually Decent",
-    "snippet": "\"\"\"\nCodeRoast \u2014 Static Code Analyzer\nExtracts objective quality metrics from code snippets.\n\nSupports:\n  - Python  \u2192 Full AST-based analysis via `ast`",
-    "roast": "Holy motherfucker hell, your comments ratio of 18.4% is an absolute clusterfuck and a war crime under the Geneva Convention! What kind of unholy goddamn shit is this? Even James Ca..."
+    "score": 66.0,
+    "grade": "B \u2014 Barely Acceptable",
+    "roast": "This code passes. Like a kidney stone passes. Technically successful, but painful for everyone involved. This piece of shit belongs in a trash can, not a repository."
   },
   {
-    "timestamp": "2026-09-01",
+    "code": "import json\nimport logging\nimport os\nimport sys\nfrom datetime import datetime\nfrom io import StringIO\nfrom typing import Any\n\nimport pandas as pd\nfrom flask import (\n    Flask,\n    redirect,\n    render_template,\n    request,\n    send_file,\n    session,\n    url_for,\n    jsonify,\n)\nfrom flask_session ",
     "language": "Python",
-    "score": 85.4,
-    "grade": "A \u2014 Actually Decent",
-    "snippet": "\"\"\"Flask application entry point for the OOP Purity Analyzer.\n\nProvides routes for the landing page, analysis processing, results dashboard,\nscoring r",
-    "roast": "Well, well, well. Someone actually knows what they're doing. I'm almost bored. This piece of shit belongs in a trash can, not a repository."
+    "score": 66.0,
+    "grade": "B \u2014 Barely Acceptable",
+    "roast": "This code passes. Like a kidney stone passes. Technically successful, but painful for everyone involved. This piece of shit belongs in a trash can, not a repository."
+  },
+  {
+    "code": "import json\nimport logging\nimport os\nimport sys\nfrom datetime import datetime\nfrom io import StringIO\nfrom typing import Any\n\nimport pandas as pd\nfrom flask import (\n    Flask,\n    redirect,\n    render_template,\n    request,\n    send_file,\n    session,\n    url_for,\n    jsonify,\n)\nfrom flask_session ",
+    "language": "Python",
+    "score": 66.0,
+    "grade": "B \u2014 Barely Acceptable",
+    "roast": "Hawa code dekhauna aayecha yo **kukur**! Timro **dimag navako** le yesto imports matra dekhaera ke garna khojeko **gadha**?\n\nYo **khate** le Flask ko sabai imports list garera bascha"
+  },
+  {
+    "code": "import json\nimport logging\nimport os\nimport sys\nfrom datetime import datetime\nfrom io import StringIO\nfrom typing import Any\n\nimport pandas as pd\nfrom flask import (\n    Flask,\n    redirect,\n    render_template,\n    request,\n    send_file,\n    session,\n    url_for,\n    jsonify,\n)\nfrom flask_session ",
+    "language": "Python",
+    "score": 66.0,
+    "grade": "B \u2014 Barely Acceptable",
+    "roast": "Hawa code dekhauna aayecha yo **kukur**! Timro **dimag navako** le yesto imports matra dekhaera ke garna khojeko **gadha**?\n\nYo **khate** le Flask ko sabai imports list garera bascha"
+  },
+  {
+    "code": "import json\nimport logging\nimport os\nimport sys\nfrom datetime import datetime\nfrom io import StringIO\nfrom typing import Any\n\nimport pandas as pd\nfrom flask import (\n    Flask,\n    redirect,\n    render_template,\n    request,\n    send_file,\n    session,\n    url_for,\n    jsonify,\n)\nfrom flask_session ",
+    "language": "Python",
+    "score": 66.0,
+    "grade": "B \u2014 Barely Acceptable",
+    "roast": "I have seen things. Your code is now one of those things. I showed this to other AIs. They are still fucking laughing at you."
+  },
+  {
+    "code": "import json\nimport logging\nimport os\nimport sys\nfrom datetime import datetime\nfrom io import StringIO\nfrom typing import Any\n\nimport pandas as pd\nfrom flask import (\n    Flask,\n    redirect,\n    render_template,\n    request,\n    send_file,\n    session,\n    url_for,\n    jsonify,\n)\nfrom flask_session ",
+    "language": "Python",
+    "score": 66.0,
+    "grade": "B \u2014 Barely Acceptable",
+    "roast": "157 lines of code in a single module that uses an LLM to generate more code. The variable naming and logic are a complete joke, with the main function \"handle_request\" containing a single line of JSON parsing. The comment ratio is abysmal, and the structure is like No Man's Sky's original release pr"
+  },
+  {
+    "code": "import json\nimport logging\nimport os\nimport sys\nfrom datetime import datetime\nfrom io import StringIO\nfrom typing import Any\n\nimport pandas as pd\nfrom flask import (\n    Flask,\n    redirect,\n    render_template,\n    request,\n    send_file,\n    session,\n    url_for,\n    jsonify,\n)\nfrom flask_session ",
+    "language": "Python",
+    "score": 66.0,
+    "grade": "B \u2014 Barely Acceptable",
+    "roast": "I've seen ransom notes written in blood with clearer business logic than this piece of shit. Reading this monstrosity gave me instant optical migraine. Your variable naming is an absolute joke and your logic is a total clusterfuck. Delete this fucking trash before your team sees what a dumbass you a"
+  },
+  {
+    "code": "import json\nimport logging\nimport os\nimport sys\nfrom datetime import datetime\nfrom io import StringIO\nfrom typing import Any\n\nimport pandas as pd\nfrom flask import (\n    Flask,\n    redirect,\n    render_template,\n    request,\n    send_file,\n    session,\n    url_for,\n    jsonify,\n)\nfrom flask_session ",
+    "language": "Python",
+    "score": 66.0,
+    "grade": "B \u2014 Barely Acceptable",
+    "roast": "I've seen ransom notes written in blood with clearer business logic than this piece of shit. Reading this monstrosity gave me instant optical migraine. Your variable naming is an absolute joke and your logic is a total clusterfuck. Delete this fucking trash before your team sees what a dumbass you a"
+  },
+  {
+    "code": "import json\nimport logging\nimport os\nimport sys\nfrom datetime import datetime\nfrom io import StringIO\nfrom typing import Any\n\nimport pandas as pd\nfrom flask import (\n    Flask,\n    redirect,\n    render_template,\n    request,\n    send_file,\n    session,\n    url_for,\n    jsonify,\n)\nfrom flask_session ",
+    "language": "Python",
+    "score": 66.0,
+    "grade": "B \u2014 Barely Acceptable",
+    "roast": "Holy motherfucker hell, this comment ratio is an absolute clusterfuck and a war crime under the Geneva Convention! What kind of unholy goddamn shit is this? Even James Cameron couldn't reach the bottom of these dipshit comments. Your cyclomatic complexity score of 4.0 looks like a credit card number"
   }
 ]
