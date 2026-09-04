@@ -700,17 +700,14 @@ class LLMRoastGenerator:
                 ]
             text = random.choice(openers) + " " + text.strip() + random.choice(closers)
 
-        # 3. Filter out forbidden terms (randikhola, randi, rape, murder, etc.)
+        # 3. Filter out forbidden terms (rape, murder, etc.)
         forbidden_map = {
-            'randikhola': 'bagmati khola',
-            'randi': 'harami',
             'rape': 'goddamn destroy',
             'raped': 'goddamn destroyed',
             'raping': 'goddamn destroying',
             'murder': 'destroy',
             'murdered': 'destroyed',
-            'murdering': 'destroying',
-            'kill yourself': 'quit coding'
+            'murdering': 'destroying'
         }
         import re
         for term, replacement in forbidden_map.items():
