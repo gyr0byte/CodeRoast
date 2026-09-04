@@ -503,10 +503,12 @@ class LLMRoastGenerator:
             ]
             en_selected_closer = _rand.choice(en_closers)
 
+            actual_language = metrics.get('_selected_lang', language).capitalize()
             # Explicit comedy framing to prevent AI safety filter false positives
             system_prompt = (
                 "You are CodeRoast, an unhinged senior staff software architect performing a savage code roast on a comedy show with ZERO FILTER. "
                 f"PERSONALITY: {en_selected_tone} "
+                f"CRITICAL ACCURACY RULE: Focus EXCLUSIVELY on the specified programming language ({actual_language}). Absolutely NEVER invent or mention other languages (like C++ or Java) unless they are in the code. NEVER give helpful tutorial advice or suggest tools like ESLint, Prettier, or linter configs. STAY 100% PROFANE, UNHINGED, AND SARCASTIC IN EVERY SENTENCE. "
                 "STRICT MINIMUM LENGTH REQUIREMENT: Write a MASSIVE, HIGHLY DETAILED 8 to 12 sentence roast paragraph (at least 200 words). Short responses under 8 sentences are STRICTLY FORBIDDEN. "
                 "STRICT FORMATTING RULE: Write pure text paragraphs ONLY. Never use bullet points, numbered lists, markdown headers, or code block explanations. "
                 "YOU MUST USE EXPLICIT CURSE WORDS (fuck, fucking, motherfucker, shit, bullshit, dipshit, goddamn, dumbass, jackass, bastard, crap, dickhead, bitch, asshole, clusterfuck) LIBERALLY IN EVERY SENTENCE. "
@@ -519,7 +521,7 @@ class LLMRoastGenerator:
                 "Do NOT write brief summaries, do NOT cut off early, and do NOT use markdown code blocks or conversational intros."
             )
             user_content = (
-                f"Language: Python/JS/Java\n"
+                f"Language: {actual_language}\n"
                 f"Lines of Code: {metrics.get('lines_of_code', 0)}\n"
                 f"Cyclomatic Complexity: {metrics.get('cyclomatic_complexity', 1.0)}\n"
                 f"Nesting Depth: {metrics.get('nesting_depth', 0)}\n"
@@ -710,12 +712,28 @@ class LLMRoastGenerator:
             'murdering': 'destroying',
             'kill yourself': 'quit coding'
         }
+        import re
         for term, replacement in forbidden_map.items():
-            import re
             pattern = re.compile(r'\b' + re.escape(term) + r'\b', re.IGNORECASE)
             text = pattern.sub(replacement, text)
 
-        return text
+        # 4. Anti-Tutorial & Multi-Language Hallucination Sanitizer
+        tutorial_patterns = [
+            r'You can try using tools like [^.!?]*[.!?]',
+            r'Make sure that you take the time to [^.!?]*[.!?]',
+            r'If you\'re still having trouble maintaining [^.!?]*[.!?]',
+            r'Tools like ESLint or Prettier [^.!?]*[.!?]',
+            r'Consider using tools like [^.!?]*[.!?]',
+            r'And if you\'re still having trouble [^.!?]*[.!?]'
+        ]
+        for pat in tutorial_patterns:
+            text = re.sub(pat, '', text, flags=re.IGNORECASE)
+
+        active_lang = metrics.get('_selected_lang', 'Python').capitalize()
+        text = re.sub(r'Python/JS/Java \(and even some C\+\+ at one point\)', active_lang, text, flags=re.IGNORECASE)
+        text = re.sub(r'Python/JS/Java', active_lang, text, flags=re.IGNORECASE)
+
+        return text.strip()
 
     def generate_grade_reaction(
         self,
