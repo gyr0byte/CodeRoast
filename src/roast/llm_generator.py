@@ -455,7 +455,7 @@ class LLMRoastGenerator:
                 f"Write one continuous profane roast paragraph (8-12 sentences, 200+ words). "
                 f"Use curse words (fuck, shit, bullshit, goddamn, dumbass, asshole, clusterfuck) in every sentence. "
                 f"Quote actual variable names and function names from the code. Be specific about flaws. "
-                f"Draw inspiration from: {flavor_hint}. "
+                f"Draw inspiration from: {flavor_hints}. "
                 f"End with: {closer_hint}. "
                 f"Language is {actual_language} — do NOT mention other languages. "
                 f"No bullet points, no markdown, no helpful advice, no tool suggestions. Pure unhinged comedy roast only."
