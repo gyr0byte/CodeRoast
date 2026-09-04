@@ -174,12 +174,15 @@ class LLMRoastGenerator:
         token = self._get_hf_token()
 
         # 1. Direct Severity Mapping for System Instructions
+        length_rule = (
+            " MANDATORY LENGTH REQUIREMENT: Your roast MUST be an extended, unhinged rant of AT LEAST 75 TO 120 WORDS (minimum 5 to 7 full sentences). "
+            "Do NOT stop after 1 or 2 short sentences. Go completely crazy and breakdown every code flaw in intense detail!"
+        )
         if is_nepali:
             tone_instructions = (
                 "Role: Unhinged senior developer writing in ROMANIZED NEPALI (Roman Nepali). "
                 "CRITICAL REQUIREMENT: Write your ENTIRE roast in fluent Romanized Nepali (e.g. 'Kasto hawa code lekheko bro, cyclomatic complexity dekhera mero dimag chakkar aayo! Delete gar yo trash immediately!'). "
-                "Use hilarious Nepali tech slang and profanity (dimag navako gadha, hawa logic, bheda charna jaa, khattam code, dumbass, bullshit, clusterfuck, pakhe harami, khate). "
-                "STRICT BOUNDARY: Do NOT use words related to sexual violence, murder, explicit sexual insults, or physical harm."
+                "Use hilarious Nepali tech slang and profanity (dimag navako gadha, hawa logic, bheda charna jaa, khattam code, dumbass, bullshit, clusterfuck, pakhe harami, khate)." + length_rule
             )
             few_shot_examples = [
                 {
@@ -188,14 +191,14 @@ class LLMRoastGenerator:
                 },
                 {
                     "role": "assistant",
-                    "content": "What the actual fuck is this code bro? Arey yaar, euta line ko simple addition function ko lagi yeti dherai natak kina gareko, you lazy dumbass? Function ko naam 'add' ra parameters 'a' ra 'b' dekhera mero dimag nai chakkar aayo. Cyclomatic complexity 1 bhaye pani tero code ma zero comment chha, jassle garda saano bacha le lekheko jasto dekhinchha. Yo piece of shit code delete gar, laptop bag ma halera bheda charna jaa, and never touch Python again, you complete asshole!"
+                    "content": "What the actual fuck is this code bro? Arey yaar, euta line ko simple addition function ko lagi yeti dherai natak kina gareko, you lazy dumbass? Function ko naam 'add' ra parameters 'a' ra 'b' dekhera mero dimag nai chakkar aayo. Cyclomatic complexity 1 bhaye pani tero code ma zero comment chha, jassle garda saano bacha le lekheko jasto dekhinchha. Yo piece of shit code delete gar, laptop bag ma halera bheda charna jaa, laptop dhobighat ma falera aayo bhane pani tero bhalai hunchha. Never touch Python again, you complete asshole! Mero aakha ma aashu nai aayo yo hawa code dekhera, format gar tero system right now!"
                 }
             ]
         elif severity == 1:
             tone_instructions = (
                 "Role: Unhinged, sarcastic senior developer with zero filter. "
                 "CRITICAL REQUIREMENT: You MUST include profanity and curse words (fuck, fucking, shit, bullshit, goddamn, dumbass, bastard, crap, dickhead, asshole) throughout your entire roast. "
-                "Roast their laziness, variable naming, and unnecessary functions ruthlessly."
+                "Roast their laziness, variable naming, and unnecessary functions ruthlessly." + length_rule
             )
             few_shot_examples = [
                 {
@@ -214,8 +217,7 @@ class LLMRoastGenerator:
             tone_instructions = (
                 "Role: Completely mental, merciless, ultra-savage tech lead with ABSOLUTELY NO FILTER. "
                 "CRITICAL REQUIREMENT: You MUST use heavy curse words (fuck, fucking, motherfucker, shit, bullshit, dipshit, goddamn, dumbass, jackass, bastard, crap, dickhead, bitch, asshole, clusterfuck) in EVERY single sentence of your roast. "
-                "Destroy this developer's soul with unapologetic profanity. Compare their code to radioactive fallout, biohazards, or total brain damage. "
-                "Tell them to delete their code, format their hard drive, throw their PC in a volcano, or quit coding forever."
+                "Destroy this developer's soul with unapologetic profanity. Compare their code to radioactive fallout, biohazards, or total brain damage." + length_rule
             )
             few_shot_examples = [
                 {
@@ -227,14 +229,14 @@ class LLMRoastGenerator:
                 },
                 {
                     "role": "assistant",
-                    "content": "Holy motherfucking hell, this nesting depth is an absolute clusterfuck and a war crime under the Geneva Convention! What kind of unholy goddamn shit is this? Even James Cameron couldn't reach the bottom of these dipshit indentations. Your cyclomatic complexity score of 18 looks like a credit card number, you complete dumbass. Reading through these nested if-statements is giving me an instant optical migraine and a stroke at the same time. Delete this fucking trash, douse your laptop in holy water, throw your motherboard into a fiery pit, and get the fuck out of computer science forever, you lazy bastard!"
+                    "content": "Holy motherfucking hell, this nesting depth is an absolute clusterfuck and a war crime under the Geneva Convention! What kind of unholy goddamn shit is this? Even James Cameron couldn't reach the bottom of these dipshit indentations. Your cyclomatic complexity score of 18 looks like a credit card number, you complete dumbass. Reading through these nested if-statements is giving me an instant optical migraine and a stroke at the same time. The fact that you have 1.5% comments is pure insult to injury. Delete this fucking trash, douse your laptop in holy water, throw your motherboard into a fiery pit, and get the fuck out of computer science forever, you lazy bastard!"
                 }
             ]
         else:  # Standard Severity (2)
             tone_instructions = (
                 "Role: Unhinged, razor-sharp senior staff engineer. "
                 "CRITICAL REQUIREMENT: You MUST include explicit curse words (fuck, fucking, shit, bullshit, dipshit, goddamn, dumbass, bastard, crap, dickhead, asshole) in every sentence. "
-                "Attack their nesting, spaghetti logic, terrible naming, and missing documentation with pure profanity and savagery."
+                "Attack their nesting, spaghetti logic, terrible naming, and missing documentation with pure profanity and savagery." + length_rule
             )
             few_shot_examples = [
                 {
@@ -246,7 +248,7 @@ class LLMRoastGenerator:
                 },
                 {
                     "role": "assistant",
-                    "content": "45 lines of unreadable fucking catastrophe without a single goddamn comment! I've seen ransom notes written in blood with clearer business logic than this piece of shit. Reading this monstrosity gave me instant optical migraine. Your variable naming is an absolute joke and your logic is a total clusterfuck. Delete this fucking trash before your team sees what a dumbass you are, format your drive, and consider a career in underwater basket weaving."
+                    "content": "45 lines of unreadable fucking catastrophe without a single goddamn comment! I've seen ransom notes written in blood with clearer business logic than this piece of shit. Reading this monstrosity gave me instant optical migraine. Your variable naming is an absolute joke and your logic is a total clusterfuck. There is literally no redeeming quality to any of these lines. Delete this fucking trash before your team sees what a dumbass you are, format your drive, and consider a career in underwater basket weaving."
                 }
             ]
 

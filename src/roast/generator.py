@@ -250,18 +250,27 @@ class RoastGenerator:
     def _finalize(self, roast_parts: list, severity: int) -> str:
         """
         Combine roast parts and add a severity modifier.
-        Limits output to at most 3 roast segments to avoid overwhelming.
+        Ensures a full, crazy, multi-sentence roast (at least 75+ words).
         """
-        # Cap at 3 roasts to keep it punchy
-        if len(roast_parts) > 3:
-            roast_parts = random.sample(roast_parts, 3)
-
-        # Add severity modifier
+        extra_rants = [
+            "Your code looks like a ransom note compiled by a chaotic neural network.",
+            "I showed this codebase to a senior architect and they immediately submitted their 2-week resignation notice.",
+            "Delete this atrocious trash right now, format your SSD, throw your PC into an active volcano, and never touch a keyboard again.",
+            "I've seen ransomware scripts written in Visual Basic with cleaner separation of concerns than this biohazard.",
+            "If this source code was a vehicle, it would have 3 wheels missing, a lawnmower engine, and no brakes going down a mountain."
+        ]
+        
+        full_text = " ".join(roast_parts)
         modifier_level = max(1, min(severity, 3))
         modifier = random.choice(self.severity_modifiers[modifier_level])
-        roast_parts.append(modifier)
+        
+        while len(full_text.split()) < 75 and extra_rants:
+            rant = extra_rants.pop(random.randint(0, len(extra_rants) - 1))
+            full_text += " " + rant
+            
+        full_text += " " + modifier
+        return full_text
 
-        return " ".join(roast_parts)
 
     @staticmethod
     def _find_bad_name(metrics: dict) -> str:
