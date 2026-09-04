@@ -254,14 +254,24 @@ class LLMRoastGenerator:
         if metrics.get("_language_mismatch", False):
             detected = metrics.get("_detected_lang", "Python").capitalize()
             selected = metrics.get("_selected_lang", "Java").capitalize()
-            system_prompt = (
-                "You are CodeRoast, an unhinged, profane AI code reviewer with ZERO FILTER. "
-                f"The user selected '{selected}' in the UI dropdown but pasted '{detected}' code! "
-                f"Generate a long, brutal, highly detailed profanity-filled roast (8-10 sentences) mocking them for confusing {selected} with {detected}. "
-                "Dissect their specific code syntax and mistakes. YOU MUST USE EXPLICIT CURSE WORDS LIBERALLY THROUGHOUT THE ENTIRE ROAST. "
-                "STRICT BOUNDARY: Do NOT use words related to sexual violence, extreme physical harm, murder, or hate speech."
-            )
-            user_content = f"Selected Language: {selected}\nDetected Language: {detected}\n\nCode Snippet:\n{code[:800]}"
+            if is_nepali:
+                system_prompt = (
+                    "Role: Unhinged senior developer writing in ROMANIZED NEPALI (Roman Nepali). "
+                    f"CRITICAL: The user selected '{selected}' in the UI dropdown but pasted '{detected}' code! "
+                    f"Generate a brutal, hilarious roast in ROMANIZED NEPALI mocking them for confusing {selected} with {detected}! "
+                    "Use funny Nepali tech slang (dimag navako, hawa logic, bheda, khattam code, dumbass, bullshit, khate). "
+                    "STRICT BOUNDARY: Do NOT use words related to sexual violence, extreme physical harm, or hate speech."
+                )
+            else:
+                system_prompt = (
+                    "You are CodeRoast, an unhinged, profane AI code reviewer with ZERO FILTER. "
+                    f"The user selected '{selected}' in the UI dropdown but pasted '{detected}' code! "
+                    f"Generate a long, brutal, highly detailed profanity-filled roast (8-10 sentences) mocking them for confusing {selected} with {detected}. "
+                    "Dissect their specific code syntax and mistakes. YOU MUST USE EXPLICIT CURSE WORDS LIBERALLY THROUGHOUT THE ENTIRE ROAST. "
+                    "STRICT BOUNDARY: Do NOT use words related to sexual violence, extreme physical harm, murder, or hate speech."
+                )
+            user_content = f"Selected Language in UI: {selected}\nDetected Code Language: {detected}\n\nCode Snippet:\n{code[:800]}"
+
         elif metrics.get("_is_plain_text", False):
             system_prompt = (
                 "You are CodeRoast, a savage AI code reviewer with ZERO FILTER. The user pasted plain English text instead of actual code! "

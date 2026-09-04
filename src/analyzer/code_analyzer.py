@@ -58,7 +58,8 @@ class CodeAnalyzer:
         python_markers = [
             r"\bdef\s+\w+", r"\belif\b", r"\bself\.", r"\bisinstance\s*\(",
             r"^\s*#\s*\w+", r"\bprint\s*\(", r"\b__init__\b", r"\[\s*\w+\s+for\s+\w+\s+in\s+",
-            r"\bfrom\s+\w+\s+import\b", r"maketrans"
+            r"\bfrom\s+\w+\s+import\b", r"\bimport\s+\w+", r"\bNone\b", r"\bTrue\b", r"\bFalse\b",
+            r"\bpass\b", r"\brange\s*\(", r"\blen\s*\(", r":\s*$"
         ]
         java_markers = [
             r"\bpublic\s+class\b", r"\bpublic\s+static\s+void\b", r"\bSystem\.out\.print",
@@ -75,6 +76,13 @@ class CodeAnalyzer:
         java_score = sum(1 for m in java_markers if re.search(m, self.code, re.MULTILINE))
         js_score = sum(1 for m in js_markers if re.search(m, self.code, re.MULTILINE))
 
+        # Check if Python AST parsing succeeds
+        try:
+            ast.parse(self.code)
+            py_score += 3
+        except Exception:
+            pass
+
         if py_score > java_score and py_score > js_score and py_score >= 1:
             return "python"
         elif java_score > py_score and java_score > js_score and java_score >= 1:
@@ -83,6 +91,7 @@ class CodeAnalyzer:
             return "javascript"
 
         return "unknown"
+
 
     def is_valid_code(self) -> bool:
         """

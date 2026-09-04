@@ -89,6 +89,18 @@ class RoastGenerator:
                 tag = "🤖 [Gemini Flash AI Roast]: " if gemini_key else "🤖 [Qwen2.5-Coder AI Roast]: "
                 return f"{tag}{ai_roast}"
 
+        # ── Check for language mismatch ─────────────────────────────────
+        if metrics.get("_language_mismatch", False):
+            detected = metrics.get("_detected_lang", "Python").capitalize()
+            selected = metrics.get("_selected_lang", "Java").capitalize()
+            if is_nepali:
+                return (
+                    f"🤖 Arey dumbass, UI ma **{selected}** select garera **{detected}** code paste garchhas? "
+                    f"Mero dimag chakkar aayo! Yo {detected} trash delete garera first ma eye test garna jaa, you blind pakhe!"
+                )
+            template = random.choice(self.templates.get("language_mismatch", []))
+            return template.format(detected=detected, selected=selected)
+
         # Static Nepali Fallback Template Matrix
         if is_nepali:
             nepali_list = NEPALI_ROAST_TEMPLATES.get(severity, NEPALI_ROAST_TEMPLATES[2])
@@ -96,18 +108,11 @@ class RoastGenerator:
 
         roast_parts = []
 
-        # ── Check for language mismatch ─────────────────────────────────
-        if metrics.get("_language_mismatch", False):
-            detected = metrics.get("_detected_lang", "Python").capitalize()
-            selected = metrics.get("_selected_lang", "Java").capitalize()
-            template = random.choice(self.templates.get("language_mismatch", []))
-            roast_parts.append(template.format(detected=detected, selected=selected))
-            return self._finalize(roast_parts, severity)
-
         # ── Check for plain text or syntax errors ───────────────────────
         if metrics.get("_is_plain_text", False):
             roast_parts.append(random.choice(self.templates["plain_text"]))
             return self._finalize(roast_parts, severity)
+
 
         if metrics.get("_syntax_error", False):
             roast_parts.append(random.choice(self.templates["syntax_error"]))
