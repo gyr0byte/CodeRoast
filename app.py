@@ -57,12 +57,12 @@ def generate_roast_audio(text: str, lang_code: str = "en") -> Optional[bytes]:
 
 
 def draw_impact_caption(draw, text: str, width: int, y_start: int, font, is_bottom: bool = False):
-    """Draw classic white uppercase meme text with thick black outline."""
+    """Draw classic white uppercase meme text with thick black outline centered at y_start."""
     import textwrap
     text = text.upper()
     lines = textwrap.wrap(text, width=22)
     stroke_w = 4
-    line_h = 42
+    line_h = 38
     
     if is_bottom:
         total_h = len(lines) * line_h
@@ -78,9 +78,181 @@ def draw_impact_caption(draw, text: str, width: int, y_start: int, font, is_bott
         y_pos += line_h
 
 
+MEME_CATALOG = {
+    "mismatch": [
+        {
+            "template": "drake_hotline_bling.jpg",
+            "top": "SELECTING {sel} IN THE UI DROPDOWN",
+            "bottom": "PASTING {det} CODE LIKE A TOTAL CHAD!",
+            "top_y": 0.14, "bottom_y": 0.65
+        },
+        {
+            "template": "theyre_the_same_picture.jpg",
+            "top": "PAM: CORPORATE WANTS YOU TO FIND THE DIFFERENCE",
+            "bottom": "{sel} DROPDOWN vs {det} CODE (THEY ARE THE SAME)",
+            "top_y": 0.08, "bottom_y": 0.76
+        },
+        {
+            "template": "two_buttons.jpg",
+            "top": "PRESS BUTTON FOR {sel} OR PASTES {det}?",
+            "bottom": "COMPILER: TOTAL CONFUSION UNLOCKED!",
+            "top_y": 0.10, "bottom_y": 0.75
+        },
+        {
+            "template": "change_my_mind.jpg",
+            "top": "{det} CODE IN A {sel} DROPDOWN IS REVOLUTIONARY",
+            "bottom": "CHANGE MY MIND",
+            "top_y": 0.12, "bottom_y": 0.75
+        },
+        {
+            "template": "trade_offer.jpg",
+            "top": "I RECEIVE: {sel} DROPDOWN CHOICE",
+            "bottom": "YOU GIVE: {det} CODE SPAGHETTI!",
+            "top_y": 0.10, "bottom_y": 0.75
+        }
+    ],
+    "nesting": [
+        {
+            "template": "running_away_balloon.jpg",
+            "top": "ME TRYING TO WRITE CLEAN LOGIC",
+            "bottom": "NESTING DEPTH LEVEL {nesting} (INCEPTION)!",
+            "top_y": 0.10, "bottom_y": 0.75
+        },
+        {
+            "template": "drake_hotline_bling.jpg",
+            "top": "1-LEVEL FLAT CONTROL FLOW",
+            "bottom": "{nesting} NESTED FOR-LOOPS INSIDE AN IF STATEMENT!",
+            "top_y": 0.14, "bottom_y": 0.65
+        },
+        {
+            "template": "left_exit_12_off_ramp.jpg",
+            "top": "EARLY RETURN PATTERN",
+            "bottom": "INDENTING {nesting} LEVELS DEEP INTO OBLIVION!",
+            "top_y": 0.18, "bottom_y": 0.76
+        },
+        {
+            "template": "expanding_brain.jpg",
+            "top": "1 IF STATEMENT",
+            "bottom": "{nesting} LEVELS OF DEEP NESTED INCEPTION!",
+            "top_y": 0.08, "bottom_y": 0.78
+        }
+    ],
+    "complexity": [
+        {
+            "template": "batman_slapping_robin.jpg",
+            "top": "MY CODE WORKS FINE BRO!",
+            "bottom": "CYCLOMATIC COMPLEXITY IS {comp} YOU DUMBASS!",
+            "top_y": 0.08, "bottom_y": 0.75
+        },
+        {
+            "template": "roll_safe_think_about_it.jpg",
+            "top": "CANNOT HAVE LOGIC BUGS",
+            "bottom": "IF COMPLEXITY IS {comp} AND NO ONE CAN READ IT!",
+            "top_y": 0.10, "bottom_y": 0.75
+        },
+        {
+            "template": "left_exit_12_off_ramp.jpg",
+            "top": "SIMPLE DECISION TREES",
+            "bottom": "CYCLOMATIC COMPLEXITY {comp} NIGHTMARE!",
+            "top_y": 0.18, "bottom_y": 0.76
+        },
+        {
+            "template": "panik_kalm_panik.jpg",
+            "top": "CODE COMPILES WITHOUT ERRORS",
+            "bottom": "COMPLEXITY SCORE IS {comp}! PANIK!",
+            "top_y": 0.10, "bottom_y": 0.75
+        }
+    ],
+    "spaghetti": [
+        {
+            "template": "left_exit_12_off_ramp.jpg",
+            "top": "CLEAN REUSABLE FUNCTIONS",
+            "bottom": "ONE {loc}-LINE MONOLITHIC SPAGHETTI FUNCTION!",
+            "top_y": 0.18, "bottom_y": 0.76
+        },
+        {
+            "template": "drake_hotline_bling.jpg",
+            "top": "BREAKING CODE INTO MULTIPLE MODULES",
+            "bottom": "WRITING ONE GIANT {loc}-LINE FUNCTION TO RULE ALL!",
+            "top_y": 0.14, "bottom_y": 0.65
+        },
+        {
+            "template": "buff_doge_vs._cheems.jpg",
+            "top": "SENIOR DEV: 10-LINE MODULAR UTILITY",
+            "bottom": "YOU: ONE {loc}-LINE GOD FUNCTION IN 1 FILE!",
+            "top_y": 0.10, "bottom_y": 0.75
+        },
+        {
+            "template": "clown_applying_makeup.jpg",
+            "top": "I WILL REFACTOR THIS FUNCTION LATER",
+            "bottom": "IT IS NOW {loc} LINES LONG AND UNTOUCHABLE!",
+            "top_y": 0.08, "bottom_y": 0.75
+        },
+        {
+            "template": "a_train_hitting_a_school_bus.jpg",
+            "top": "CLEAN SOFTWARE ARCHITECTURE",
+            "bottom": "YOUR {loc}-LINE MONOLITHIC FUNCTION!",
+            "top_y": 0.10, "bottom_y": 0.75
+        }
+    ],
+    "praise": [
+        {
+            "template": "epic_handshake.jpg",
+            "top": "SENIOR ARCHITECT & YOUR CLEAN CODE",
+            "bottom": "GRADE {grade} PERFECT PEP8 ARCHITECTURE!",
+            "top_y": 0.10, "bottom_y": 0.75
+        },
+        {
+            "template": "buff_doge_vs._cheems.jpg",
+            "top": "YOUR CODE (GRADE {grade} GIGACHAD)",
+            "bottom": "OTHER STUDENTS SPAGHETTI CODE",
+            "top_y": 0.10, "bottom_y": 0.75
+        },
+        {
+            "template": "leonardo_dicaprio_cheers.jpg",
+            "top": "CHEERS TO WRITE CLEAN CODE",
+            "bottom": "GRADE {grade} LEGENDARY ARCHITECTURE!",
+            "top_y": 0.08, "bottom_y": 0.75
+        }
+    ],
+    "disaster": [
+        {
+            "template": "disaster_girl.jpg",
+            "top": "ME PUSHING CODE TO PRODUCTION",
+            "bottom": "GRADE {grade}: ENTIRE SERVER BURNING DOWN!",
+            "top_y": 0.08, "bottom_y": 0.75
+        },
+        {
+            "template": "drake_hotline_bling.jpg",
+            "top": "WRITING WORKING BUG-FREE CODE",
+            "bottom": "PASTING SYNTAX ERRORS & PRAYING TO GOD!",
+            "top_y": 0.14, "bottom_y": 0.65
+        },
+        {
+            "template": "roll_safe_think_about_it.jpg",
+            "top": "CANNOT FAIL CODE REVIEW",
+            "bottom": "IF YOU RECEIVE GRADE {grade} AND REJECT IT ALL!",
+            "top_y": 0.10, "bottom_y": 0.75
+        },
+        {
+            "template": "clown_applying_makeup.jpg",
+            "top": "JUST ONE MORE QUICK FIX BEFORE SUBMITTING",
+            "bottom": "FINAL GRADE {grade}: EVERYTHING IS BROKEN!",
+            "top_y": 0.08, "bottom_y": 0.75
+        },
+        {
+            "template": "hide_the_pain_harold.jpg",
+            "top": "SMILE AND PRETEND IT WORKS",
+            "bottom": "COMPILER VERDICT: GRADE {grade} DISASTER!",
+            "top_y": 0.08, "bottom_y": 0.75
+        }
+    ]
+}
+
+
 def generate_code_meme(metrics: dict, grade: str, language: str) -> bytes:
-    """Generate an authentic classic Impact Font meme using templates from assets/memes."""
-    import os
+    """Generate an authentic classic Impact Font meme using templates from assets/memes with dynamic pool selection and precise template alignment."""
+    import os, random
     grade_clean = grade.encode("ascii", "ignore").decode("ascii").strip()
     grade_str = grade_clean.split()[0] if grade_clean else "F"
     complexity = metrics.get("cyclomatic_complexity", 1)
@@ -88,34 +260,33 @@ def generate_code_meme(metrics: dict, grade: str, language: str) -> bytes:
     loc = metrics.get("lines_of_code", 0)
     is_mismatch = metrics.get("_language_mismatch", False)
     
-    meme_dir = "assets/memes"
+    sel_lang = metrics.get("_selected_lang", "JAVA").upper()
+    det_lang = metrics.get("_detected_lang", "PYTHON").upper()
+    
+    # ── Category Selection ───────────────────────────────────────────
     if is_mismatch:
-        template_name = "drake_hotline_bling.jpg"
-        sel_lang = metrics.get("_selected_lang", "JAVA")
-        det_lang = metrics.get("_detected_lang", "PYTHON")
-        top_text = f"SELECTED {sel_lang.upper()} IN THE UI"
-        bottom_text = f"PASTED {det_lang.upper()} CODE LIKE A PRO!"
+        category = "mismatch"
     elif nesting >= 3:
-        template_name = "running_away_balloon.jpg"
-        top_text = "ME TRYING TO WRITE CLEAN LOGIC"
-        bottom_text = f"NESTING DEPTH LEVEL {nesting} (INCEPTION)!"
+        category = "nesting"
     elif complexity >= 5:
-        template_name = "batman_slapping_robin.jpg"
-        top_text = "MY CODE WORKS PERFECTLY!"
-        bottom_text = f"CYCLOMATIC COMPLEXITY IS {complexity} BRO!"
+        category = "complexity"
     elif loc > 30:
-        template_name = "left_exit_12_off_ramp.jpg"
-        top_text = "CLEAN REUSABLE FUNCTIONS"
-        bottom_text = f"ONE {loc}-LINE SPAGHETTI FUNCTION!"
+        category = "spaghetti"
     elif grade_str in ["S", "A"]:
-        template_name = "epic_handshake.jpg"
-        top_text = "SENIOR DEV QUALITY CODE"
-        bottom_text = f"GRADE {grade_str} CLEAN PEP8 ARCHITECTURE!"
+        category = "praise"
     else:
-        template_name = "drake_blank.jpg"
-        top_text = "RUNNING CODE AND PRAYING IT WORKS"
-        bottom_text = f"COMPILER: VERDICT GRADE {grade_str} (DISASTER)!"
+        category = "disaster"
         
+    meme_item = random.choice(MEME_CATALOG[category])
+    template_name = meme_item["template"]
+    
+    top_text = meme_item["top"].format(sel=sel_lang, det=det_lang, nesting=nesting, comp=complexity, loc=loc, grade=grade_str)
+    bottom_text = meme_item["bottom"].format(sel=sel_lang, det=det_lang, nesting=nesting, comp=complexity, loc=loc, grade=grade_str)
+    
+    top_y_pct = meme_item.get("top_y", 0.10)
+    bottom_y_pct = meme_item.get("bottom_y", 0.75)
+    
+    meme_dir = "assets/memes"
     template_path = os.path.join(meme_dir, template_name)
     if not os.path.exists(template_path):
         files = [f for f in os.listdir(meme_dir) if f.endswith(".jpg")] if os.path.exists(meme_dir) else []
@@ -139,13 +310,16 @@ def generate_code_meme(metrics: dict, grade: str, language: str) -> bytes:
         font_path = r"C:\Windows\Fonts\impact.ttf"
         
     try:
-        font = ImageFont.truetype(font_path, size=38)
+        font = ImageFont.truetype(font_path, size=36)
     except Exception:
         font = ImageFont.load_default()
         
-    # Render Classic Impact Font Meme Text
-    draw_impact_caption(draw, top_text, target_w, 20, font, is_bottom=False)
-    draw_impact_caption(draw, bottom_text, target_w, h_size - 15, font, is_bottom=True)
+    # Render Classic Impact Font Meme Text with exact template visual zone alignment
+    top_y_pos = int(h_size * top_y_pct)
+    bottom_y_pos = int(h_size * bottom_y_pct)
+    
+    draw_impact_caption(draw, top_text, target_w, top_y_pos, font, is_bottom=False)
+    draw_impact_caption(draw, bottom_text, target_w, bottom_y_pos, font, is_bottom=False)
     
     buf = io.BytesIO()
     img.save(buf, format="PNG")
