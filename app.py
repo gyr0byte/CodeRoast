@@ -762,10 +762,6 @@ with col2:
         """
         components.html(speech_html, height=65)
 
-        # Engine 2: Native Streamlit MP3 Audio Bar
-        audio_bytes = generate_roast_audio(clean_roast_text, lang_code="en" if target_lang == "english" else "hi")
-        if audio_bytes:
-            st.audio(audio_bytes, format="audio/mp3")
 
         # ─── 🎨 AI Custom Code Meme ──────────────────────────────────────────────
         st.markdown("<br>", unsafe_allow_html=True)
