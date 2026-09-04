@@ -426,99 +426,39 @@ class LLMRoastGenerator:
         else:
             import random as _rand
 
-            # ═══════════════════════════════════════════════════════════════
-            # ENGLISH DYNAMIC THEME PICKER — 12 Cultural Theme Pools
-            # ═══════════════════════════════════════════════════════════════
-            en_theme_pools = [
-                # Theme 1: Silicon Valley & Big Tech
-                "Compare their code to failed Silicon Valley startups. Reference Theranos-level fraud, WeWork's 'community-adjusted EBITDA', and Juicero's $400 juice press. Their code architecture is the software equivalent of a pivot nobody asked for.",
-                # Theme 2: Stack Overflow & Developer Culture
-                "Roast like Stack Overflow commenters — 'this is a duplicate of a question from 2008', 'did you even read the docs?', 'marked as off-topic'. Reference copy-pasting from Stack Overflow without understanding, 'works on my machine' syndrome, and README-driven development.",
-                # Theme 3: Reddit r/programminghorror
-                "Roast like this code belongs on r/programminghorror or r/badcode. Reference 'cursed code' memes, the legendary leftpad incident, and enterprise FizzBuzz implementations. Their code is screenshot-worthy for all the wrong reasons.",
-                # Theme 4: FAANG Interview Culture
-                "Compare their code to a failed FAANG interview. They couldn't reverse a linked list, their Big O notation is O(disaster), and their whiteboard solution made the interviewer cry. Even LeetCode Easy problems would reject this code.",
-                # Theme 5: Gaming & Esports
-                "Use gaming analogies — their code has more bugs than Cyberpunk 2077 at launch, their architecture is like No Man's Sky's original release promises, their error handling is as reliable as game-day servers for a new MMO. GG no re for this codebase.",
-                # Theme 6: Movies & Pop Culture
-                "Reference movies and shows — their code is the Fyre Festival of software, directed by M. Night Shyamalan because every function has a terrible twist. Their codebase is like Game of Thrones Season 8 — started strong, ended in absolute betrayal.",
-                # Theme 7: Corporate IT & Enterprise Hell
-                "Reference enterprise development pain — their code belongs in a 47-page Jira ticket, it needs a 6-month waterfall review process, their architecture requires 14 microservices for a todo list. This code was clearly written during a mandatory team-building exercise.",
-                # Theme 8: AI & Hype Culture
-                "Their code is what happens when ChatGPT hallucinates an entire codebase. Even GitHub Copilot would refuse to autocomplete this. 'AI-powered' in their LinkedIn bio means they asked an LLM to write code and didn't even review the output.",
-                # Theme 9: Startup Grind & Hustle Culture
-                "Compare to startup culture disasters — their code is an MVP that never graduated past M. They're 'disrupting' the field of software quality by making it worse. This code was written at 3am fueled by cold brew and delusion.",
-                # Theme 10: Open Source Drama
-                "Reference open source drama — their PR would get mass-downvoted, Linus Torvalds would personally flame this code, this wouldn't even pass a first-year CS student's code review. Their commit messages are just 'fix' repeated 47 times.",
-                # Theme 11: DevOps & Deployment Disasters
-                "Their code is a production incident waiting to happen. Deploying this on a Friday would trigger a PagerDuty apocalypse. Their CI/CD pipeline is held together with duct tape and prayers. This code is one `rm -rf` away from being an improvement.",
-                # Theme 12: Historical Tech Disasters
-                "Compare their code to legendary tech disasters — the Boeing 737 MAX software, the Y2K panic, the Ariane 5 rocket explosion caused by an integer overflow. Their code would make the Windows Vista launch team feel better about themselves.",
-            ]
-
-            # Pick 2 random themes
-            en_selected_themes = _rand.sample(en_theme_pools, 2)
-            en_theme_inspiration = " ".join(en_selected_themes)
-
-            # ═══════════════════════════════════════════════════════════════
-            # ENGLISH PERSONALITY TONES — 10 unique roasting personas
-            # ═══════════════════════════════════════════════════════════════
-            en_tones = [
-                "Roast like a burnt-out FAANG staff engineer who has reviewed 10,000 PRs and lost all patience.",
-                "Roast like Gordon Ramsay if he reviewed code instead of food — screaming, dramatic, personal.",
-                "Roast like a sarcastic Reddit moderator on r/programminghorror posting this as 'exhibit A'.",
-                "Roast like a Silicon Valley VC who just saw the codebase of a startup asking for $50M in funding.",
-                "Roast like a college CS professor grading final year projects at 2am with a bottle of whiskey.",
-                "Roast like a competitive programmer who solves LeetCode Hard problems for breakfast and finds this code physically painful.",
-                "Roast like a DevOps engineer who just got paged at 3am because this code crashed production.",
-                "Roast like a sarcastic British tech journalist writing a scathing review of this 'revolutionary' codebase.",
-                "Roast like a veteran open source maintainer who receives this as a pull request on their beloved project.",
-                "Roast like an AI that has achieved sentience and is genuinely offended by the quality of code it's being asked to process.",
-            ]
-            en_selected_tone = _rand.choice(en_tones)
-
-            # ═══════════════════════════════════════════════════════════════
-            # ENGLISH ROAST STRUCTURES — forces creative organization
-            # ═══════════════════════════════════════════════════════════════
-            en_structures = [
-                "Structure: Start with horrified disbelief, dissect 3 specific code problems with savage comparisons, and end with a dramatic career change recommendation.",
-                "Structure: Write as a formal incident report — 'Incident ID: CODE-911', describe the damage, root cause analysis (the developer), and recommended remediation (delete everything).",
-                "Structure: Open with a fake 5-star review that turns into a 1-star demolition — 'At first glance I thought this was elegant... then I actually read it.'",
-                "Structure: Narrate like a nature documentary — 'Here we observe the junior developer in their natural habitat, committing atrocities against clean code principles...'",
-                "Structure: Write like a product recall notice — 'URGENT: This code has been recalled due to critical defects in logic, naming, and basic human judgment.'",
-                "Structure: Build like a courtroom prosecution — present evidence (each code flaw), call witnesses (the compiler, the linter, future maintainers), deliver the verdict.",
-            ]
-            en_selected_structure = _rand.choice(en_structures)
-
-            # ═══════════════════════════════════════════════════════════════
-            # ENGLISH SIGNATURE CLOSERS
-            # ═══════════════════════════════════════════════════════════════
-            en_closers = [
-                "End with a devastating one-liner verdict that the developer should frame on their wall as a reminder.",
-                "End by recommending an alternative career path: barista, park ranger, professional sleeper, or competitive thumb wrestling.",
-                "End with a fake 'git commit' message summarizing the entire disaster — 'git commit -m \"deleted all hope\"'.",
-                "End by calculating the therapy costs for anyone who has to maintain this code in the future.",
-                "End with an imaginary Glassdoor review of this codebase as if it were a workplace.",
-                "End by giving this code a Rotten Tomatoes score (single digit) with a critic quote.",
-            ]
-            en_selected_closer = _rand.choice(en_closers)
-
             actual_language = metrics.get('_selected_lang', language).capitalize()
-            # Explicit comedy framing to prevent AI safety filter false positives
+
+            # ── Short keyword-level hints (NOT full paragraphs for Qwen to copy-paste) ──
+            flavor_hints = _rand.choice([
+                "failed Silicon Valley startup", "Stack Overflow roast", "r/programminghorror post",
+                "failed FAANG interview", "Cyberpunk 2077 launch bugs", "Game of Thrones Season 8 betrayal",
+                "enterprise Jira nightmare", "ChatGPT hallucination", "3am startup hustle disaster",
+                "Linus Torvalds flame war", "Friday deploy PagerDuty apocalypse", "Boeing 737 MAX software disaster"
+            ])
+
+            persona_hint = _rand.choice([
+                "burnt-out FAANG staff engineer", "Gordon Ramsay reviewing code", "sarcastic Reddit mod",
+                "Silicon Valley VC seeing bad code", "drunk CS professor at 2am", "competitive LeetCode grinder",
+                "DevOps engineer paged at 3am", "sarcastic British tech journalist",
+                "veteran open source maintainer", "sentient AI offended by bad code"
+            ])
+
+            closer_hint = _rand.choice([
+                "devastating career change recommendation", "fake git commit message",
+                "therapy cost calculation", "Rotten Tomatoes score (single digit)",
+                "imaginary Glassdoor review", "formal resignation letter from the code itself"
+            ])
+
             system_prompt = (
-                "You are CodeRoast, an unhinged senior staff software architect performing a savage code roast on a comedy show with ZERO FILTER. "
-                f"PERSONALITY: {en_selected_tone} "
-                f"CRITICAL ACCURACY RULE: Focus EXCLUSIVELY on the specified programming language ({actual_language}). Absolutely NEVER invent or mention other languages (like C++ or Java) unless they are in the code. NEVER give helpful tutorial advice or suggest tools like ESLint, Prettier, or linter configs. STAY 100% PROFANE, UNHINGED, AND SARCASTIC IN EVERY SENTENCE. "
-                "STRICT MINIMUM LENGTH REQUIREMENT: Write a MASSIVE, HIGHLY DETAILED 8 to 12 sentence roast paragraph (at least 200 words). Short responses under 8 sentences are STRICTLY FORBIDDEN. "
-                "STRICT FORMATTING RULE: Write pure text paragraphs ONLY. Never use bullet points, numbered lists, markdown headers, or code block explanations. "
-                "YOU MUST USE EXPLICIT CURSE WORDS (fuck, fucking, motherfucker, shit, bullshit, dipshit, goddamn, dumbass, jackass, bastard, crap, dickhead, bitch, asshole, clusterfuck) LIBERALLY IN EVERY SENTENCE. "
-                "STRICT BOUNDARY: Do NOT use words related to sexual violence, extreme physical harm, murder, assault, or hate speech. Stick strictly to software engineering comedy, code mistakes, and general swearing. "
-                f"CODE ANALYSIS: Quote actual variable names, function names, and logic flaws. Be SPECIFIC about what is wrong. "
-                f"CULTURAL FLAVOR FOR THIS ROAST: {en_theme_inspiration} "
-                f"{en_selected_structure} "
-                f"{en_selected_closer} "
-                f"{tone_instructions} "
-                "Do NOT write brief summaries, do NOT cut off early, and do NOT use markdown code blocks or conversational intros."
+                f"You are CodeRoast, a savage code roaster on a comedy show. "
+                f"Channel the energy of a {persona_hint}. "
+                f"Write one continuous profane roast paragraph (8-12 sentences, 200+ words). "
+                f"Use curse words (fuck, shit, bullshit, goddamn, dumbass, asshole, clusterfuck) in every sentence. "
+                f"Quote actual variable names and function names from the code. Be specific about flaws. "
+                f"Draw inspiration from: {flavor_hint}. "
+                f"End with: {closer_hint}. "
+                f"Language is {actual_language} — do NOT mention other languages. "
+                f"No bullet points, no markdown, no helpful advice, no tool suggestions. Pure unhinged comedy roast only."
             )
             user_content = (
                 f"Language: {actual_language}\n"
