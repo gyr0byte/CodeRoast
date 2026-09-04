@@ -237,6 +237,22 @@ st.markdown("""
         animation: pulseText 1.2s infinite ease-in-out;
     }
 
+    /* Smooth Fade-In for Roast Streaming Text */
+    @keyframes fadeInText {
+        from {
+            opacity: 0.5;
+            transform: translateY(3px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .roast-stream-content {
+        animation: fadeInText 0.35s ease-out;
+    }
+
+
 
     /* Score bars */
     .score-row {
@@ -592,11 +608,14 @@ with col2:
                     <div style="font-size: 1.05rem; font-weight: bold; color: #a78bfa; margin-bottom: 10px;">
                         🤖 Senior Dev AI Verdict:
                     </div>
-                    {clean_accum}
+                    <div class="roast-stream-content">
+                        {clean_accum}
+                    </div>
                     <br><br>
                     <em style="color: #94a3b8; font-size: 0.9rem;">— {grade_reaction}</em>
                 </div>
                 """, unsafe_allow_html=True)
+
 
             st.session_state["roast_text"] = accumulated_text
             roast_text = accumulated_text

@@ -212,9 +212,13 @@ class RoastGenerator:
         )
 
         words = full_roast.split(" ")
+        is_english = language.lower() in ["english", "eng"]
+        delay = 0.04 if is_english else 0.012
+
         for i, word in enumerate(words):
             yield word + (" " if i < len(words) - 1 else "")
-            time.sleep(0.012)
+            time.sleep(delay)
+
 
 
     def get_grade_reaction(
