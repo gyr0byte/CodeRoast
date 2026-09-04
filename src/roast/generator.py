@@ -212,12 +212,13 @@ class RoastGenerator:
         )
 
         words = full_roast.split(" ")
-        is_english = language.lower() in ["english", "eng"]
-        delay = 0.04 if is_english else 0.012
+        is_slow = language.lower() in ["english", "eng", "roman_nepali_qwen"]
+        delay = 0.035 if is_slow else 0.012
 
         for i, word in enumerate(words):
             yield word + (" " if i < len(words) - 1 else "")
             time.sleep(delay)
+
 
 
 

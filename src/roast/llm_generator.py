@@ -169,9 +169,12 @@ class LLMRoastGenerator:
         Generates a dynamic roast text response using Gemini Flash or Qwen AI.
         Supports language='english' or language='nepali' / 'roman_nepali'.
         """
-        is_nepali = language.lower() in ["nepali", "roman_nepali", "roman nepali"]
+        is_nepali_qwen = language.lower() in ["roman_nepali_qwen", "nepali_qwen"]
+        is_nepali_gemini = language.lower() in ["nepali", "roman_nepali", "roman nepali", "roman_nepali_gemini"]
+        is_nepali = is_nepali_qwen or is_nepali_gemini
         g_key = self._get_gemini_key(gemini_key)
         token = self._get_hf_token()
+
 
         # 1. Direct Severity Mapping for System Instructions
         if is_nepali:
@@ -516,9 +519,9 @@ class LLMRoastGenerator:
 
 
         # ── Route Selection ─────────────────────────────────────────────────
-        # Romanized Nepali -> Exclusively Gemini Flash API (Fallback to NEPALI_ROAST_TEMPLATES if API fails/absent)
-        # English -> Exclusively Qwen AI (Ollama / HuggingFace)
-        if is_nepali:
+        # Romanized Nepali (Gemini) -> Exclusively Gemini Flash API
+        # Romanized Nepali (Qwen) & English -> Local GPU Qwen AI (Ollama / HuggingFace)
+        if is_nepali_gemini:
             if g_key:
                 gemini_prompt = f"{system_prompt}\n\n{user_content}"
                 gemini_result = self._call_gemini_api(gemini_prompt, g_key)
@@ -528,6 +531,7 @@ class LLMRoastGenerator:
                         return roast
             # Return None to trigger curated NEPALI_ROAST_TEMPLATES fallback instead of Qwen pseudo-Nepali gibberish
             return None
+
 
         messages = [{"role": "system", "content": system_prompt}]
         messages.extend(few_shot_examples)
