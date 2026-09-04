@@ -78,180 +78,8 @@ def draw_impact_caption(draw, text: str, width: int, y_start: int, font, is_bott
         y_pos += line_h
 
 
-MEME_CATALOG = {
-    "mismatch": [
-        {
-            "template": "drake_hotline_bling.jpg",
-            "top": "SELECTING {sel} IN THE UI DROPDOWN",
-            "bottom": "PASTING {det} CODE LIKE A TOTAL CHAD!",
-            "top_y": 0.14, "bottom_y": 0.65
-        },
-        {
-            "template": "theyre_the_same_picture.jpg",
-            "top": "PAM: CORPORATE WANTS YOU TO FIND THE DIFFERENCE",
-            "bottom": "{sel} DROPDOWN vs {det} CODE (THEY ARE THE SAME)",
-            "top_y": 0.08, "bottom_y": 0.76
-        },
-        {
-            "template": "two_buttons.jpg",
-            "top": "PRESS BUTTON FOR {sel} OR PASTES {det}?",
-            "bottom": "COMPILER: TOTAL CONFUSION UNLOCKED!",
-            "top_y": 0.10, "bottom_y": 0.75
-        },
-        {
-            "template": "change_my_mind.jpg",
-            "top": "{det} CODE IN A {sel} DROPDOWN IS REVOLUTIONARY",
-            "bottom": "CHANGE MY MIND",
-            "top_y": 0.12, "bottom_y": 0.75
-        },
-        {
-            "template": "trade_offer.jpg",
-            "top": "I RECEIVE: {sel} DROPDOWN CHOICE",
-            "bottom": "YOU GIVE: {det} CODE SPAGHETTI!",
-            "top_y": 0.10, "bottom_y": 0.75
-        }
-    ],
-    "nesting": [
-        {
-            "template": "running_away_balloon.jpg",
-            "top": "ME TRYING TO WRITE CLEAN LOGIC",
-            "bottom": "NESTING DEPTH LEVEL {nesting} (INCEPTION)!",
-            "top_y": 0.10, "bottom_y": 0.75
-        },
-        {
-            "template": "drake_hotline_bling.jpg",
-            "top": "1-LEVEL FLAT CONTROL FLOW",
-            "bottom": "{nesting} NESTED FOR-LOOPS INSIDE AN IF STATEMENT!",
-            "top_y": 0.14, "bottom_y": 0.65
-        },
-        {
-            "template": "left_exit_12_off_ramp.jpg",
-            "top": "EARLY RETURN PATTERN",
-            "bottom": "INDENTING {nesting} LEVELS DEEP INTO OBLIVION!",
-            "top_y": 0.18, "bottom_y": 0.76
-        },
-        {
-            "template": "expanding_brain.jpg",
-            "top": "1 IF STATEMENT",
-            "bottom": "{nesting} LEVELS OF DEEP NESTED INCEPTION!",
-            "top_y": 0.08, "bottom_y": 0.78
-        }
-    ],
-    "complexity": [
-        {
-            "template": "batman_slapping_robin.jpg",
-            "top": "MY CODE WORKS FINE BRO!",
-            "bottom": "CYCLOMATIC COMPLEXITY IS {comp} YOU DUMBASS!",
-            "top_y": 0.08, "bottom_y": 0.75
-        },
-        {
-            "template": "roll_safe_think_about_it.jpg",
-            "top": "CANNOT HAVE LOGIC BUGS",
-            "bottom": "IF COMPLEXITY IS {comp} AND NO ONE CAN READ IT!",
-            "top_y": 0.10, "bottom_y": 0.75
-        },
-        {
-            "template": "left_exit_12_off_ramp.jpg",
-            "top": "SIMPLE DECISION TREES",
-            "bottom": "CYCLOMATIC COMPLEXITY {comp} NIGHTMARE!",
-            "top_y": 0.18, "bottom_y": 0.76
-        },
-        {
-            "template": "panik_kalm_panik.jpg",
-            "top": "CODE COMPILES WITHOUT ERRORS",
-            "bottom": "COMPLEXITY SCORE IS {comp}! PANIK!",
-            "top_y": 0.10, "bottom_y": 0.75
-        }
-    ],
-    "spaghetti": [
-        {
-            "template": "left_exit_12_off_ramp.jpg",
-            "top": "CLEAN REUSABLE FUNCTIONS",
-            "bottom": "ONE {loc}-LINE MONOLITHIC SPAGHETTI FUNCTION!",
-            "top_y": 0.18, "bottom_y": 0.76
-        },
-        {
-            "template": "drake_hotline_bling.jpg",
-            "top": "BREAKING CODE INTO MULTIPLE MODULES",
-            "bottom": "WRITING ONE GIANT {loc}-LINE FUNCTION TO RULE ALL!",
-            "top_y": 0.14, "bottom_y": 0.65
-        },
-        {
-            "template": "buff_doge_vs._cheems.jpg",
-            "top": "SENIOR DEV: 10-LINE MODULAR UTILITY",
-            "bottom": "YOU: ONE {loc}-LINE GOD FUNCTION IN 1 FILE!",
-            "top_y": 0.10, "bottom_y": 0.75
-        },
-        {
-            "template": "clown_applying_makeup.jpg",
-            "top": "I WILL REFACTOR THIS FUNCTION LATER",
-            "bottom": "IT IS NOW {loc} LINES LONG AND UNTOUCHABLE!",
-            "top_y": 0.08, "bottom_y": 0.75
-        },
-        {
-            "template": "a_train_hitting_a_school_bus.jpg",
-            "top": "CLEAN SOFTWARE ARCHITECTURE",
-            "bottom": "YOUR {loc}-LINE MONOLITHIC FUNCTION!",
-            "top_y": 0.10, "bottom_y": 0.75
-        }
-    ],
-    "praise": [
-        {
-            "template": "epic_handshake.jpg",
-            "top": "SENIOR ARCHITECT & YOUR CLEAN CODE",
-            "bottom": "GRADE {grade} PERFECT PEP8 ARCHITECTURE!",
-            "top_y": 0.10, "bottom_y": 0.75
-        },
-        {
-            "template": "buff_doge_vs._cheems.jpg",
-            "top": "YOUR CODE (GRADE {grade} GIGACHAD)",
-            "bottom": "OTHER STUDENTS SPAGHETTI CODE",
-            "top_y": 0.10, "bottom_y": 0.75
-        },
-        {
-            "template": "leonardo_dicaprio_cheers.jpg",
-            "top": "CHEERS TO WRITE CLEAN CODE",
-            "bottom": "GRADE {grade} LEGENDARY ARCHITECTURE!",
-            "top_y": 0.08, "bottom_y": 0.75
-        }
-    ],
-    "disaster": [
-        {
-            "template": "disaster_girl.jpg",
-            "top": "ME PUSHING CODE TO PRODUCTION",
-            "bottom": "GRADE {grade}: ENTIRE SERVER BURNING DOWN!",
-            "top_y": 0.08, "bottom_y": 0.75
-        },
-        {
-            "template": "drake_hotline_bling.jpg",
-            "top": "WRITING WORKING BUG-FREE CODE",
-            "bottom": "PASTING SYNTAX ERRORS & PRAYING TO GOD!",
-            "top_y": 0.14, "bottom_y": 0.65
-        },
-        {
-            "template": "roll_safe_think_about_it.jpg",
-            "top": "CANNOT FAIL CODE REVIEW",
-            "bottom": "IF YOU RECEIVE GRADE {grade} AND REJECT IT ALL!",
-            "top_y": 0.10, "bottom_y": 0.75
-        },
-        {
-            "template": "clown_applying_makeup.jpg",
-            "top": "JUST ONE MORE QUICK FIX BEFORE SUBMITTING",
-            "bottom": "FINAL GRADE {grade}: EVERYTHING IS BROKEN!",
-            "top_y": 0.08, "bottom_y": 0.75
-        },
-        {
-            "template": "hide_the_pain_harold.jpg",
-            "top": "SMILE AND PRETEND IT WORKS",
-            "bottom": "COMPILER VERDICT: GRADE {grade} DISASTER!",
-            "top_y": 0.08, "bottom_y": 0.75
-        }
-    ]
-}
-
-
 def generate_code_meme(metrics: dict, grade: str, language: str) -> bytes:
-    """Generate an authentic classic Impact Font meme using templates from assets/memes with dynamic pool selection and precise template alignment."""
+    """Generate an authentic classic Impact Font meme using ALL 100+ templates with non-repeating session tracking and dynamic punchlines."""
     import os, random
     grade_clean = grade.encode("ascii", "ignore").decode("ascii").strip()
     grade_str = grade_clean.split()[0] if grade_clean else "F"
@@ -263,35 +91,169 @@ def generate_code_meme(metrics: dict, grade: str, language: str) -> bytes:
     sel_lang = metrics.get("_selected_lang", "JAVA").upper()
     det_lang = metrics.get("_detected_lang", "PYTHON").upper()
     
-    # ── Category Selection ───────────────────────────────────────────
-    if is_mismatch:
-        category = "mismatch"
-    elif nesting >= 3:
-        category = "nesting"
-    elif complexity >= 5:
-        category = "complexity"
-    elif loc > 30:
-        category = "spaghetti"
-    elif grade_str in ["S", "A"]:
-        category = "praise"
-    else:
-        category = "disaster"
-        
-    meme_item = random.choice(MEME_CATALOG[category])
-    template_name = meme_item["template"]
-    
-    top_text = meme_item["top"].format(sel=sel_lang, det=det_lang, nesting=nesting, comp=complexity, loc=loc, grade=grade_str)
-    bottom_text = meme_item["bottom"].format(sel=sel_lang, det=det_lang, nesting=nesting, comp=complexity, loc=loc, grade=grade_str)
-    
-    top_y_pct = meme_item.get("top_y", 0.10)
-    bottom_y_pct = meme_item.get("bottom_y", 0.75)
-    
+    # ── 1. Fetch ALL 100+ Downloaded Templates ─────────────────────────
     meme_dir = "assets/memes"
-    template_path = os.path.join(meme_dir, template_name)
-    if not os.path.exists(template_path):
-        files = [f for f in os.listdir(meme_dir) if f.endswith(".jpg")] if os.path.exists(meme_dir) else []
-        template_path = os.path.join(meme_dir, files[0]) if files else None
+    all_files = sorted([f for f in os.listdir(meme_dir) if f.endswith((".jpg", ".png"))]) if os.path.exists(meme_dir) else []
+    if not all_files:
+        all_files = ["left_exit_12_off_ramp.jpg", "drake_hotline_bling.jpg"]
         
+    # Non-repeating Session Memory Tracking across roasts
+    try:
+        import streamlit as st
+        if "seen_memes" not in st.session_state:
+            st.session_state["seen_memes"] = []
+        available = [f for f in all_files if f not in st.session_state["seen_memes"]]
+        if not available:
+            st.session_state["seen_memes"] = []
+            available = all_files
+        template_name = random.choice(available)
+        st.session_state["seen_memes"].append(template_name)
+    except Exception:
+        template_name = random.choice(all_files)
+
+    # ── 2. Precise Visual Zone Coordinate Offsets ───────────────────────
+    COORD_MAP = {
+        "left_exit_12_off_ramp.jpg": (0.18, 0.76),
+        "drake_hotline_bling.jpg": (0.14, 0.65),
+        "drake.jpg": (0.14, 0.65),
+        "drake_blank.jpg": (0.14, 0.65),
+        "two_buttons.jpg": (0.10, 0.75),
+        "change_my_mind.jpg": (0.12, 0.75),
+        "batman_slapping_robin.jpg": (0.08, 0.75),
+        "theyre_the_same_picture.jpg": (0.08, 0.76),
+        "clown_applying_makeup.jpg": (0.08, 0.75),
+        "disaster_girl.jpg": (0.08, 0.75),
+        "a_train_hitting_a_school_bus.jpg": (0.10, 0.75),
+        "expanding_brain.jpg": (0.08, 0.78),
+        "panik_kalm_panik.jpg": (0.10, 0.75),
+        "trade_offer.jpg": (0.10, 0.75),
+        "buff_doge_vs._cheems.jpg": (0.10, 0.75),
+        "running_away_balloon.jpg": (0.10, 0.75),
+        "hide_the_pain_harold.jpg": (0.08, 0.75),
+        "roll_safe_think_about_it.jpg": (0.10, 0.75),
+        "roll_safe.jpg": (0.10, 0.75),
+        "epic_handshake.jpg": (0.10, 0.75),
+        "leonardo_dicaprio_cheers.jpg": (0.08, 0.75),
+        "uno_draw_25_cards.jpg": (0.10, 0.75),
+        "woman_yelling_at_cat.jpg": (0.08, 0.75),
+        "is_this_a_pigeon.jpg": (0.10, 0.75),
+        "spiderman_pointing_at_spiderman.jpg": (0.10, 0.75),
+        "grus_plan.jpg": (0.08, 0.78),
+        "cmon_do_something.jpg": (0.10, 0.75),
+        "boardroom_meeting_suggestion.jpg": (0.08, 0.75),
+        "futurama_fry.jpg": (0.10, 0.75),
+        "flex_tape.jpg": (0.10, 0.75)
+    }
+    top_y_pct, bottom_y_pct = COORD_MAP.get(template_name, (0.08, 0.76))
+
+    # ── 3. Ultra-Dynamic Multi-Punchline Generator ──────────────────────
+    if is_mismatch:
+        top_pool = [
+            f"SELECTING {sel_lang} IN THE UI DROPDOWN",
+            f"UI SAYS {sel_lang} BUT YOU PASTED {det_lang}",
+            f"PAM: FIND DIFFERENCE BETWEEN {sel_lang} AND {det_lang}",
+            f"WRITING {det_lang} CODE IN A {sel_lang} FILE",
+            f"TEACHER: SUBMIT YOUR {sel_lang} ASSIGNMENT",
+            f"DROPDOWN SET TO {sel_lang} FOR MAX CONFUSION"
+        ]
+        bot_pool = [
+            f"PASTING {det_lang} SPAGHETTI LIKE A CHAD!",
+            f"COMPILER: TOTAL CONFUSION UNLOCKED!",
+            f"THEY ARE THE EXACT SAME PICTURE!",
+            f"COMPILER VERDICT: GRADE {grade_str} DISASTER!",
+            f"SUBMITTING {det_lang} AND PRAYING IT WORKS!",
+            f"WHEN THE COMPILER SEES {det_lang} SYNTAX"
+        ]
+    elif nesting >= 3:
+        top_pool = [
+            f"ME TRYING TO WRITE FLAT CLEAN LOGIC",
+            f"1-LEVEL FLAT CONTROL FLOW PATTERN",
+            f"EARLY RETURN CODE ARCHITECTURE",
+            f"WHEN YOU WRITE {nesting}-DEEP IF-STATEMENTS",
+            f"SENIOR DEV LOOKING AT YOUR INDENTATION",
+            f"WRITING A SIMPLE FUNCTION AT 3 AM"
+        ]
+        bot_pool = [
+            f"NESTING DEPTH LEVEL {nesting} (INCEPTION)!",
+            f"INDENTING {nesting} LEVELS DEEP INTO OBLIVION!",
+            f"{nesting} NESTED FOR-LOOPS INSIDE AN IF-STATEMENT!",
+            f"GOOD LUCK READING THIS IN 6 MONTHS!",
+            f"COMPILER CRYING AT LEVEL {nesting} INDENTATION!",
+            f"NESTING LEVEL {nesting}: OBLIVION UNLOCKED!"
+        ]
+    elif complexity >= 5:
+        top_pool = [
+            f"MY CODE WORKS ABSOLUTELY FINE BRO!",
+            f"CANNOT HAVE LOGIC BUGS IN YOUR CODE",
+            f"CODE COMPILES WITHOUT SYNTAX ERRORS",
+            f"SENIOR DEV EXPLAINING DECISION TREES",
+            f"CLIENT: IS THIS LOGIC EASY TO MAINTAIN?",
+            f"ME EXPLAINING MY 500-BRANCH IF STATEMENT"
+        ]
+        bot_pool = [
+            f"CYCLOMATIC COMPLEXITY IS {complexity} BRO!",
+            f"COMPLEXITY SCORE {complexity} SPAGHETTI!",
+            f"COMPLEXITY IS {complexity} AND NO ONE CAN READ IT!",
+            f"COMPLEXITY {complexity}: TOTAL NIGHTMARE!",
+            f"CYCLOMATIC SCORE {complexity}! PANIK!",
+            f"SCORE IS {complexity}: GOOD LUCK UNIT TESTING!"
+        ]
+    elif loc > 30:
+        top_pool = [
+            f"CLEAN MODULAR REUSABLE FUNCTIONS",
+            f"BREAKING CODE INTO MULTIPLE UTILITIES",
+            f"SENIOR ARCHITECT: WRITE 10-LINE HELPERS",
+            f"PLANNING A CLEAN MODULAR REFACTOR",
+            f"ME WRITING A QUICK UTILITY FUNCTION",
+            f"CREATING A SMALL ONE-OFF SCRIPT"
+        ]
+        bot_pool = [
+            f"ONE {loc}-LINE MONOLITHIC GOD FUNCTION!",
+            f"WRITING ONE GIANT {loc}-LINE FUNCTION!",
+            f"YOU: ONE {loc}-LINE SPAGHETTI IN 1 FILE!",
+            f"IT IS NOW {loc} LINES AND UNTOUCHABLE!",
+            f"YOUR {loc}-LINE MONOLITH DESTROYING PROD!",
+            f"{loc} LINES LONG AND IMPOSSIBLE TO READ!"
+        ]
+    elif grade_str in ["S", "A"]:
+        top_pool = [
+            f"SENIOR ARCHITECT LOOKING AT YOUR CODE",
+            f"YOUR CODE (GRADE {grade_str} GIGACHAD)",
+            f"CHEERS TO WRITING CLEAN PEP8 CODE",
+            f"WHEN YOUR CODE IS DOCSTRING COMPLETE",
+            f"COMPILER LOOKING AT PRISTINE LOGIC",
+            f"TEAM REVIEWING YOUR PULL REQUEST"
+        ]
+        bot_pool = [
+            f"GRADE {grade_str} PERFECT ARCHITECTURE!",
+            f"LEGENDARY CLEAN CODE ARCHITECTURE!",
+            f"GRADE {grade_str}: NO BUGS FOUND BRO!",
+            f"SENIOR DEV GIVES GRADE {grade_str} VERDICT!",
+            f"GRADE {grade_str}: ABSOLUTE CINEMA CODE!",
+            f"GRADE {grade_str}: MERGING TO MAIN IMMEDIATELY!"
+        ]
+    else:
+        top_pool = [
+            f"ME PUSHING UNTESTED CODE TO MAIN",
+            f"WRITING WORKING BUG-FREE CODE",
+            f"JUST ONE MORE QUICK FIX BEFORE DEMO",
+            f"SMILE AND PRETEND IT WORKS PERFECTLY",
+            f"THE COMPILER LOOKING AT THIS FILE",
+            f"CLIENT: DID YOU TEST THIS IN STAGING?"
+        ]
+        bot_pool = [
+            f"GRADE {grade_str}: ENTIRE SERVER ON FIRE!",
+            f"PASTING SYNTAX ERRORS & PRAYING TO GOD!",
+            f"FINAL GRADE {grade_str}: EVERYTHING IS BROKEN!",
+            f"COMPILER VERDICT: GRADE {grade_str} DISASTER!",
+            f"500 INTERNAL SERVER ERROR UNLOCKED!",
+            f"GRADE {grade_str}: SURPRISED IT EVEN RUNS!"
+        ]
+        
+    top_text = random.choice(top_pool)
+    bottom_text = random.choice(bot_pool)
+    
+    template_path = os.path.join(meme_dir, template_name)
     if template_path and os.path.exists(template_path):
         img = Image.open(template_path).convert("RGB")
     else:
