@@ -197,9 +197,31 @@ class RoastGenerator:
     ):
         """
         Yields real-time text chunks of the generated roast for typewriter UI streaming.
+        Uses native Gemini SSE streaming when outputting in Romanized Nepali.
         """
         import time
 
+        is_nepali = language.lower() in ["nepali", "roman_nepali", "roman nepali"]
+
+        if use_llm and is_nepali and self.llm_generator is not None and code:
+            g_key = self.llm_generator._get_gemini_key(gemini_key)
+            if g_key:
+                # Build prompt for Gemini stream
+                prompt = (
+                    "Role: Unhinged senior developer writing in ROMANIZED NEPALI (Roman Nepali). "
+                    "CRITICAL REQUIREMENT: Write your ENTIRE roast in fluent Romanized Nepali (e.g. 'Kasto hawa code lekheko bro, cyclomatic complexity dekhera mero dimag chakkar aayo! Delete gar yo trash immediately!'). "
+                    "YOU MUST USE EXPLICIT NEPALI DEV PROFANITY (kukur, gadha, dimag navako, harami, khate, pakhe, bheda, hawa, khattam, pasa, kaathe) IN EVERY SINGLE SENTENCE. "
+                    "STRICT BOUNDARY: Do NOT use words related to sexual violence, extreme physical harm, murder, or hate speech. "
+                    f"Code Snippet:\n{code[:800]}"
+                )
+                has_yielded = False
+                for chunk in self.llm_generator._call_gemini_api_stream(prompt, g_key):
+                    has_yielded = True
+                    yield chunk
+                if has_yielded:
+                    return
+
+        # Fallback simulated word stream
         full_roast = self.generate_roast(
             metrics=metrics,
             quality_level=quality_level,
@@ -215,6 +237,7 @@ class RoastGenerator:
         for i, word in enumerate(words):
             yield word + (" " if i < len(words) - 1 else "")
             time.sleep(0.012)
+
 
 
     def get_grade_reaction(

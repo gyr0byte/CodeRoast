@@ -156,6 +156,51 @@ class LLMRoastGenerator:
         print("[WARNING] Gemini API call failed across all model variants.")
         return None
 
+    def _call_gemini_api_stream(self, prompt: str, gemini_key: str):
+        """Streams real-time text tokens directly from Google Gemini API via SSE."""
+        for model_name in ["gemini-2.5-flash", "gemini-flash-lite-latest", "gemini-3.5-flash-lite"]:
+            try:
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:streamGenerateContent?alt=sse&key={gemini_key}"
+                payload = {
+                    "contents": [{"parts": [{"text": prompt}]}],
+                    "generationConfig": {
+                        "temperature": 0.95,
+                        "maxOutputTokens": 1500
+                    }
+                }
+                req = urllib.request.Request(
+                    url,
+                    data=json.dumps(payload).encode("utf-8"),
+                    headers={"Content-Type": "application/json"}
+                )
+                with urllib.request.urlopen(req, timeout=20) as resp:
+                    if resp.status == 200:
+                        has_streamed = False
+                        for raw_line in resp:
+                            line = raw_line.decode("utf-8").strip()
+                            if line.startswith("data:"):
+                                data_str = line[5:].strip()
+                                if not data_str or data_str == "[DONE]":
+                                    continue
+                                try:
+                                    res_data = json.loads(data_str)
+                                    candidates = res_data.get("candidates", [])
+                                    if candidates:
+                                        parts = candidates[0].get("content", {}).get("parts", [])
+                                        if parts and "text" in parts[0]:
+                                            text_chunk = parts[0]["text"]
+                                            if text_chunk:
+                                                has_streamed = True
+                                                yield text_chunk
+                                except Exception:
+                                    continue
+                        if has_streamed:
+                            return
+            except Exception as e:
+                print(f"[WARNING] Gemini SSE Streaming error on {model_name}: {e}")
+                continue
+
+
     def generate_roast(
         self,
         code: str,
