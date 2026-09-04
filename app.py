@@ -367,6 +367,8 @@ def get_codebert_scorer():
 with st.sidebar:
     st.markdown("### ⚙️ Engine Settings")
     
+    language = st.selectbox("Code Language", ["Python", "Java", "JavaScript"], index=0)
+    
     roast_language = st.selectbox(
         "Roast Tone",
         [
@@ -382,6 +384,7 @@ with st.sidebar:
         target_lang = "roman_nepali_gemini"
     else:
         target_lang = "english"
+
 
     
     severity = st.slider("Roast Severity", 1, 3, 2, help="1 = Gentle, 2 = Standard, 3 = No Mercy")
