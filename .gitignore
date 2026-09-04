@@ -41,6 +41,9 @@ ipython_config.py
 # Project Specific
 models_cache/
 ollama_models/
+leaderboard.json
+data/leaderboard.json
+*.json
 data/raw/*
 !data/raw/.gitkeep
 !data/raw/scraped_code.csv
