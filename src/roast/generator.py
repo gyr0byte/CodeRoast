@@ -184,6 +184,39 @@ class RoastGenerator:
 
         return self._finalize(roast_parts, severity)
 
+    def generate_roast_stream(
+        self,
+        metrics: dict,
+        quality_level: int,
+        severity: int = 2,
+        code: Optional[str] = None,
+        use_llm: bool = True,
+        language: str = "english",
+        gemini_key: Optional[str] = None,
+        **kwargs
+    ):
+        """
+        Yields real-time text chunks of the generated roast for typewriter UI streaming.
+        """
+        import time
+
+        full_roast = self.generate_roast(
+            metrics=metrics,
+            quality_level=quality_level,
+            severity=severity,
+            code=code,
+            use_llm=use_llm,
+            language=language,
+            gemini_key=gemini_key,
+            **kwargs
+        )
+
+        words = full_roast.split(" ")
+        for i, word in enumerate(words):
+            yield word + (" " if i < len(words) - 1 else "")
+            time.sleep(0.012)
+
+
     def get_grade_reaction(
         self,
         grade: str,
