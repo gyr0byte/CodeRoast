@@ -1,6 +1,6 @@
 """
 🔥 CodeRoast — Brutally Honest Code Reviews
-Streamlit Chat Interface — ChatGPT / Claude Style
+Streamlit Chat Interface — Custom High-Fidelity Theme (Matching Mockup)
 """
 
 import config  # noqa: F401 — Sets HF_HOME and TF log level first
@@ -11,6 +11,7 @@ import os
 import sys
 import json
 import io
+import time
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
@@ -31,109 +32,253 @@ from src.roast.templates import GRADE_REACTIONS, NEPALI_ROAST_TEMPLATES
 # ─── Page Config ─────────────────────────────────────────────────────────────
 
 st.set_page_config(
-    page_title="CodeRoast 🔥",
+    page_title="CodeRoast AI 🔥",
     page_icon="🔥",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# ─── Premium Chat CSS ────────────────────────────────────────────────────────
+# ─── Custom CSS for Exact Mockup Match ───────────────────────────────────────
 
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
+    /* Global Body & Background */
     .stApp {
-        background: linear-gradient(180deg, #08080f 0%, #0e1117 100%);
-        font-family: 'Inter', sans-serif;
+        background-color: #0b0c12 !important;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        color: #e2e8f0;
     }
 
+    /* Sidebar Styling */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0c0c1a 0%, #111827 100%);
-        border-right: 1px solid rgba(167, 139, 250, 0.1);
+        background-color: #13141f !important;
+        border-right: 1px solid #232538 !important;
+        padding-top: 1rem;
     }
 
-    .sidebar-brand {
-        background: linear-gradient(135deg, #ff4b4b 0%, #ff8c00 50%, #ffd700 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-size: 1.7rem;
-        font-weight: 900;
-        letter-spacing: -0.5px;
+    [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+        gap: 0.8rem;
     }
 
-    .grade-card {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-        border: 1px solid #333;
+    .sidebar-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.2rem;
+    }
+    .sidebar-title {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .sidebar-section-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #f1f5f9;
+        margin-top: 0.8rem;
+        margin-bottom: 0.2rem;
+        letter-spacing: -0.2px;
+    }
+
+    .sidebar-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.3rem;
+    }
+
+    .metrics-card {
+        background: #181a28;
+        border: 1px solid #26293e;
         border-radius: 12px;
+        padding: 10px;
+        margin-top: 0.4rem;
+    }
+
+    /* Main Chat Section */
+    .chat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #1e2030;
+        margin-bottom: 20px;
+    }
+    .chat-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #f8fafc;
+    }
+
+    /* User Message Card */
+    .user-msg-container {
+        background: #171926;
+        border: 1px solid #25283d;
+        border-radius: 14px;
         padding: 16px;
+        margin-bottom: 20px;
+    }
+    .user-msg-header {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #94a3b8;
+        margin-bottom: 10px;
+    }
+    .user-msg-text {
+        font-size: 0.95rem;
+        color: #e2e8f0;
+        margin-top: 10px;
+    }
+
+    /* AI Assistant Card */
+    .ai-msg-wrapper {
+        display: flex;
+        gap: 14px;
+        margin-bottom: 24px;
+    }
+    .ai-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: #25163a;
+        border: 1px solid #6d28d9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+    .ai-content-box {
+        flex-grow: 1;
+    }
+
+    .ai-roast-card {
+        background: linear-gradient(135deg, #1c1533 0%, #130f24 100%);
+        border: 1px solid #7c3aed;
+        box-shadow: 0 0 25px rgba(124, 58, 237, 0.18);
+        border-radius: 16px;
+        padding: 18px 22px;
+        color: #f1f5f9;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .ai-roast-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+    .ai-roast-status {
+        color: #c4b5fd;
+        letter-spacing: 0.3px;
+    }
+    .ai-roast-badge {
+        background: rgba(124, 58, 237, 0.3);
+        border: 1px solid #7c3aed;
+        color: #ff8c00;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* Action Buttons Row */
+    .action-buttons-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+    }
+
+    .action-btn {
+        background: #171926;
+        border: 1px solid #2e324c;
+        color: #cbd5e1;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .action-btn-primary {
+        border-color: #d97706;
+        color: #f59e0b;
+    }
+
+    /* Welcome / Empty State */
+    .welcome-container {
         text-align: center;
-        margin: 10px 0;
-    }
-    .grade-letter {
-        font-size: 2.8rem;
-        font-weight: 900;
-        background: linear-gradient(135deg, #ff4b4b, #ff8c00);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .grade-label { color: #aaa; font-size: 0.85rem; }
-
-    .score-row { display: flex; align-items: center; margin: 5px 0; }
-    .score-label { width: 85px; color: #aaa; font-size: 0.78rem; }
-    .score-bar-bg { flex: 1; height: 5px; background: #333; border-radius: 3px; overflow: hidden; }
-    .score-bar-fill { height: 100%; border-radius: 3px; }
-    .score-value { width: 30px; text-align: right; color: #ddd; font-weight: 600; font-size: 0.78rem; }
-
-    .welcome-box {
-        display: flex; flex-direction: column; align-items: center;
-        justify-content: center; padding: 120px 20px; text-align: center;
+        padding: 80px 20px;
     }
     .welcome-title {
+        font-size: 2.4rem;
+        font-weight: 800;
         background: linear-gradient(135deg, #ff4b4b 0%, #ff8c00 50%, #ffd700 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        font-size: 2.8rem; font-weight: 900; margin-bottom: 8px;
-    }
-    .welcome-sub { color: #555; font-size: 1.05rem; max-width: 480px; }
-
-    .roast-bubble {
-        background: linear-gradient(135deg, #1a0a2e 0%, #0f0a1e 100%);
-        border: 1px solid rgba(167, 139, 250, 0.25);
-        border-radius: 10px;
-        padding: 16px 18px;
-        margin: 6px 0;
-        line-height: 1.65;
-        color: #e0e0e0;
-        font-size: 0.95rem;
-        box-shadow: 0 4px 20px rgba(167, 139, 250, 0.08);
+        margin-bottom: 10px;
     }
 
-    .roast-header {
-        color: #a78bfa; font-weight: 700; font-size: 0.8rem;
-        margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+    /* Custom Input Controls Styling */
+    .stSelectbox > div > div {
+        background-color: #171926 !important;
+        border: 1px solid #2a2d42 !important;
+        color: #f8fafc !important;
+        border-radius: 8px !important;
     }
 
-    .grade-pill {
-        display: inline-block;
-        background: linear-gradient(135deg, #ff4b4b, #ff8c00);
-        color: white; font-weight: 800; font-size: 0.7rem;
-        padding: 2px 8px; border-radius: 10px;
+    .stTextArea textarea {
+        background-color: #12131c !important;
+        border: 1px solid #232538 !important;
+        color: #e2e8f0 !important;
+        border-radius: 10px !important;
+        font-family: 'JetBrains Mono', monospace !important;
+        font-size: 0.85rem !important;
     }
 
-    .shame-entry {
-        background: #111827; border-left: 3px solid #ef4444;
-        padding: 8px 10px; margin: 5px 0; border-radius: 4px; font-size: 0.78rem;
+    /* Severity Slider customization */
+    .stSlider > div {
+        padding-top: 0;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# ─── Initialize ──────────────────────────────────────────────────────────────
+# ─── Initialize State ────────────────────────────────────────────────────────
 
 roast_generator = RoastGenerator()
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
+
+if "latest_metrics" not in st.session_state:
+    # Default metrics for initial radar display
+    st.session_state.latest_metrics = {
+        "lines_of_code": 15, "function_count": 1, "avg_function_length": 15,
+        "cyclomatic_complexity": 2, "naming_score": 75, "comment_ratio": 0.0,
+        "nesting_depth": 1, "duplicate_code_score": 100
+    }
+if "latest_scores" not in st.session_state:
+    st.session_state.latest_scores = {
+        "readability": 65, "efficiency": 80, "structure": 70, "creativity": 60, "overall": 70, "grade": "B Good"
+    }
 
 # ─── Helper Functions ────────────────────────────────────────────────────────
 
@@ -206,7 +351,7 @@ def clean_roast(text):
             .replace("🤖 [Qwen2.5-Coder AI Roast]: ", "")
             .replace("🤖 AI Roast: ", "").replace("🤖 ", ""))
 
-# ─── Lazy Model Loaders ──────────────────────────────────────────────────────
+# ─── Lazy Model Loaders ───────────────────────────────────────────────────────
 
 @st.cache_resource
 def get_classifier():
@@ -230,111 +375,97 @@ def get_codebert_scorer():
         pass
     return None
 
-# ─── Sidebar ─────────────────────────────────────────────────────────────────
+# ─── Sidebar (Matching Mockup Left Panel) ────────────────────────────────────
 
 with st.sidebar:
-    st.markdown('<div class="sidebar-brand">🔥 CodeRoast AI</div>', unsafe_allow_html=True)
-    st.caption("Brutally honest code reviews. You asked for this.")
-    st.divider()
+    # Sidebar Header
+    st.markdown("""
+    <div class="sidebar-header">
+        <div class="sidebar-title">🔥 CodeRoast AI</div>
+        <div style="color: #64748b; cursor: pointer; font-size: 0.9rem;">«</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    language = st.selectbox("📝 Code Language", ["Python", "Java", "JavaScript"])
-    roast_language = st.selectbox("🌐 Roast Language", ["🇬🇧 English", "🇳🇵 Roman Nepali (रोमन नेपाली)"])
-    target_lang = "roman_nepali" if "Nepali" in roast_language else "english"
-    severity = st.slider("🔥 Roast Severity", 1, 3, 2, help="1 = Mild · 2 = Medium · 3 = Spicy 🌶️")
-    use_ai_llm = st.checkbox("🤖 Enable AI Roast", value=True)
+    # 1. Project Settings
+    st.markdown('<div class="sidebar-section-title">Project Settings</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-label">LANGUAGE</div>', unsafe_allow_html=True)
+    language = st.selectbox("Language Selector", ["Python", "Java", "JavaScript"], label_visibility="collapsed")
 
-    st.divider()
-    code_input = st.text_area(
-        "📋 Paste Your Code",
+    # 2. Severity Slider
+    st.markdown('<div class="sidebar-section-title">Severity Slider</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #94a3b8; margin-bottom: 2px;">
+        <span>Mild</span><span>Medium</span><span>Spicy</span>
+    </div>
+    """, unsafe_allow_html=True)
+    severity = st.slider("Severity Level", 1, 3, 2, label_visibility="collapsed")
+
+    # 3. Roast Metrics (Radar Chart Card)
+    st.markdown('<div class="sidebar-section-title">Roast Metrics</div>', unsafe_allow_html=True)
+    
+    sc = st.session_state.latest_scores
+    fig = go.Figure(data=go.Scatterpolar(
+        r=[sc["readability"], sc["efficiency"], sc["structure"], sc["creativity"], sc["readability"]],
+        theta=["Readability", "Performance", "Security", "Code Style", "Readability"],
+        fill="toself",
+        fillcolor="rgba(167, 139, 250, 0.25)",
+        line=dict(color="#a78bfa", width=2),
+    ))
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(range=[0, 100], showticklabels=False, gridcolor="#2a2d42"),
+            angularaxis=dict(tickfont=dict(size=8, color="#94a3b8"), gridcolor="#2a2d42"),
+            bgcolor="rgba(0,0,0,0)",
+        ),
+        showlegend=False,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=25, r=25, t=15, b=15),
         height=180,
-        placeholder="def my_function(x):\n    # TODO: write code\n    pass",
     )
-    roast_button = st.button("🔥 Roast My Code", type="primary", use_container_width=True)
+    
+    st.markdown('<div class="metrics-card">', unsafe_allow_html=True)
+    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    # ── Post-Roast Analytics ──────────────────────────────────────────────
-    if "latest_scores" in st.session_state:
-        st.divider()
-        sc = st.session_state.latest_scores
-        mt = st.session_state.latest_metrics
-        ml = st.session_state.get("latest_model_label", "")
+    # 4. Parameter Controls (Collapsible)
+    with st.expander("Parameter Controls", expanded=False):
+        roast_language = st.selectbox("Roast Output", ["🇬🇧 English", "🇳🇵 Roman Nepali"])
+        target_lang = "roman_nepali" if "Nepali" in roast_language else "english"
+        use_ai_llm = st.checkbox("Enable Dynamic AI", value=True)
 
-        gl = sc["grade"].split(" ")[0]
-        gd = " ".join(sc["grade"].split(" ")[1:])
-        st.markdown(f"""
-        <div class="grade-card">
-            <div class="grade-letter">{gl}</div>
-            <div class="grade-label">{gd}</div>
-            <div style="color:#666;font-size:0.78rem;margin-top:5px;">Score: {sc['overall']}/100</div>
-            <div style="color:#4ade80;font-size:0.7rem;margin-top:3px;">{ml}</div>
-        </div>
-        """, unsafe_allow_html=True)
+    # 5. Code Input & Trigger Button
+    st.markdown('<div class="sidebar-section-title">Code Input</div>', unsafe_allow_html=True)
+    code_input = st.text_area(
+        "Code Input",
+        height=140,
+        placeholder="def calculate_area(radius):\n    pi = 3.14159\n    return pi * radius * radius",
+        label_visibility="collapsed"
+    )
+    
+    roast_button = st.button("🔥 Roast Code", type="primary", use_container_width=True)
 
-        def score_bar(label, value):
-            c = "#4ade80" if value >= 75 else "#facc15" if value >= 50 else "#fb923c" if value >= 30 else "#ef4444"
-            st.markdown(f"""<div class="score-row"><span class="score-label">{label}</span>
-            <div class="score-bar-bg"><div class="score-bar-fill" style="width:{value}%;background:{c};"></div></div>
-            <span class="score-value">{value}</span></div>""", unsafe_allow_html=True)
-
-        score_bar("Readability", sc["readability"])
-        score_bar("Efficiency", sc["efficiency"])
-        score_bar("Structure", sc["structure"])
-        score_bar("Creativity", sc["creativity"])
-
-        with st.expander("📊 Quality Radar", expanded=False):
-            fig = go.Figure(data=go.Scatterpolar(
-                r=[sc["readability"], sc["efficiency"], sc["structure"], sc["creativity"], sc["readability"]],
-                theta=["Readability", "Efficiency", "Structure", "Creativity", "Readability"],
-                fill="toself", fillcolor="rgba(255,75,75,0.15)", line=dict(color="#FF4B4B", width=2),
-            ))
-            fig.update_layout(
-                polar=dict(
-                    radialaxis=dict(range=[0, 100], showticklabels=True, tickfont=dict(size=8, color="#666"), gridcolor="#333"),
-                    angularaxis=dict(tickfont=dict(size=9, color="#aaa"), gridcolor="#333"),
-                    bgcolor="rgba(0,0,0,0)",
-                ),
-                showlegend=False, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                margin=dict(l=35, r=35, t=15, b=15), height=220,
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
-        with st.expander("📋 Raw Metrics"):
-            mc = st.columns(2)
-            items = [
-                ("Lines", mt["lines_of_code"]), ("Functions", mt["function_count"]),
-                ("Avg Length", mt["avg_function_length"]), ("Complexity", mt["cyclomatic_complexity"]),
-                ("Naming", mt["naming_score"]), ("Comments", f"{mt['comment_ratio']:.1%}"),
-                ("Nesting", mt["nesting_depth"]), ("Duplication", mt["duplicate_code_score"]),
-            ]
-            for i, (n, v) in enumerate(items):
-                with mc[i % 2]:
-                    st.metric(label=n, value=v)
-
-    # ── Hall of Shame ─────────────────────────────────────────────────────
-    st.divider()
-    with st.expander("🏆 Hall of Shame"):
+    # Hall of Shame expander in sidebar
+    with st.expander("🏆 Hall of Shame", expanded=False):
         lb = load_leaderboard()
         if not lb:
-            st.info("No entries yet. Submit some bad code! 🔥")
+            st.caption("No entries yet. Submit bad code! 🔥")
         else:
-            for rank, entry in enumerate(lb, 1):
-                st.markdown(f"""<div class="shame-entry">
-                    <span style="color:#f87171;font-weight:600;">#{rank}</span>
-                    <span style="color:#9ca3af;">— {entry.get('grade','F')} ({entry.get('score',0)}/100)</span>
-                    <div style="color:#6b7280;font-style:italic;margin-top:3px;font-size:0.72rem;">
-                        "{entry.get('roast','')[:80]}..."
-                    </div>
-                </div>""", unsafe_allow_html=True)
+            for rank, entry in enumerate(lb[:5], 1):
+                st.markdown(f"""
+                <div style="background:#171926; border-left:3px solid #ef4444; padding:6px 10px; margin:4px 0; border-radius:4px; font-size:0.75rem;">
+                    <span style="color:#f87171; font-weight:700;">#{rank} {entry.get('grade','F')}</span> ({entry.get('score',0)}/100)
+                    <div style="color:#94a3b8; font-style:italic; margin-top:2px;">"{entry.get('roast','')[:60]}..."</div>
+                </div>
+                """, unsafe_allow_html=True)
 
-    st.divider()
-    st.caption("Built by gyr0byte — Always building, never stopping. 🔥")
-
-# ─── Handle Roast Button ─────────────────────────────────────────────────────
+# ─── Handle Roast Processing ─────────────────────────────────────────────────
 
 if roast_button:
     if not code_input:
-        st.warning("Paste some code first! 🔥")
+        st.sidebar.warning("Paste code first!")
     else:
-        with st.spinner("📊 Analyzing code metrics & quality..."):
+        with st.spinner("Analyzing AST Metrics..."):
             lang_key = language.lower()
             analyzer = CodeAnalyzer(code_input, language=lang_key)
             analysis_metrics = analyzer.get_metrics()
@@ -361,134 +492,164 @@ if roast_button:
             analysis_scores["grade"], use_llm=use_ai_llm, code=code_input, metrics=analysis_metrics
         )
 
+        st.session_state.latest_scores = analysis_scores
+        st.session_state.latest_metrics = analysis_metrics
+
+        curr_time = time.strftime("%I:%M %p")
         st.session_state.chat_history.append({
-            "role": "user", "code": code_input, "language": language,
+            "role": "user", "code": code_input, "language": language, "time": curr_time
         })
         st.session_state.pending_roast = {
             "metrics": analysis_metrics, "scores": analysis_scores,
             "quality_level": quality_level, "severity": severity,
             "use_ai": use_ai_llm, "target_lang": target_lang,
             "grade_reaction": grade_reaction, "model_label": model_label,
-            "code": code_input, "language": language,
+            "code": code_input, "language": language, "time": curr_time
         }
 
-# ─── Main Chat Canvas ────────────────────────────────────────────────────────
+# ─── Main Chat Canvas (Matching Mockup Center) ───────────────────────────────
 
-# Welcome screen
+# Top Chat Header Bar
+st.markdown("""
+<div class="chat-header">
+    <div class="chat-title">Chat</div>
+    <div style="color: #64748b; font-size: 1.2rem; cursor: pointer;">⚙️</div>
+</div>
+""", unsafe_allow_html=True)
+
+# Welcome State
 if not st.session_state.chat_history and "pending_roast" not in st.session_state:
     st.markdown("""
-    <div class="welcome-box">
-        <div style="font-size: 4.5rem;">🔥</div>
+    <div class="welcome-container">
+        <div style="font-size: 3.8rem; margin-bottom: 10px;">🔥</div>
         <div class="welcome-title">CodeRoast AI</div>
-        <div class="welcome-sub">
-            Paste your code in the sidebar and hit <strong>Roast My Code</strong>
-            to get brutally honest, AI-powered code reviews.
-        </div>
-        <div style="color: #444; font-size: 0.85rem; margin-top: 15px;">
-            Supports Python · Java · JavaScript &nbsp;|&nbsp; English · Roman Nepali
-        </div>
+        <p style="color: #94a3b8; font-size: 1.05rem; max-width: 500px; margin: 0 auto 25px auto;">
+            Enter your code in the sidebar panel and click <strong>Roast Code</strong> to generate a real-time AI code review.
+        </p>
     </div>
     """, unsafe_allow_html=True)
 
-# Render chat history
-for msg in st.session_state.chat_history:
+# Render Chat Thread
+for idx, msg in enumerate(st.session_state.chat_history):
     if msg["role"] == "user":
-        with st.chat_message("user"):
-            st.caption(f"📝 {msg['language']}")
-            st.code(msg["code"], language=msg["language"].lower())
+        st.markdown(f"""
+        <div class="user-msg-container">
+            <div class="user-msg-header">USER - {msg.get('time', '10:15 AM')} ({msg['language']})</div>
+        </div>
+        """, unsafe_allow_html=True)
+        st.code(msg["code"], language=msg["language"].lower())
+        st.markdown('<div class="user-msg-text">Rate this function for me!</div><br>', unsafe_allow_html=True)
 
     elif msg["role"] == "assistant":
-        with st.chat_message("assistant", avatar="🔥"):
-            grade_pill = msg.get("grade", "")
-            score_val = msg.get("score", 0)
-            st.markdown(f"""<div class="roast-header">
-                🔥 CODE ROAST AI &nbsp;
-                <span class="grade-pill">{grade_pill.split(' ')[0]} — {score_val}/100</span>
-            </div>""", unsafe_allow_html=True)
+        clean_text = msg["content"]
+        card_bytes = generate_roast_card_image(
+            grade=msg.get("grade", "F"), score=msg.get("score", 0),
+            language=msg.get("language", "Python"), roast=clean_text
+        )
 
-            st.markdown(f"""<div class="roast-bubble">{msg['content']}<br><br>
-                <em style="color:#888;">— {msg.get('reaction','')}</em>
-            </div>""", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="ai-msg-wrapper">
+            <div class="ai-avatar">🔥</div>
+            <div class="ai-content-box">
+                <div class="ai-roast-card">
+                    <div class="ai-roast-header">
+                        <span class="ai-roast-status">CODE ROAST AI</span>
+                        <div class="ai-roast-badge">🔥 VERDICT COMPLETED</div>
+                    </div>
+                    <div>{clean_text}</div>
+                    <br>
+                    <div style="color: #94a3b8; font-style: italic; font-size: 0.85rem;">— {msg.get('reaction','')}</div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Action Buttons Row
+        c1, c2, c3, _ = st.columns([1.6, 1.2, 1.2, 3])
+        with c1:
+            st.download_button("📥 Download Card", data=card_bytes, file_name=f"coderoast_{idx}.png", mime="image/png", key=f"dl_{idx}")
 
-            card_bytes = generate_roast_card_image(
-                grade=msg.get("grade", "F"), score=msg.get("score", 0),
-                language=msg.get("language", "Python"), roast=msg.get("content", "")
-            )
-            st.download_button(
-                "⬇️ Download Roast Card",
-                data=card_bytes,
-                file_name=f"coderoast_{msg.get('grade','F').split()[0]}.png",
-                mime="image/png",
-                key=f"dl_{id(msg)}",
-            )
-
-# Stream pending roast
+# Handle Streaming Pending Roast
 if "pending_roast" in st.session_state:
     data = st.session_state.pop("pending_roast")
 
-    with st.chat_message("assistant", avatar="🔥"):
-        grade_pill_text = data["scores"]["grade"].split(" ")[0]
-        st.markdown(f"""<div class="roast-header">
-            🔥 CODE ROAST AI — streaming... &nbsp;
-            <span class="grade-pill">{grade_pill_text} — {data['scores']['overall']}/100</span>
-        </div>""", unsafe_allow_html=True)
+    # Render User Message first
+    st.markdown(f"""
+    <div class="user-msg-container">
+        <div class="user-msg-header">USER - {data.get('time', '10:15 AM')} ({data['language']})</div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.code(data["code"], language=data["language"].lower())
+    st.markdown('<div class="user-msg-text">Rate this function for me!</div><br>', unsafe_allow_html=True)
 
-        placeholder = st.empty()
+    # Prepare AI Streaming Container
+    st.markdown("""
+    <div class="ai-msg-wrapper">
+        <div class="ai-avatar">🔥</div>
+        <div class="ai-content-box">
+    """, unsafe_allow_html=True)
+    
+    placeholder = st.empty()
 
-        roast_stream = roast_generator.generate_roast_stream(
-            metrics=data["metrics"], quality_level=data["quality_level"],
-            severity=data["severity"], code=data["code"],
-            use_llm=data["use_ai"], language=data["target_lang"]
-        )
+    roast_stream = roast_generator.generate_roast_stream(
+        metrics=data["metrics"], quality_level=data["quality_level"],
+        severity=data["severity"], code=data["code"],
+        use_llm=data["use_ai"], language=data["target_lang"]
+    )
 
-        accumulated = ""
-        for chunk in roast_stream:
-            accumulated += chunk
-            cleaned = clean_roast(accumulated)
-            placeholder.markdown(f"""<div class="roast-bubble">{cleaned}</div>""", unsafe_allow_html=True)
+    accumulated = ""
+    for chunk in roast_stream:
+        accumulated += chunk
+        cleaned = clean_roast(accumulated)
+        placeholder.markdown(f"""
+        <div class="ai-roast-card">
+            <div class="ai-roast-header">
+                <span class="ai-roast-status">CODE ROAST AI - streaming...</span>
+                <div class="ai-roast-badge">🔥 ROASTING...</div>
+            </div>
+            <div>{cleaned}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-        final_clean = clean_roast(accumulated)
-        placeholder.markdown(f"""<div class="roast-bubble">{final_clean}<br><br>
-            <em style="color:#888;">— {data['grade_reaction']}</em>
-        </div>""", unsafe_allow_html=True)
+    final_clean = clean_roast(accumulated)
+    placeholder.markdown(f"""
+    <div class="ai-roast-card">
+        <div class="ai-roast-header">
+            <span class="ai-roast-status">CODE ROAST AI</span>
+            <div class="ai-roast-badge">🔥 ROASTING COMPLETE</div>
+        </div>
+        <div>{final_clean}</div>
+        <br>
+        <div style="color: #94a3b8; font-style: italic; font-size: 0.85rem;">— {data['grade_reaction']}</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-        card_bytes = generate_roast_card_image(
-            grade=data["scores"]["grade"], score=data["scores"]["overall"],
-            language=data["language"], roast=final_clean
-        )
-        st.download_button(
-            "⬇️ Download Roast Card",
-            data=card_bytes,
-            file_name=f"coderoast_{grade_pill_text}.png",
-            mime="image/png",
-            key="dl_new",
-        )
+    st.markdown("</div></div>", unsafe_allow_html=True)
 
-    # Save to history
+    # Save to session history
     st.session_state.chat_history.append({
         "role": "assistant", "content": final_clean,
         "grade": data["scores"]["grade"], "score": data["scores"]["overall"],
-        "reaction": data["grade_reaction"], "language": data["language"],
+        "reaction": data["grade_reaction"], "language": data["language"]
     })
 
-    # Update sidebar analytics
-    st.session_state.latest_scores = data["scores"]
-    st.session_state.latest_metrics = data["metrics"]
-    st.session_state.latest_model_label = data["model_label"]
-
-    # Save to leaderboard
     save_to_leaderboard(
         code_snippet=data["code"], language=data["language"],
         score=data["scores"]["overall"], grade=data["scores"]["grade"],
         roast_text=final_clean
     )
 
-# ─── Footer ──────────────────────────────────────────────────────────────────
+# ─── Bottom Chat Input Bar (Matching Mockup Footer) ──────────────────────────
 
-st.markdown("---")
-st.markdown(
-    '<p style="text-align:center;color:#333;font-size:0.75rem;">'
-    'Built by gyr0byte — Not a person, a process. Always building, never stopping. 🔥'
-    '</p>',
-    unsafe_allow_html=True,
-)
+st.markdown("<br><br>", unsafe_allow_html=True)
+st.markdown("""
+<div style="background: #151724; border: 1px solid #272a3d; border-radius: 12px; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between;">
+    <div style="color: #64748b; font-size: 0.9rem;">
+        Paste code in sidebar & click <strong>🔥 Roast Code</strong> | Type '/' for commands
+    </div>
+    <div style="display: flex; gap: 8px;">
+        <button style="background: #1f2233; border: 1px solid #31354c; color: #94a3b8; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; cursor: pointer;">📎 Attach</button>
+        <button style="background: #f97316; border: none; color: white; padding: 6px 16px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer;">Send</button>
+    </div>
+</div>
+""", unsafe_allow_html=True)
