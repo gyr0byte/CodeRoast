@@ -424,31 +424,9 @@ if roast_button:
                     quality_level = 3
                 model_used_label = "📊 Rule-Based Static Analysis (Fallback)"
 
-        # 2. Roast Generation
-        if use_ai_llm:
-            sp_msg = "🇳🇵 Generating Romanized Nepali AI Roast..." if target_lang == "roman_nepali" else "🤖 Generating Unhinged Roast from Qwen / Gemini AI..."
-            with st.spinner(sp_msg):
-                if roast_generator.llm_generator is None:
-                    from src.roast.llm_generator import LLMRoastGenerator
-                    roast_generator.llm_generator = LLMRoastGenerator()
-
-                roast_text = roast_generator.generate_roast(
-                    metrics=metrics,
-                    quality_level=quality_level,
-                    severity=severity,
-                    code=code_input,
-                    use_llm=True,
-                    language=target_lang
-                )
-        else:
-            roast_text = roast_generator.generate_roast(
-                metrics=metrics,
-                quality_level=quality_level,
-                severity=severity,
-                code=code_input,
-                use_llm=False,
-                language=target_lang
-            )
+        if roast_generator.llm_generator is None and use_ai_llm:
+            from src.roast.llm_generator import LLMRoastGenerator
+            roast_generator.llm_generator = LLMRoastGenerator()
 
         grade_reaction = roast_generator.get_grade_reaction(
             scores["grade"],
@@ -461,16 +439,20 @@ if roast_button:
         # Store in session state for persistence across potential UI refreshes
         st.session_state["metrics"] = metrics
         st.session_state["scores"] = scores
-        st.session_state["roast_text"] = roast_text
+        st.session_state["quality_level"] = quality_level
+        st.session_state["severity"] = severity
+        st.session_state["code_input"] = code_input
+        st.session_state["use_ai_llm"] = use_ai_llm
+        st.session_state["target_lang"] = target_lang
         st.session_state["grade_reaction"] = grade_reaction
         st.session_state["model_used_label"] = model_used_label
         st.session_state["has_results"] = True
+        st.session_state["is_new_roast"] = True
 
 # Retrieve from session state if present
 if "has_results" in st.session_state and st.session_state["has_results"]:
     metrics = st.session_state["metrics"]
     scores = st.session_state["scores"]
-    roast_text = st.session_state["roast_text"]
     grade_reaction = st.session_state["grade_reaction"]
     model_used_label = st.session_state["model_used_label"]
     has_results = True
@@ -478,6 +460,39 @@ if "has_results" in st.session_state and st.session_state["has_results"]:
 # Render Column 2 (The Roast)
 with col2:
     if has_results:
+        target_lang = st.session_state.get("target_lang", "english")
+        use_ai_llm = st.session_state.get("use_ai_llm", True)
+
+        # ── Streaming or Cached Roast Handling ─────────────────────────────
+        if st.session_state.get("is_new_roast", False):
+            st.session_state["is_new_roast"] = False
+
+            if roast_generator.llm_generator is None and use_ai_llm:
+                from src.roast.llm_generator import LLMRoastGenerator
+                roast_generator.llm_generator = LLMRoastGenerator()
+
+            roast_stream = roast_generator.generate_roast_stream(
+                metrics=metrics,
+                quality_level=st.session_state.get("quality_level", 2),
+                severity=st.session_state.get("severity", 2),
+                code=st.session_state.get("code_input", ""),
+                use_llm=use_ai_llm,
+                language=target_lang
+            )
+
+            # Styled Header Box before stream
+            st.markdown("""
+            <div style="font-size: 1.1rem; font-weight: bold; color: #ff8c00; margin-bottom: 8px;">
+                🔥 CodeRoast Live Verdict:
+            </div>
+            """, unsafe_allow_html=True)
+
+            # Live Typewriter Effect via st.write_stream
+            roast_text = st.write_stream(roast_stream)
+            st.session_state["roast_text"] = roast_text
+        else:
+            roast_text = st.session_state.get("roast_text", "")
+
         # Determine background color style
         if roast_text.startswith("🤖") or "Qwen" in roast_text or "Gemini" in roast_text or "[Qwen" in roast_text:
             # AI LLM roast: Distinct purple gradient
@@ -496,7 +511,7 @@ with col2:
 
         # Save to leaderboard (Hall of Shame)
         save_to_leaderboard(
-            code_snippet=code_input,
+            code_snippet=st.session_state.get("code_input", ""),
             language=language,
             score=scores["overall"],
             grade=scores["grade"],
@@ -506,13 +521,14 @@ with col2:
         st.markdown(f"""
         <div class="roast-box" style="{roast_style}">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-                <span>🔥 <strong>CodeRoast Says:</strong></span>
+                <span>🔥 <strong>Final Verdict:</strong></span>
             </div>
             {clean_roast_text}
             <br><br>
             <em style="color: #888;">— {grade_reaction}</em>
         </div>
         """, unsafe_allow_html=True)
+
 
         # Downloadable Shareable Roast Card Button
         card_img_bytes = generate_roast_card_image(
