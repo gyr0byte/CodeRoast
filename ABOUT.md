@@ -210,11 +210,17 @@ Before LLM generation or static templates run, `generator._detect_easter_egg()` 
 *   `Empty Code`: Mocks submitting blank space.
 *   `TODO / pass` stubs: Mocks submitting unwritten placeholders.
 
-#### 4. 🖼️ Shareable Roast Cards (PNG Generator)
-Implements PIL-based image creation in `app.py` (`generate_roast_card_image`). Generates an 800x450 dark-themed social card containing the grade letter badge, total quality score, language, wrapped roast text, and `coderoast.dev` branding, available via a single-click Streamlit download button.
+#### 4. 🖼️ Authentic Classic Impact Font Meme Engine
+Powered by PIL and 100+ downloaded classic meme templates in `assets/memes/`:
+*   **Dynamic Template Pool (`MEME_CATALOG`)**: Organizes 25+ templates and punchlines into flaw categories (`mismatch`, `nesting`, `complexity`, `spaghetti`, `praise`, `disaster`). Every roast dynamically selects a new template and caption combination.
+*   **Visual Zone Alignment**: Calculates template-specific coordinate offsets (`top_y`, `bottom_y`) so Impact font text renders precisely inside target visual areas (e.g., green highway exit signs, Drake right panels, speech bubbles).
 
-#### 5. 🏆 Hall of Shame / Leaderboard
-Integrates local persistent JSON storage (`data/leaderboard.json`). Automatically saves and ranks the top 10 worst code submissions by lowest overall score, rendered dynamically in a Streamlit expander UI section.
+#### 5. 🔊 Web Speech API Voice Player
+Provides browser-native text-to-speech rendering via `window.speechSynthesis`. Users can listen to roasts read aloud with interactive play/stop controls without incurring local CPU/RAM server overhead.
+
+#### 6. 📜 Enforced 75+ Word Roast Length & Strict Safety Filters
+*   **Length Enforcement**: All AI prompts and fallback loop logic in `_finalize()` enforce a **75 to 120-word minimum length** for detailed, unhinged rants.
+*   **Automated Content Filters**: Combines strict negative prompt system rules with regex post-processing in `_ensure_profane_unhinged_roast()` to filter out banned terms (`randikhola`, `randi`) while preserving dark developer satire.
 
 #### Code Metrics Injection
 Static code metrics are dynamically injected alongside the snippet to ensure technical context:
@@ -230,7 +236,7 @@ Code Snippet:
 ```
 
 #### Robust Fallback Hierarchy
-$$\text{Easter Eggs} \longrightarrow \text{Local Qwen / Gemini Chain} \longrightarrow \text{HF Cloud Qwen Multi-Tier} \longrightarrow \text{Rule-Based Templates}$$
+$$\text{Easter Eggs} \longrightarrow \text{Local Qwen / Gemini Chain} \longrightarrow \text{HF Cloud Qwen Multi-Tier} \longrightarrow \text{Rule-Based Templates (75+ Words)}$$
 
 ---
 

@@ -36,8 +36,14 @@ It combines real static analysis metrics (lines of code, cyclomatic complexity, 
   - Powered by local `qwen2.5-coder:1.5b` with dynamic theme sampling.
   - **12 Dynamic Cultural Themes**: Silicon Valley failures, Stack Overflow elitism, r/programminghorror, FAANG interview disasters, Cyberpunk 2077 bugs, Fyre Festival, Enterprise Jira hell, ChatGPT hallucination, Startup delusion, Linus Torvalds PR flames, Friday deploy apocalypses, and Y2K.
   - **10 Tones, 6 Structures, 6 Signature Closers** yielding another **15,000+ unique roast variations**.
-- **🖼️ Shareable Roast Cards (PNG):** One-click PIL image generation (`🖼️ Download Shareable Roast Card (PNG)`) creating styled social media cards with grade badges, quality scores, and wrapped roast text.
-- **🏆 Hall of Shame / Leaderboard:** Persistent JSON tracking (`data/leaderboard.json`) ranking the top worst code snippets ever submitted with a dedicated Streamlit leaderboard UI.
+- **🖼️ Authentic Classic Impact Font Meme Generator:**
+  - Powered by 100+ downloaded meme templates in `assets/memes/` (Left Exit 12 Off Ramp, Drake Hotline Bling, Batman Slap, Two Buttons, Change My Mind, Buff Doge vs Cheems, A-Train, etc.).
+  - **Dynamic Template Pools (`MEME_CATALOG`)**: Randomly samples from 25+ template and punchline variations per flaw category (Spaghetti, Complexity, Nesting, Mismatch, Disaster, Praise) so re-roasting the same code produces a **new meme every time**.
+  - **Template Visual Zone Alignment**: Uses precise coordinate mapping (`top_y`, `bottom_y`) so text renders directly onto visual elements (e.g. centered on highway exit signs, Drake right panels, etc.).
+- **🔊 Web Speech API Voice Narration:** Browser-native text-to-speech player ("Read Roast Aloud") with instant playback, toggle controls, and 0% local server CPU/RAM load.
+- **📜 Enforced 75+ Word Length & Clean Safety Filters:**
+  - All AI-generated and template fallback roasts are guaranteed to be a minimum of **75 to 120 words** for maximum unhinged detail.
+  - Automated regex post-filters and strict system prompt exclusions remove banned offensive terms (`randikhola`, `randi`) while preserving intense developer satire.
 - **🎨 Interactive Streamlit Interface:** Features side-by-side code input & roast rendering, source-specific UI backgrounds, visual grade cards (*S to F* with randomized unhinged reactions per grade), Plotly radar charts, and customizable severity sliders.
 
 ---
@@ -92,6 +98,10 @@ CodeRoast/
 ├── ABOUT.md                    # In-depth Technical Documentation & Architecture Manual
 ├── CodeRoast_Project_Plan.md   # Project Specification & Architecture Plan
 ├── requirements.txt            # Project dependencies
+├── assets/
+│   ├── fonts/
+│   │   └── impact.ttf          # Classic Impact Meme Font
+│   └── memes/                  # 100+ Classic meme templates (.jpg)
 ├── data/
 │   ├── scrape_github.py        # GitHub API repository scraper
 │   ├── preprocess_dataset.py   # Dataset feature extractor & cleaning
