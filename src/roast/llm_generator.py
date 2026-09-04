@@ -700,8 +700,10 @@ class LLMRoastGenerator:
                 ]
             text = random.choice(openers) + " " + text.strip() + random.choice(closers)
 
-        # 3. Filter out forbidden terms (rape, murder, etc.)
+        # 3. Filter out forbidden terms (randikhola, randi, rape, murder, etc.)
         forbidden_map = {
+            'randikhola': 'mujikhola',
+            'randi': 'mujii',
             'rape': 'goddamn destroy',
             'raped': 'goddamn destroyed',
             'raping': 'goddamn destroying',
