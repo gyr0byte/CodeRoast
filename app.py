@@ -56,8 +56,30 @@ def generate_roast_audio(text: str, lang_code: str = "en") -> Optional[bytes]:
         return None
 
 
+def draw_impact_caption(draw, text: str, width: int, y_start: int, font, is_bottom: bool = False):
+    """Draw classic white uppercase meme text with thick black outline."""
+    import textwrap
+    text = text.upper()
+    lines = textwrap.wrap(text, width=22)
+    stroke_w = 4
+    line_h = 42
+    
+    if is_bottom:
+        total_h = len(lines) * line_h
+        y_pos = y_start - total_h - 10
+    else:
+        y_pos = y_start
+
+    for line in lines:
+        bbox = draw.textbbox((0, 0), line, font=font)
+        line_w = bbox[2] - bbox[0]
+        x_pos = (width - line_w) // 2
+        draw.text((x_pos, y_pos), line, font=font, fill=(255, 255, 255), stroke_width=stroke_w, stroke_fill=(0, 0, 0))
+        y_pos += line_h
+
+
 def generate_code_meme(metrics: dict, grade: str, language: str) -> bytes:
-    """Generate a custom developer meme using famous meme templates from assets/memes."""
+    """Generate an authentic classic Impact Font meme using templates from assets/memes."""
     import os
     grade_clean = grade.encode("ascii", "ignore").decode("ascii").strip()
     grade_str = grade_clean.split()[0] if grade_clean else "F"
@@ -71,28 +93,28 @@ def generate_code_meme(metrics: dict, grade: str, language: str) -> bytes:
         template_name = "drake_hotline_bling.jpg"
         sel_lang = metrics.get("_selected_lang", "JAVA")
         det_lang = metrics.get("_detected_lang", "PYTHON")
-        top_text = f"UI DROPDOWN: SELECTED {sel_lang.upper()}"
-        bottom_text = f"PASTED {det_lang.upper()} CODE LIKE A PRO"
+        top_text = f"SELECTED {sel_lang.upper()} IN THE UI"
+        bottom_text = f"PASTED {det_lang.upper()} CODE LIKE A PRO!"
     elif nesting >= 3:
         template_name = "running_away_balloon.jpg"
-        top_text = "ME TRYING TO WRITE CLEAN SIMPLE LOGIC"
-        bottom_text = f"NESTING DEPTH LEVEL {nesting} (INCEPTION)"
+        top_text = "ME TRYING TO WRITE CLEAN LOGIC"
+        bottom_text = f"NESTING DEPTH LEVEL {nesting} (INCEPTION)!"
     elif complexity >= 5:
         template_name = "batman_slapping_robin.jpg"
         top_text = "MY CODE WORKS PERFECTLY!"
         bottom_text = f"CYCLOMATIC COMPLEXITY IS {complexity} BRO!"
     elif loc > 30:
         template_name = "left_exit_12_off_ramp.jpg"
-        top_text = "CLEAN MODULAR REUSABLE FUNCTIONS"
-        bottom_text = f"ONE {loc}-LINE SPAGHETTI FUNCTION"
+        top_text = "CLEAN REUSABLE FUNCTIONS"
+        bottom_text = f"ONE {loc}-LINE SPAGHETTI FUNCTION!"
     elif grade_str in ["S", "A"]:
         template_name = "epic_handshake.jpg"
         top_text = "SENIOR DEV QUALITY CODE"
-        bottom_text = f"GRADE {grade_str} CLEAN PEP8 ARCHITECTURE"
+        bottom_text = f"GRADE {grade_str} CLEAN PEP8 ARCHITECTURE!"
     else:
-        template_name = "disappointed_muhammad_sarim_akhtar.jpg"
-        top_text = "COMPILER LOOKING AT THIS SOURCE CODE"
-        bottom_text = f"FINAL VERDICT: GRADE {grade_str} (TOTAL DISASTER)"
+        template_name = "drake_blank.jpg"
+        top_text = "RUNNING CODE AND PRAYING IT WORKS"
+        bottom_text = f"COMPILER: VERDICT GRADE {grade_str} (DISASTER)!"
         
     template_path = os.path.join(meme_dir, template_name)
     if not os.path.exists(template_path):
@@ -110,22 +132,25 @@ def generate_code_meme(metrics: dict, grade: str, language: str) -> bytes:
     img = img.resize((target_w, h_size), Image.Resampling.LANCZOS)
     
     draw = ImageDraw.Draw(img)
-    font = ImageFont.load_default()
     
-    # Top Neon Text Banner
-    draw.rectangle([(10, 10), (target_w - 10, 55)], fill=(15, 23, 42))
-    draw.text((20, 24), top_text, fill=(244, 114, 182), font=font)
-    draw.text((target_w - 200, 24), f"LANG: {language.upper()}", fill=(236, 72, 153), font=font)
-    
-    # Bottom Neon Text Banner
-    draw.rectangle([(10, h_size - 60), (target_w - 10, h_size - 10)], fill=(15, 23, 42))
-    draw.text((20, h_size - 42), bottom_text, fill=(56, 189, 248), font=font)
-    grade_color = (239, 68, 68) if grade_str in ["F", "D"] else ((245, 158, 11) if grade_str == "C" else (16, 185, 129))
-    draw.text((target_w - 200, h_size - 42), f"VERDICT: GRADE {grade_str}", fill=grade_color, font=font)
+    # Load Impact font (bundled or system)
+    font_path = os.path.join("assets", "fonts", "impact.ttf")
+    if not os.path.exists(font_path) and os.path.exists(r"C:\Windows\Fonts\impact.ttf"):
+        font_path = r"C:\Windows\Fonts\impact.ttf"
+        
+    try:
+        font = ImageFont.truetype(font_path, size=38)
+    except Exception:
+        font = ImageFont.load_default()
+        
+    # Render Classic Impact Font Meme Text
+    draw_impact_caption(draw, top_text, target_w, 20, font, is_bottom=False)
+    draw_impact_caption(draw, bottom_text, target_w, h_size - 15, font, is_bottom=True)
     
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     return buf.getvalue()
+
 
 
 
