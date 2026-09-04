@@ -220,6 +220,24 @@ st.markdown("""
         box-shadow: 0 4px 20px rgba(245, 158, 11, 0.2);
     }
 
+    /* Thinking / Cooking Pulse Animation */
+    @keyframes pulseText {
+        0% { opacity: 0.3; }
+        50% { opacity: 1; }
+        100% { opacity: 0.3; }
+    }
+    .thinking-loader {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #c084fc;
+        font-weight: 500;
+        font-size: 1.05rem;
+        padding: 12px 0;
+        animation: pulseText 1.2s infinite ease-in-out;
+    }
+
+
     /* Score bars */
     .score-row {
         display: flex;
@@ -531,6 +549,19 @@ with col2:
         if st.session_state.get("is_new_roast", False):
             st.session_state["is_new_roast"] = False
 
+            # Instantly display purple glowing card with animated thinking/cooking state
+            thinking_msg = "⚡ Analyzing AST metrics... Cooking a brutal verdict..." if target_lang == "english" else "⚡ AST metrics हेर्दै... AI roast तयार पार्दै..."
+            roast_box_placeholder.markdown(f"""
+            <div class="{card_class}">
+                <div style="font-size: 1.05rem; font-weight: bold; color: #a78bfa; margin-bottom: 10px;">
+                    🤖 Senior Dev AI Verdict:
+                </div>
+                <div class="thinking-loader">
+                    {thinking_msg} 💭
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
             if roast_generator.llm_generator is None and use_ai_llm:
                 from src.roast.llm_generator import LLMRoastGenerator
                 roast_generator.llm_generator = LLMRoastGenerator()
@@ -543,6 +574,7 @@ with col2:
                 use_llm=use_ai_llm,
                 language=target_lang
             )
+
 
             accumulated_text = ""
             for chunk in roast_stream:
