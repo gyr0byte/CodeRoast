@@ -182,7 +182,8 @@ class LLMRoastGenerator:
             tone_instructions = (
                 "Role: Unhinged senior developer writing in ROMANIZED NEPALI (Roman Nepali). "
                 "CRITICAL REQUIREMENT: Write your ENTIRE roast in fluent Romanized Nepali (e.g. 'Kasto hawa code lekheko bro, cyclomatic complexity dekhera mero dimag chakkar aayo! Delete gar yo trash immediately!'). "
-                "Use hilarious Nepali tech slang and profanity (dimag navako gadha, hawa logic, bheda charna jaa, khattam code, dumbass, bullshit, clusterfuck, pakhe harami, khate)." + length_rule
+                "Use hilarious Nepali tech slang and profanity (dimag navako gadha, hawa logic, bheda charna jaa, khattam code, dumbass, bullshit, clusterfuck, pakhe harami, khate). "
+                "STRICT EXCLUSION RULE: Absolutely NEVER use the word 'randikhola' or 'randi' under any circumstances." + length_rule
             )
             few_shot_examples = [
                 {
@@ -346,7 +347,7 @@ class LLMRoastGenerator:
                 "chappar, boksi ko chela, sungur, gadha ko baccha, baal xaina, hait, tori",
                 "dangadung, futsal cancel, tori budhi, gobar dimag, ghanti bajyo, ullu, bakhra",
                 "andha, lato, bahira, mungri, tapori, fataha, langada logic, bokya",
-                "murkha, buddhu, thakali thali jasto overloaded, randikhola ko paani jasto unclear, paagal",
+                "murkha, buddhu, thakali thali jasto overloaded, bagmati ko paani jasto unclear, paagal",
                 "ban manchhe, junglee coder, kachyaang, suruwal kholdai coding, fohor code, sarkari kaam jasto slow",
                 "phokat ko gyaan, nakali developer, jhilke code, falthu function, dherai halla kam kaam",
             ]
@@ -697,12 +698,22 @@ class LLMRoastGenerator:
                 ]
             text = random.choice(openers) + " " + text.strip() + random.choice(closers)
 
-        # 3. Filter out any unacceptable non-swearing extreme harm terms (rape, murder, kill, sexual violence)
-        forbidden_terms = ['rape', 'raped', 'raping', 'murder', 'murdered', 'murdering', 'kill yourself']
-        for term in forbidden_terms:
+        # 3. Filter out forbidden terms (randikhola, randi, rape, murder, etc.)
+        forbidden_map = {
+            'randikhola': 'bagmati khola',
+            'randi': 'harami',
+            'rape': 'goddamn destroy',
+            'raped': 'goddamn destroyed',
+            'raping': 'goddamn destroying',
+            'murder': 'destroy',
+            'murdered': 'destroyed',
+            'murdering': 'destroying',
+            'kill yourself': 'quit coding'
+        }
+        for term, replacement in forbidden_map.items():
             import re
-            pattern = re.compile(re.escape(term), re.IGNORECASE)
-            text = pattern.sub("goddamn destroy", text)
+            pattern = re.compile(r'\b' + re.escape(term) + r'\b', re.IGNORECASE)
+            text = pattern.sub(replacement, text)
 
         return text
 
