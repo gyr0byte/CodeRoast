@@ -463,6 +463,16 @@ with col2:
         target_lang = st.session_state.get("target_lang", "english")
         use_ai_llm = st.session_state.get("use_ai_llm", True)
 
+        # Determine background color style
+        if use_ai_llm:
+            # AI LLM roast: Distinct purple gradient
+            roast_style = "background: linear-gradient(135deg, #4c1d95 0%, #1e1b4b 100%); border-left: 5px solid #a78bfa; box-shadow: 0 4px 20px rgba(167, 139, 250, 0.15);"
+        else:
+            # Template roast: Distinct yellow/amber gradient
+            roast_style = "background: linear-gradient(135deg, #78350f 0%, #1c1917 100%); border-left: 5px solid #fbbf24; box-shadow: 0 4px 20px rgba(251, 191, 36, 0.15);"
+
+        roast_box_placeholder = st.empty()
+
         # ── Streaming or Cached Roast Handling ─────────────────────────────
         if st.session_state.get("is_new_roast", False):
             st.session_state["is_new_roast"] = False
@@ -480,23 +490,30 @@ with col2:
                 language=target_lang
             )
 
-            # Styled Header Box before stream
-            st.markdown("""
-            <div style="font-size: 1.1rem; font-weight: bold; color: #ff8c00; margin-bottom: 8px;">
-                🔥 CodeRoast Live Verdict:
-            </div>
-            """, unsafe_allow_html=True)
+            accumulated_text = ""
+            for chunk in roast_stream:
+                accumulated_text += chunk
+                clean_accumulated = (
+                    accumulated_text
+                    .replace("🤖 [Gemini Flash AI Roast]: ", "")
+                    .replace("🤖 [Qwen2.5-Coder AI Roast]: ", "")
+                    .replace("🤖 AI Roast: ", "")
+                    .replace("🤖 ", "")
+                )
 
-            # Live Typewriter Effect via st.write_stream
-            roast_text = st.write_stream(roast_stream)
-            st.session_state["roast_text"] = roast_text
-        else:
-            roast_text = st.session_state.get("roast_text", "")
+                roast_box_placeholder.markdown(f"""
+                <div class="roast-box" style="{roast_style}">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                        <span>🔥 <strong>Final Verdict:</strong></span>
+                    </div>
+                    {clean_accumulated}
+                    <br><br>
+                    <em style="color: #888;">— {grade_reaction}</em>
+                </div>
+                """, unsafe_allow_html=True)
 
-        # Determine background color style
-        if roast_text.startswith("🤖") or "Qwen" in roast_text or "Gemini" in roast_text or "[Qwen" in roast_text:
-            # AI LLM roast: Distinct purple gradient
-            roast_style = "background: linear-gradient(135deg, #4c1d95 0%, #1e1b4b 100%); border-left: 5px solid #a78bfa; box-shadow: 0 4px 20px rgba(167, 139, 250, 0.15);"
+            st.session_state["roast_text"] = accumulated_text
+            roast_text = accumulated_text
             clean_roast_text = (
                 roast_text
                 .replace("🤖 [Gemini Flash AI Roast]: ", "")
@@ -505,9 +522,24 @@ with col2:
                 .replace("🤖 ", "")
             )
         else:
-            # Template roast: Distinct yellow/amber gradient
-            roast_style = "background: linear-gradient(135deg, #78350f 0%, #1c1917 100%); border-left: 5px solid #fbbf24; box-shadow: 0 4px 20px rgba(251, 191, 36, 0.15);"
-            clean_roast_text = roast_text
+            roast_text = st.session_state.get("roast_text", "")
+            clean_roast_text = (
+                roast_text
+                .replace("🤖 [Gemini Flash AI Roast]: ", "")
+                .replace("🤖 [Qwen2.5-Coder AI Roast]: ", "")
+                .replace("🤖 AI Roast: ", "")
+                .replace("🤖 ", "")
+            )
+            roast_box_placeholder.markdown(f"""
+            <div class="roast-box" style="{roast_style}">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <span>🔥 <strong>Final Verdict:</strong></span>
+                </div>
+                {clean_roast_text}
+                <br><br>
+                <em style="color: #888;">— {grade_reaction}</em>
+            </div>
+            """, unsafe_allow_html=True)
 
         # Save to leaderboard (Hall of Shame)
         save_to_leaderboard(
@@ -518,16 +550,6 @@ with col2:
             roast_text=clean_roast_text
         )
 
-        st.markdown(f"""
-        <div class="roast-box" style="{roast_style}">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-                <span>🔥 <strong>Final Verdict:</strong></span>
-            </div>
-            {clean_roast_text}
-            <br><br>
-            <em style="color: #888;">— {grade_reaction}</em>
-        </div>
-        """, unsafe_allow_html=True)
 
 
         # Downloadable Shareable Roast Card Button
