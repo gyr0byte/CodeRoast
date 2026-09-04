@@ -368,24 +368,8 @@ with st.sidebar:
     st.markdown("### ⚙️ Engine Settings")
     
     language = st.selectbox("Code Language", ["Python", "Java", "JavaScript"], index=0)
-    
-    roast_language = st.selectbox(
-        "Roast Tone",
-        [
-            "🇬🇧 English",
-            "🇳🇵 Roman Nepali (⚡ Qwen Local GPU)",
-            "🇳🇵 Roman Nepali (☁️ Gemini Cloud AI)",
-        ],
-        index=0
-    )
-    if "Qwen" in roast_language:
-        target_lang = "roman_nepali_qwen"
-    elif "Gemini" in roast_language:
-        target_lang = "roman_nepali_gemini"
-    else:
-        target_lang = "english"
-
-
+    roast_language = st.selectbox("Roast Tone", ["🇬🇧 English", "🇳🇵 Roman Nepali (रोमन नेपाली)"], index=0)
+    target_lang = "roman_nepali" if "Nepali" in roast_language else "english"
     
     severity = st.slider("Roast Severity", 1, 3, 2, help="1 = Gentle, 2 = Standard, 3 = No Mercy")
     use_ai_llm = st.checkbox("🤖 Enable Dynamic AI Roast", value=True)
@@ -582,15 +566,8 @@ with col2:
             st.session_state["is_new_roast"] = False
 
             # Instantly display purple glowing card with animated thinking/cooking state
-            if target_lang == "roman_nepali_qwen":
-                thinking_msg = "⚡ Qwen GPU Local Engine... AST metrics हेर्दै... Nepali roast तयार पार्दै..."
-            elif target_lang == "roman_nepali_gemini":
-                thinking_msg = "☁️ Gemini Cloud API... AST metrics हेर्दै... Nepali roast तयार पार्दै..."
-            else:
-                thinking_msg = "⚡ Analyzing AST metrics... Cooking a brutal verdict..."
-
+            thinking_msg = "⚡ Analyzing AST metrics... Cooking a brutal verdict..." if target_lang == "english" else "⚡ AST metrics हेर्दै... AI roast तयार पार्दै..."
             roast_box_placeholder.markdown(f"""
-
             <div class="{card_class}">
                 <div style="font-size: 1.05rem; font-weight: bold; color: #a78bfa; margin-bottom: 10px;">
                     🤖 Senior Dev AI Verdict:
