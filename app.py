@@ -511,10 +511,10 @@ if roast_button:
         st.session_state["is_new_roast"] = True
         st.rerun()
 
-# ─── Right Column: Review Chat Stream ─────────────────────────────────────────
+# ─── Right Column: AI Roast Verdict ─────────────────────────────────────────
 
 with col2:
-    st.markdown("##### 💬 Review Chat (Interactive AI Thread)")
+    st.markdown("##### 🔥 AI Roast Verdict")
 
     if has_results and st.session_state.get("metrics"):
         metrics = st.session_state["metrics"]
@@ -524,87 +524,85 @@ with col2:
         use_ai_llm = st.session_state.get("use_ai_llm", True)
         code_sub = st.session_state.get("code_input", "")
 
-        # 1. User Message (Submitted Code)
-        with st.chat_message("user", avatar="💻"):
-            st.markdown(f"**Submitted Code for Review ({language}):**")
-            st.code(code_sub, language=language.lower())
+        # Live Typewriter Roast Container
+        roast_box_placeholder = st.empty()
+        card_class = "chat-bubble-assistant" if use_ai_llm else "chat-bubble-template"
 
-        # 2. Assistant Message (Live Typewriter Roast)
-        with st.chat_message("assistant", avatar="🤖"):
-            st.markdown("**CodeRoast Senior Dev AI:**")
-            
-            roast_box_placeholder = st.empty()
-            card_class = "chat-bubble-assistant" if use_ai_llm else "chat-bubble-template"
+        if st.session_state.get("is_new_roast", False):
+            st.session_state["is_new_roast"] = False
 
-            if st.session_state.get("is_new_roast", False):
-                st.session_state["is_new_roast"] = False
+            if roast_generator.llm_generator is None and use_ai_llm:
+                from src.roast.llm_generator import LLMRoastGenerator
+                roast_generator.llm_generator = LLMRoastGenerator()
 
-                if roast_generator.llm_generator is None and use_ai_llm:
-                    from src.roast.llm_generator import LLMRoastGenerator
-                    roast_generator.llm_generator = LLMRoastGenerator()
+            roast_stream = roast_generator.generate_roast_stream(
+                metrics=metrics,
+                quality_level=st.session_state.get("quality_level", 2),
+                severity=st.session_state.get("severity", 2),
+                code=code_sub,
+                use_llm=use_ai_llm,
+                language=target_lang
+            )
 
-                roast_stream = roast_generator.generate_roast_stream(
-                    metrics=metrics,
-                    quality_level=st.session_state.get("quality_level", 2),
-                    severity=st.session_state.get("severity", 2),
-                    code=code_sub,
-                    use_llm=use_ai_llm,
-                    language=target_lang
-                )
-
-                accumulated_text = ""
-                for chunk in roast_stream:
-                    accumulated_text += chunk
-                    clean_accum = (
-                        accumulated_text
-                        .replace("🤖 [Gemini Flash AI Roast]: ", "")
-                        .replace("🤖 [Qwen2.5-Coder AI Roast]: ", "")
-                        .replace("🤖 AI Roast: ", "")
-                        .replace("🤖 ", "")
-                    )
-
-                    roast_box_placeholder.markdown(f"""
-                    <div class="{card_class}">
-                        {clean_accum}
-                        <br><br>
-                        <em style="color: #94a3b8; font-size: 0.9rem;">— {grade_reaction}</em>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-                st.session_state["roast_text"] = accumulated_text
-                roast_text = accumulated_text
-                clean_roast_text = (
-                    roast_text
+            accumulated_text = ""
+            for chunk in roast_stream:
+                accumulated_text += chunk
+                clean_accum = (
+                    accumulated_text
                     .replace("🤖 [Gemini Flash AI Roast]: ", "")
                     .replace("🤖 [Qwen2.5-Coder AI Roast]: ", "")
                     .replace("🤖 AI Roast: ", "")
                     .replace("🤖 ", "")
                 )
-            else:
-                roast_text = st.session_state.get("roast_text", "")
-                clean_roast_text = (
-                    roast_text
-                    .replace("🤖 [Gemini Flash AI Roast]: ", "")
-                    .replace("🤖 [Qwen2.5-Coder AI Roast]: ", "")
-                    .replace("🤖 AI Roast: ", "")
-                    .replace("🤖 ", "")
-                )
+
                 roast_box_placeholder.markdown(f"""
                 <div class="{card_class}">
-                    {clean_roast_text}
+                    <div style="font-size: 1.05rem; font-weight: bold; color: #a78bfa; margin-bottom: 10px;">
+                        🤖 Senior Dev AI Verdict:
+                    </div>
+                    {clean_accum}
                     <br><br>
                     <em style="color: #94a3b8; font-size: 0.9rem;">— {grade_reaction}</em>
                 </div>
                 """, unsafe_allow_html=True)
 
-            # Save to leaderboard (Hall of Shame)
-            save_to_leaderboard(
-                code_snippet=code_sub,
-                language=language,
-                score=scores["overall"],
-                grade=scores["grade"],
-                roast_text=clean_roast_text
+            st.session_state["roast_text"] = accumulated_text
+            roast_text = accumulated_text
+            clean_roast_text = (
+                roast_text
+                .replace("🤖 [Gemini Flash AI Roast]: ", "")
+                .replace("🤖 [Qwen2.5-Coder AI Roast]: ", "")
+                .replace("🤖 AI Roast: ", "")
+                .replace("🤖 ", "")
             )
+        else:
+            roast_text = st.session_state.get("roast_text", "")
+            clean_roast_text = (
+                roast_text
+                .replace("🤖 [Gemini Flash AI Roast]: ", "")
+                .replace("🤖 [Qwen2.5-Coder AI Roast]: ", "")
+                .replace("🤖 AI Roast: ", "")
+                .replace("🤖 ", "")
+            )
+            roast_box_placeholder.markdown(f"""
+            <div class="{card_class}">
+                <div style="font-size: 1.05rem; font-weight: bold; color: #a78bfa; margin-bottom: 10px;">
+                    🤖 Senior Dev AI Verdict:
+                </div>
+                {clean_roast_text}
+                <br><br>
+                <em style="color: #94a3b8; font-size: 0.9rem;">— {grade_reaction}</em>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # Save to leaderboard (Hall of Shame)
+        save_to_leaderboard(
+            code_snippet=code_sub,
+            language=language,
+            score=scores["overall"],
+            grade=scores["grade"],
+            roast_text=clean_roast_text
+        )
 
         # Download PNG Card Button under thread
         card_img_bytes = generate_roast_card_image(
@@ -623,13 +621,13 @@ with col2:
 
     else:
         # Default placeholder when app starts
-        with st.chat_message("assistant", avatar="🤖"):
-            st.markdown("""
-            <div class="chat-bubble-assistant">
-                👋 <strong>CodeRoast AI Reviewer Online!</strong><br><br>
-                Paste your source code in the <strong>Code Inspection Studio</strong> on the left, select your options, and click <strong>🔥 Roast My Code</strong> to start our live review chat session!
-            </div>
-            """, unsafe_allow_html=True)
+        st.markdown("""
+        <div class="chat-bubble-assistant">
+            👋 <strong>CodeRoast AI Reviewer Online!</strong><br><br>
+            Paste your source code in the <strong>Code Inspection Studio</strong> on the left, select your options, and click <strong>🔥 Roast My Code</strong> to generate your live roast verdict!
+        </div>
+        """, unsafe_allow_html=True)
+
 
 # ─── Leaderboard / Hall of Shame Section ─────────────────────────────────────
 
