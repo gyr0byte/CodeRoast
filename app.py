@@ -57,36 +57,8 @@ def generate_roast_audio(text: str, lang_code: str = "en") -> Optional[bytes]:
 
 
 def generate_code_meme(metrics: dict, grade: str, language: str) -> bytes:
-    """Generate a high-contrast 2-Panel 'EXPECTATION vs REALITY' developer meme card."""
-    width, height = 800, 520
-    img = Image.new("RGB", (width, height), color=(11, 15, 25))
-    draw = ImageDraw.Draw(img)
-    
-    # Outer Neon Border
-    draw.rectangle([(0, 0), (width - 1, height - 1)], outline=(168, 85, 247), width=6)
-    draw.rectangle([(8, 8), (width - 9, height - 9)], outline=(236, 72, 153), width=2)
-    
-    font = ImageFont.load_default()
-    
-    # Top Header Title
-    draw.rectangle([(20, 20), (width - 20, 75)], fill=(30, 41, 59), outline=(168, 85, 247), width=2)
-    draw.text((35, 38), "CODEROAST MEME: EXPECTATION vs REALITY", fill=(245, 158, 11), font=font)
-    draw.text((width - 220, 38), f"LANG: {language.upper()}", fill=(236, 72, 153), font=font)
-    
-    # Left Panel: Expectation (Clean Code)
-    draw.rectangle([(30, 95), (width // 2 - 15, 430)], fill=(15, 118, 110), outline=(45, 212, 191), width=3)
-    draw.text((50, 115), "EXPECTATION (CLEAN CODE)", fill=(255, 255, 255), font=font)
-    draw.line([(50, 140), (width // 2 - 35, 140)], fill=(45, 212, 191), width=2)
-    
-    draw.text((50, 165), "[+] Clean PEP8 Architecture", fill=(240, 253, 244), font=font)
-    draw.text((50, 205), "[+] 100% Test Coverage", fill=(240, 253, 244), font=font)
-    draw.text((50, 245), "[+] Meaningful Variable Names", fill=(240, 253, 244), font=font)
-    draw.text((50, 285), "[+] Zero Nesting Disasters", fill=(240, 253, 244), font=font)
-    
-    draw.rectangle([(50, 350), (width // 2 - 35, 405)], fill=(13, 148, 136))
-    draw.text((70, 368), "TARGET: GRADE S (100/100)", fill=(255, 215, 0), font=font)
-    
-    # Right Panel: Reality (User Code Roast)
+    """Generate a custom developer meme using famous meme templates from assets/memes."""
+    import os
     grade_clean = grade.encode("ascii", "ignore").decode("ascii").strip()
     grade_str = grade_clean.split()[0] if grade_clean else "F"
     complexity = metrics.get("cyclomatic_complexity", 1)
@@ -94,33 +66,67 @@ def generate_code_meme(metrics: dict, grade: str, language: str) -> bytes:
     loc = metrics.get("lines_of_code", 0)
     is_mismatch = metrics.get("_language_mismatch", False)
     
-    draw.rectangle([(width // 2 + 15, 95), (width - 30, 430)], fill=(153, 27, 27), outline=(248, 113, 113), width=3)
-    draw.text((width // 2 + 35, 115), "YOUR CODE REALITY", fill=(255, 255, 255), font=font)
-    draw.line([(width // 2 + 35, 140), (width - 50, 140)], fill=(248, 113, 113), width=2)
-    
+    meme_dir = "assets/memes"
     if is_mismatch:
-        sel_lang = metrics.get("_selected_lang", "Java")
-        det_lang = metrics.get("_detected_lang", "Python")
-        draw.text((width // 2 + 35, 165), f"[-] Selected: {sel_lang}", fill=(254, 226, 226), font=font)
-        draw.text((width // 2 + 35, 205), f"[-] Pasted: {det_lang}", fill=(254, 226, 226), font=font)
-        draw.text((width // 2 + 35, 245), "[-] Status: Total Confusion", fill=(254, 226, 226), font=font)
-        draw.text((width // 2 + 35, 285), "[-] Compiler: Confused", fill=(254, 226, 226), font=font)
+        template_name = "drake_hotline_bling.jpg"
+        sel_lang = metrics.get("_selected_lang", "JAVA")
+        det_lang = metrics.get("_detected_lang", "PYTHON")
+        top_text = f"UI DROPDOWN: SELECTED {sel_lang.upper()}"
+        bottom_text = f"PASTED {det_lang.upper()} CODE LIKE A PRO"
+    elif nesting >= 3:
+        template_name = "running_away_balloon.jpg"
+        top_text = "ME TRYING TO WRITE CLEAN SIMPLE LOGIC"
+        bottom_text = f"NESTING DEPTH LEVEL {nesting} (INCEPTION)"
+    elif complexity >= 5:
+        template_name = "batman_slapping_robin.jpg"
+        top_text = "MY CODE WORKS PERFECTLY!"
+        bottom_text = f"CYCLOMATIC COMPLEXITY IS {complexity} BRO!"
+    elif loc > 30:
+        template_name = "left_exit_12_off_ramp.jpg"
+        top_text = "CLEAN MODULAR REUSABLE FUNCTIONS"
+        bottom_text = f"ONE {loc}-LINE SPAGHETTI FUNCTION"
+    elif grade_str in ["S", "A"]:
+        template_name = "epic_handshake.jpg"
+        top_text = "SENIOR DEV QUALITY CODE"
+        bottom_text = f"GRADE {grade_str} CLEAN PEP8 ARCHITECTURE"
     else:
-        draw.text((width // 2 + 35, 165), f"[-] Complexity: {complexity}", fill=(254, 226, 226), font=font)
-        draw.text((width // 2 + 35, 205), f"[-] Nesting Level: {nesting}", fill=(254, 226, 226), font=font)
-        draw.text((width // 2 + 35, 245), f"[-] Lines of Code: {loc}", fill=(254, 226, 226), font=font)
-        draw.text((width // 2 + 35, 285), "[-] CPU Status: Sweating", fill=(254, 226, 226), font=font)
+        template_name = "disappointed_muhammad_sarim_akhtar.jpg"
+        top_text = "COMPILER LOOKING AT THIS SOURCE CODE"
+        bottom_text = f"FINAL VERDICT: GRADE {grade_str} (TOTAL DISASTER)"
         
-    draw.rectangle([(width // 2 + 35, 350), (width - 50, 405)], fill=(185, 28, 28))
-    draw.text((width // 2 + 55, 368), f"VERDICT: GRADE {grade_str}", fill=(255, 255, 255), font=font)
+    template_path = os.path.join(meme_dir, template_name)
+    if not os.path.exists(template_path):
+        files = [f for f in os.listdir(meme_dir) if f.endswith(".jpg")] if os.path.exists(meme_dir) else []
+        template_path = os.path.join(meme_dir, files[0]) if files else None
+        
+    if template_path and os.path.exists(template_path):
+        img = Image.open(template_path).convert("RGB")
+    else:
+        img = Image.new("RGB", (750, 500), color=(15, 23, 42))
+        
+    target_w = 750
+    w_percent = (target_w / float(img.size[0]))
+    h_size = int((float(img.size[1]) * float(w_percent)))
+    img = img.resize((target_w, h_size), Image.Resampling.LANCZOS)
     
-    # Footer
-    draw.text((30, 475), "Generated by CodeRoast AI • University Project Fair", fill=(148, 163, 184), font=font)
-    draw.text((width - 200, 475), "gyr0byte/CodeRoast", fill=(100, 116, 139), font=font)
+    draw = ImageDraw.Draw(img)
+    font = ImageFont.load_default()
+    
+    # Top Neon Text Banner
+    draw.rectangle([(10, 10), (target_w - 10, 55)], fill=(15, 23, 42))
+    draw.text((20, 24), top_text, fill=(244, 114, 182), font=font)
+    draw.text((target_w - 200, 24), f"LANG: {language.upper()}", fill=(236, 72, 153), font=font)
+    
+    # Bottom Neon Text Banner
+    draw.rectangle([(10, h_size - 60), (target_w - 10, h_size - 10)], fill=(15, 23, 42))
+    draw.text((20, h_size - 42), bottom_text, fill=(56, 189, 248), font=font)
+    grade_color = (239, 68, 68) if grade_str in ["F", "D"] else ((245, 158, 11) if grade_str == "C" else (16, 185, 129))
+    draw.text((target_w - 200, h_size - 42), f"VERDICT: GRADE {grade_str}", fill=grade_color, font=font)
     
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     return buf.getvalue()
+
 
 
 
