@@ -57,80 +57,71 @@ def generate_roast_audio(text: str, lang_code: str = "en") -> Optional[bytes]:
 
 
 def generate_code_meme(metrics: dict, grade: str, language: str) -> bytes:
-    """Generate a high-contrast dark neon custom developer meme card based on code metrics."""
-    width, height = 750, 480
-    img = Image.new("RGB", (width, height), color=(10, 14, 23))
+    """Generate a high-contrast 2-Panel 'EXPECTATION vs REALITY' developer meme card."""
+    width, height = 800, 520
+    img = Image.new("RGB", (width, height), color=(11, 15, 25))
     draw = ImageDraw.Draw(img)
     
-    # Outer Neon Border & Glassmorphic Accent
-    draw.rectangle([(15, 15), (width - 15, height - 15)], outline=(168, 85, 247), width=4)
-    draw.rectangle([(25, 25), (width - 25, height - 25)], outline=(236, 72, 153), width=1)
+    # Outer Neon Border
+    draw.rectangle([(0, 0), (width - 1, height - 1)], outline=(168, 85, 247), width=6)
+    draw.rectangle([(8, 8), (width - 9, height - 9)], outline=(236, 72, 153), width=2)
     
     font = ImageFont.load_default()
     
-    # Determine Meme Text based on code flaws & AST metrics
-    is_mismatch = metrics.get("_language_mismatch", False)
-    is_plain_text = metrics.get("_is_plain_text", False)
+    # Top Header Title
+    draw.rectangle([(20, 20), (width - 20, 75)], fill=(30, 41, 59), outline=(168, 85, 247), width=2)
+    draw.text((35, 38), "CODEROAST MEME: EXPECTATION vs REALITY", fill=(245, 158, 11), font=font)
+    draw.text((width - 220, 38), f"LANG: {language.upper()}", fill=(236, 72, 153), font=font)
+    
+    # Left Panel: Expectation (Clean Code)
+    draw.rectangle([(30, 95), (width // 2 - 15, 430)], fill=(15, 118, 110), outline=(45, 212, 191), width=3)
+    draw.text((50, 115), "EXPECTATION (CLEAN CODE)", fill=(255, 255, 255), font=font)
+    draw.line([(50, 140), (width // 2 - 35, 140)], fill=(45, 212, 191), width=2)
+    
+    draw.text((50, 165), "[+] Clean PEP8 Architecture", fill=(240, 253, 244), font=font)
+    draw.text((50, 205), "[+] 100% Test Coverage", fill=(240, 253, 244), font=font)
+    draw.text((50, 245), "[+] Meaningful Variable Names", fill=(240, 253, 244), font=font)
+    draw.text((50, 285), "[+] Zero Nesting Disasters", fill=(240, 253, 244), font=font)
+    
+    draw.rectangle([(50, 350), (width // 2 - 35, 405)], fill=(13, 148, 136))
+    draw.text((70, 368), "TARGET: GRADE S (100/100)", fill=(255, 215, 0), font=font)
+    
+    # Right Panel: Reality (User Code Roast)
+    grade_clean = grade.encode("ascii", "ignore").decode("ascii").strip()
+    grade_str = grade_clean.split()[0] if grade_clean else "F"
     complexity = metrics.get("cyclomatic_complexity", 1)
     nesting = metrics.get("max_nesting_depth", 0)
     loc = metrics.get("lines_of_code", 0)
-    funcs = metrics.get("function_count", 0)
-    comments = metrics.get("comment_ratio", 0)
-    grade_str = grade.split()[0] if grade else "F"
+    is_mismatch = metrics.get("_language_mismatch", False)
+    
+    draw.rectangle([(width // 2 + 15, 95), (width - 30, 430)], fill=(153, 27, 27), outline=(248, 113, 113), width=3)
+    draw.text((width // 2 + 35, 115), "YOUR CODE REALITY", fill=(255, 255, 255), font=font)
+    draw.line([(width // 2 + 35, 140), (width - 50, 140)], fill=(248, 113, 113), width=2)
     
     if is_mismatch:
-        selected = metrics.get("_selected_lang", "JAVA").upper()
-        detected = metrics.get("_detected_lang", "PYTHON").upper()
-        top_text = f"SELECTS {selected} IN UI DROPDOWN"
-        bottom_text = f"PASTES {detected} CODE LIKE A TOTAL CHAD 🤡"
-    elif is_plain_text:
-        top_text = "PASTES 8 PARAGRAPHS OF ENGLISH TEXT"
-        bottom_text = "COMPILER: IS THIS A NOVEL OR SOURCE CODE? 📖"
-    elif nesting >= 3:
-        top_text = f"NESTING DEPTH: LEVEL {nesting}"
-        bottom_text = "CHRISTOPHER NOLAN WANTS HIS INCEPTION BACK 🌀"
-    elif complexity >= 5:
-        top_text = f"CYCLOMATIC COMPLEXITY: {complexity}"
-        bottom_text = "MY CPU STARTED SWEATING AND PRAYING 💦"
-    elif loc > 30 and funcs <= 1:
-        top_text = f"ONE {loc}-LINE FUNCTION TO RULE THEM ALL"
-        bottom_text = "ITALIAN CHEFS ARE JEALOUS OF THIS SPAGHETTI 🍝"
-    elif comments == 0 and loc > 20:
-        top_text = "0% COMMENTS IN YOUR CODEBASE"
-        bottom_text = "FUTURE ME WILL FIGURE IT OUT (SPOILER: HE WONT) 🔮"
-    elif grade_str in ["S", "A"]:
-        top_text = f"GRADE {grade_str}: PERFECT SYNTAX & ZERO BUGS"
-        bottom_text = "WAIT... WHO ALLOWED YOU TO WRITE CLEAN CODE? 👑"
+        sel_lang = metrics.get("_selected_lang", "Java")
+        det_lang = metrics.get("_detected_lang", "Python")
+        draw.text((width // 2 + 35, 165), f"[-] Selected: {sel_lang}", fill=(254, 226, 226), font=font)
+        draw.text((width // 2 + 35, 205), f"[-] Pasted: {det_lang}", fill=(254, 226, 226), font=font)
+        draw.text((width // 2 + 35, 245), "[-] Status: Total Confusion", fill=(254, 226, 226), font=font)
+        draw.text((width // 2 + 35, 285), "[-] Compiler: Confused", fill=(254, 226, 226), font=font)
     else:
-        top_text = "RUNS CODE & PRAYS TO GOD IT WORKS"
-        bottom_text = "COMPILER: SYNTAX ERROR AT LINES 1 TO 999 💀"
-
-    # Top Header Banner
-    draw.rectangle([(35, 35), (width - 35, 85)], fill=(24, 32, 47), outline=(168, 85, 247), width=2)
-    draw.text((50, 52), "🎨 CODEROAST OFFICIAL AI MEME", fill=(245, 158, 11), font=font)
-    draw.text((width - 240, 52), f"GRADE: {grade_str} ({language.upper()})", fill=(236, 72, 153), font=font)
-    
-    # Meme Card Container
-    draw.rectangle([(50, 110), (width - 50, 390)], fill=(2, 6, 23), outline=(51, 65, 85), width=2)
-    
-    # Draw Top Meme Text
-    draw.text((80, 140), top_text, fill=(244, 114, 182), font=font)
-    
-    # Center Visual Badge Circle
-    circle_color = (239, 68, 68) if grade_str in ["F", "D"] else ((245, 158, 11) if grade_str == "C" else (16, 185, 129))
-    draw.ellipse([(width//2 - 50, 195), (width//2 + 50, 295)], fill=circle_color, outline=(255, 255, 255), width=3)
-    draw.text((width//2 - 18, 238), f"Grade {grade_str}", fill=(255, 255, 255), font=font)
-    
-    # Draw Bottom Meme Text
-    draw.text((80, 330), bottom_text, fill=(56, 189, 248), font=font)
+        draw.text((width // 2 + 35, 165), f"[-] Complexity: {complexity}", fill=(254, 226, 226), font=font)
+        draw.text((width // 2 + 35, 205), f"[-] Nesting Level: {nesting}", fill=(254, 226, 226), font=font)
+        draw.text((width // 2 + 35, 245), f"[-] Lines of Code: {loc}", fill=(254, 226, 226), font=font)
+        draw.text((width // 2 + 35, 285), "[-] CPU Status: Sweating", fill=(254, 226, 226), font=font)
+        
+    draw.rectangle([(width // 2 + 35, 350), (width - 50, 405)], fill=(185, 28, 28))
+    draw.text((width // 2 + 55, 368), f"VERDICT: GRADE {grade_str}", fill=(255, 255, 255), font=font)
     
     # Footer
-    draw.text((50, 420), "Generated by CodeRoast AI • University Project Fair", fill=(148, 163, 184), font=font)
-    draw.text((width - 230, 420), "gyr0byte/CodeRoast", fill=(100, 116, 139), font=font)
+    draw.text((30, 475), "Generated by CodeRoast AI • University Project Fair", fill=(148, 163, 184), font=font)
+    draw.text((width - 200, 475), "gyr0byte/CodeRoast", fill=(100, 116, 139), font=font)
     
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     return buf.getvalue()
+
 
 
 
