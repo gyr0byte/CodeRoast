@@ -220,6 +220,17 @@ st.markdown("""
         box-shadow: 0 4px 20px rgba(245, 158, 11, 0.2);
     }
 
+    @keyframes cookingPulse {
+        0% { opacity: 0.7; box-shadow: 0 0 10px rgba(168, 85, 247, 0.3); }
+        50% { opacity: 1.0; box-shadow: 0 0 25px rgba(168, 85, 247, 0.75); }
+        100% { opacity: 0.7; box-shadow: 0 0 10px rgba(168, 85, 247, 0.3); }
+    }
+
+    .cooking-loader {
+        animation: cookingPulse 1.4s infinite ease-in-out;
+    }
+
+
     /* Score bars */
     .score-row {
         display: flex;
@@ -529,11 +540,24 @@ with col2:
         card_class = "chat-bubble-assistant" if use_ai_llm else "chat-bubble-template"
 
         if st.session_state.get("is_new_roast", False):
+            # Show immediate purple cooking background while analyzing
+            roast_box_placeholder.markdown(f"""
+            <div class="{card_class} cooking-loader">
+                <div style="font-size: 1.05rem; font-weight: bold; color: #a78bfa; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                    🤖 <span>Senior Dev AI is Analyzing & Cooking...</span>
+                </div>
+                <div style="color: #cbd5e1; font-style: italic; font-size: 0.95rem;">
+                    🔍 Inspecting AST structure... 🧠 Preparing savage roast... 🔥 Cooking the verdict...
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
             st.session_state["is_new_roast"] = False
 
             if roast_generator.llm_generator is None and use_ai_llm:
                 from src.roast.llm_generator import LLMRoastGenerator
                 roast_generator.llm_generator = LLMRoastGenerator()
+
 
             roast_stream = roast_generator.generate_roast_stream(
                 metrics=metrics,
