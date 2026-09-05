@@ -43,15 +43,15 @@ if (-not (Get-Process -Name ollama -ErrorAction SilentlyContinue)) {
 }
 ```
 
-### Step 4: Verify Ollama & Qwen Model (Optional)
+### Step 4: Verify Ollama & Llama 3.2 Model (Optional)
 
-Check if Ollama is running and has the `qwen2.5-coder:1.5b` model ready:
+Check if Ollama is running and has the `llama3.2:3b` model ready:
 
 ```powershell
 & "D:\Ollama\ollama.exe" list
 ```
 
-*(If missing, pull it once: `& "D:\Ollama\ollama.exe" pull qwen2.5-coder:1.5b`)*
+*(If missing, pull it once: `& "D:\Ollama\ollama.exe" pull llama3.2:3b`)*
 
 ### Step 5: Launch the CodeRoast Web App
 
@@ -71,8 +71,8 @@ Once started, open your web browser at:
 | Roast Mode | AI Model Used | Source / Backend |
 |---|---|---|
 | 🇳🇵 **Romanized Nepali** | **Gemini Multi-Model Fallback** (`2.5-flash` → `flash-lite-latest` → `3.5-flash-lite` → `3.1-flash-lite`) | Google Gemini REST API (`GEMINI_API_KEY` in `.env`) |
-| 🇬🇧 **English Roast** | **Qwen 2.5 Coder 1.5B** | Local GPU via Ollama (`http://localhost:11434`) |
-| 🅰️ **Letter Grade & Reaction** | **Qwen 2.5 Coder 1.5B** | Local GPU via Ollama |
+| 🇬🇧 **English Roast** | **Llama 3.2 3B** | Local GPU via Ollama (`http://localhost:11434`) |
+| 🅰️ **Letter Grade & Reaction** | **Llama 3.2 3B** | Local GPU via Ollama |
 
 ---
 
