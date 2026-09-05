@@ -78,38 +78,72 @@ def draw_impact_caption(draw, text: str, width: int, y_start: int, font, is_bott
         y_pos += line_h
 
 
-def generate_code_meme(metrics: dict, grade: str, language: str) -> bytes:
-    """Generate an authentic classic Impact Font meme using ALL 100+ templates with non-repeating session tracking and dynamic punchlines."""
+def extract_code_elements(code: str, metrics: dict):
+    """Extract key identifiers, variables, and magic numbers to weave into memes."""
+    import re
+    fn_matches = re.findall(r'(?:def|function)\s+([a-zA-Z_]\w*)', code)
+    func_name = fn_matches[0] if fn_matches else "your_code"
+
+    generic_names = ['temp', 'tmp', 'data', 'val', 'value', 'res', 'result', 'obj', 'foo', 'bar', 'baz', 'item', 'arr', 'num']
+    words = re.findall(r'\b[a-zA-Z_]\w*\b', code)
+    found_generic = [w for w in words if w.lower() in generic_names]
+    if found_generic:
+        bad_var = found_generic[0]
+    else:
+        single_letters = [w for w in words if len(w) == 1 and w.isalpha() and w.lower() not in ('a', 'i')]
+        bad_var = single_letters[0] if single_letters else "data"
+
+    magic_nums = [m for m in re.findall(r'(?<![a-zA-Z0-9_])([0-9]{2,})(?![a-zA-Z0-9_])', code) if m not in ('100', '0', '1')]
+    magic_num = magic_nums[0] if magic_nums else "999"
+
+    return func_name, bad_var, magic_num
+
+
+def generate_code_meme(
+    metrics: dict,
+    grade: str,
+    language: str,
+    code: str = "",
+    target_lang: str = "english",
+    template_override: Optional[str] = None
+) -> bytes:
+    """Generate an authentic classic Impact Font meme using template-specific punchlines and actual code flaws."""
     import os, random
     grade_clean = grade.encode("ascii", "ignore").decode("ascii").strip()
     grade_str = grade_clean.split()[0] if grade_clean else "F"
-    complexity = metrics.get("cyclomatic_complexity", 1)
-    nesting = metrics.get("max_nesting_depth", 0)
-    loc = metrics.get("lines_of_code", 0)
+    complexity = int(metrics.get("cyclomatic_complexity", 1))
+    nesting = int(metrics.get("nesting_depth", metrics.get("max_nesting_depth", 0)))
+    loc = int(metrics.get("lines_of_code", 0))
     is_mismatch = metrics.get("_language_mismatch", False)
-    
+
     sel_lang = metrics.get("_selected_lang", "JAVA").upper()
     det_lang = metrics.get("_detected_lang", "PYTHON").upper()
-    
-    # ── 1. Fetch ALL 100+ Downloaded Templates ─────────────────────────
+    is_nepali = target_lang.lower() in ["nepali", "roman_nepali", "roman nepali"]
+
+    func_name, bad_var, magic_num = extract_code_elements(code, metrics)
+
+    # ── 1. Fetch Downloaded Templates ──────────────────────────────────
     meme_dir = "assets/memes"
     all_files = sorted([f for f in os.listdir(meme_dir) if f.endswith((".jpg", ".png"))]) if os.path.exists(meme_dir) else []
     if not all_files:
         all_files = ["left_exit_12_off_ramp.jpg", "drake_hotline_bling.jpg"]
-        
-    # Non-repeating Session Memory Tracking across roasts
-    try:
-        import streamlit as st
-        if "seen_memes" not in st.session_state:
-            st.session_state["seen_memes"] = []
-        available = [f for f in all_files if f not in st.session_state["seen_memes"]]
-        if not available:
-            st.session_state["seen_memes"] = []
-            available = all_files
-        template_name = random.choice(available)
-        st.session_state["seen_memes"].append(template_name)
-    except Exception:
-        template_name = random.choice(all_files)
+
+    # Non-repeating Session Memory Tracking
+    if template_override and template_override in all_files:
+        template_name = template_override
+    else:
+        try:
+            import streamlit as st
+            if "seen_memes" not in st.session_state:
+                st.session_state["seen_memes"] = []
+            available = [f for f in all_files if f not in st.session_state["seen_memes"]]
+            if not available:
+                st.session_state["seen_memes"] = []
+                available = all_files
+            template_name = random.choice(available)
+            st.session_state["seen_memes"].append(template_name)
+        except Exception:
+            template_name = random.choice(all_files)
 
     # ── 2. Precise Visual Zone Coordinate Offsets ───────────────────────
     COORD_MAP = {
@@ -137,121 +171,415 @@ def generate_code_meme(metrics: dict, grade: str, language: str) -> bytes:
         "uno_draw_25_cards.jpg": (0.10, 0.75),
         "woman_yelling_at_cat.jpg": (0.08, 0.75),
         "is_this_a_pigeon.jpg": (0.10, 0.75),
+        "is_this_butterfly.jpg": (0.10, 0.75),
         "spiderman_pointing_at_spiderman.jpg": (0.10, 0.75),
+        "spider_man_triple.jpg": (0.10, 0.75),
         "grus_plan.jpg": (0.08, 0.78),
         "cmon_do_something.jpg": (0.10, 0.75),
         "boardroom_meeting_suggestion.jpg": (0.08, 0.75),
         "futurama_fry.jpg": (0.10, 0.75),
-        "flex_tape.jpg": (0.10, 0.75)
+        "flex_tape.jpg": (0.10, 0.75),
+        "gus_fring_we_are_not_the_same.jpg": (0.10, 0.75),
+        "distracted_boyfriend.jpg": (0.10, 0.75),
+        "surprised_pikachu.jpg": (0.10, 0.75),
+        "this_is_fine.jpg": (0.08, 0.75),
+        "anakin_padme_4_panel.jpg": (0.08, 0.75),
+        "bernie_sanders_once_again_asking.jpg": (0.10, 0.75),
+        "bernie_i_am_once_again_asking_for_your_support.jpg": (0.10, 0.75),
+        "all_my_homies_hate.jpg": (0.10, 0.75),
+        "types_of_headaches_meme.jpg": (0.08, 0.75),
+        "pawn_stars_best_i_can_do.jpg": (0.10, 0.75),
+        "yall_got_any_more_of_that.jpg": (0.10, 0.75),
+        "you_know,_im_something_of_a_scientist_myself.jpg": (0.08, 0.75),
+        "who_killed_hannibal.jpg": (0.08, 0.75),
+        "bike_fall.jpg": (0.08, 0.75),
+        "mother_ignoring_kid_drowning_in_a_pool.jpg": (0.08, 0.75)
     }
     top_y_pct, bottom_y_pct = COORD_MAP.get(template_name, (0.08, 0.76))
 
-    # ── 3. Ultra-Dynamic Multi-Punchline Generator ──────────────────────
-    if is_mismatch:
-        top_pool = [
-            f"SELECTING {sel_lang} IN THE UI DROPDOWN",
-            f"UI SAYS {sel_lang} BUT YOU PASTED {det_lang}",
-            f"PAM: FIND DIFFERENCE BETWEEN {sel_lang} AND {det_lang}",
-            f"WRITING {det_lang} CODE IN A {sel_lang} FILE",
-            f"TEACHER: SUBMIT YOUR {sel_lang} ASSIGNMENT",
-            f"DROPDOWN SET TO {sel_lang} FOR MAX CONFUSION"
-        ]
-        bot_pool = [
-            f"PASTING {det_lang} SPAGHETTI LIKE A CHAD!",
-            f"COMPILER: TOTAL CONFUSION UNLOCKED!",
-            f"THEY ARE THE EXACT SAME PICTURE!",
-            f"COMPILER VERDICT: GRADE {grade_str} DISASTER!",
-            f"SUBMITTING {det_lang} AND PRAYING IT WORKS!",
-            f"WHEN THE COMPILER SEES {det_lang} SYNTAX"
-        ]
-    elif nesting >= 3:
-        top_pool = [
-            f"ME TRYING TO WRITE FLAT CLEAN LOGIC",
-            f"1-LEVEL FLAT CONTROL FLOW PATTERN",
-            f"EARLY RETURN CODE ARCHITECTURE",
-            f"WHEN YOU WRITE {nesting}-DEEP IF-STATEMENTS",
-            f"SENIOR DEV LOOKING AT YOUR INDENTATION",
-            f"WRITING A SIMPLE FUNCTION AT 3 AM"
-        ]
-        bot_pool = [
-            f"NESTING DEPTH LEVEL {nesting} (INCEPTION)!",
-            f"INDENTING {nesting} LEVELS DEEP INTO OBLIVION!",
-            f"{nesting} NESTED FOR-LOOPS INSIDE AN IF-STATEMENT!",
-            f"GOOD LUCK READING THIS IN 6 MONTHS!",
-            f"COMPILER CRYING AT LEVEL {nesting} INDENTATION!",
-            f"NESTING LEVEL {nesting}: OBLIVION UNLOCKED!"
-        ]
-    elif complexity >= 5:
-        top_pool = [
-            f"MY CODE WORKS ABSOLUTELY FINE BRO!",
-            f"CANNOT HAVE LOGIC BUGS IN YOUR CODE",
-            f"CODE COMPILES WITHOUT SYNTAX ERRORS",
-            f"SENIOR DEV EXPLAINING DECISION TREES",
-            f"CLIENT: IS THIS LOGIC EASY TO MAINTAIN?",
-            f"ME EXPLAINING MY 500-BRANCH IF STATEMENT"
-        ]
-        bot_pool = [
-            f"CYCLOMATIC COMPLEXITY IS {complexity} BRO!",
-            f"COMPLEXITY SCORE {complexity} SPAGHETTI!",
-            f"COMPLEXITY IS {complexity} AND NO ONE CAN READ IT!",
-            f"COMPLEXITY {complexity}: TOTAL NIGHTMARE!",
-            f"CYCLOMATIC SCORE {complexity}! PANIK!",
-            f"SCORE IS {complexity}: GOOD LUCK UNIT TESTING!"
-        ]
-    elif loc > 30:
-        top_pool = [
-            f"CLEAN MODULAR REUSABLE FUNCTIONS",
-            f"BREAKING CODE INTO MULTIPLE UTILITIES",
-            f"SENIOR ARCHITECT: WRITE 10-LINE HELPERS",
-            f"PLANNING A CLEAN MODULAR REFACTOR",
-            f"ME WRITING A QUICK UTILITY FUNCTION",
-            f"CREATING A SMALL ONE-OFF SCRIPT"
-        ]
-        bot_pool = [
-            f"ONE {loc}-LINE MONOLITHIC GOD FUNCTION!",
-            f"WRITING ONE GIANT {loc}-LINE FUNCTION!",
-            f"YOU: ONE {loc}-LINE SPAGHETTI IN 1 FILE!",
-            f"IT IS NOW {loc} LINES AND UNTOUCHABLE!",
-            f"YOUR {loc}-LINE MONOLITH DESTROYING PROD!",
-            f"{loc} LINES LONG AND IMPOSSIBLE TO READ!"
-        ]
-    elif grade_str in ["S", "A"]:
-        top_pool = [
-            f"SENIOR ARCHITECT LOOKING AT YOUR CODE",
-            f"YOUR CODE (GRADE {grade_str} GIGACHAD)",
-            f"CHEERS TO WRITING CLEAN PEP8 CODE",
-            f"WHEN YOUR CODE IS DOCSTRING COMPLETE",
-            f"COMPILER LOOKING AT PRISTINE LOGIC",
-            f"TEAM REVIEWING YOUR PULL REQUEST"
-        ]
-        bot_pool = [
-            f"GRADE {grade_str} PERFECT ARCHITECTURE!",
-            f"LEGENDARY CLEAN CODE ARCHITECTURE!",
-            f"GRADE {grade_str}: NO BUGS FOUND BRO!",
-            f"SENIOR DEV GIVES GRADE {grade_str} VERDICT!",
-            f"GRADE {grade_str}: ABSOLUTE CINEMA CODE!",
-            f"GRADE {grade_str}: MERGING TO MAIN IMMEDIATELY!"
-        ]
+    # ── 3. Template-Specific Hilarious Joke Engine ──────────────────────
+    TEMPLATE_JOKES = {
+        "batman_slapping_robin.jpg": {
+            "en": [
+                ("ROBIN: 'IT WORKS ON MY LOCALHOST BRO—'", f"BATMAN: 'SHUT UP, YOU HAVE {nesting} LEVELS OF NESTING!'"),
+                ("ROBIN: 'I WILL RENAME {bad_var} TOMORROW—'", "BATMAN: 'SHUT UP AND USE MEANINGFUL IDENTIFIERS!'"),
+                (f"ROBIN: 'COMPLEXITY {complexity} IS NORMAL—'", f"BATMAN: 'NOT EVEN JAMES CAMERON CAN REACH YOUR INDENTATION!'"),
+                ("ROBIN: 'COMMENTS ARE FOR WEAKLINGS—'", "BATMAN: 'SHUT UP, NO ONE ON THE TEAM CAN READ THIS!'"),
+                (f"ROBIN: 'GRADE {grade_str} IS PASSING RIGHT?—'", "BATMAN: 'FORMAT YOUR SSD IMMEDIATELY!'")
+            ],
+            "np": [
+                ("ROBIN: 'DAI MERO LOCALHOST MA CHALYO—'", f"BATMAN: 'OYE PAKHE, {nesting} LEVEL KO INDENTATION KASLE MERGE GARCHHA!'"),
+                (f"ROBIN: 'VARIABLE KO NAAM {bad_var} TA HO—'", "BATMAN: 'CHUP LAG! TERO YESTO HAWAL CODE BAGMATI MA FAL!'"),
+                (f"ROBIN: 'GRADE {grade_str} AAYE PANI CHALCHHA—'", "BATMAN: 'LOKSEWA KO FORM BHARNA JAA RIGHT NOW!'")
+            ]
+        },
+        "drake_hotline_bling.jpg": {
+            "en": [
+                ("WRITING MEANINGFUL NAMES & COMMENTS", f"NAMING EVERYTHING '{bad_var}' & PRAYING IN PROD"),
+                ("BREAKING CODE INTO 10-LINE HELPERS", f"ONE {loc}-LINE GOD FUNCTION WITH {nesting} NESTED LOOPS"),
+                ("PROPER ERROR HANDLING AND LOGGING", f"TRY: {func_name}() EXCEPT: PASS"),
+                ("USING FLAT CONTROL FLOW PATTERNS", f"PYRAMID OF DOOM (GRADE {grade_str} DISASTER)")
+            ],
+            "np": [
+                ("DOCSTRING RA PROPER LOGIC LEKHNE", f"'{bad_var}' LEKHERA LAPTOP BHEDA CHARNA LAGNE"),
+                ("CLEAN FUNCTIONS BANAYERA MERGE GARNE", f"ZERO COMMENT HALERA {loc} LINE SPAGHETTI DUMP GARNE")
+            ]
+        },
+        "two_buttons.jpg": {
+            "en": [
+                (f"FIX CYCLOMATIC COMPLEXITY ({complexity})", "PUSH TO PROD ON FRIDAY & TURN OFF PHONE"),
+                ("WRITE 1 HELPFUL COMMENT", f"RENAME '{bad_var}' TO '{bad_var}2' AND CALL IT REFACTORED"),
+                (f"ADMIT CODE IS GRADE {grade_str}", "BLAME THE COMPILER FOR NOT GETTING YOUR GENIUS")
+            ],
+            "np": [
+                ("CODE REFACTOR GARERA MERGE GARNE", "LOKSEWA KO FORM BHARERA BHEDA CHARNA JANE"),
+                ("EUTA MATRAI COMMENT THAPNE", "LAPTOP BAGMATI MA FALERA SUKHA PAUNE")
+            ]
+        },
+        "uno_draw_25_cards.jpg": {
+            "en": [
+                (f"WRITE 1 HELPFUL COMMENT IN {func_name}()", "OR DRAW 25 CARDS"),
+                (f"FLATTEN YOUR {nesting}-LEVEL INDENTATION", "OR DRAW 25 CARDS"),
+                (f"STOP USING MAGIC NUMBER {magic_num}", "OR DRAW 25 CARDS"),
+                (f"RENAME VARIABLE '{bad_var}' TO AN ACTUAL WORD", "OR DRAW 25 CARDS")
+            ],
+            "np": [
+                ("CODE MA EUTA HELPFUL COMMENT LEKHNE", "KI CHUPCHAP 25 WATA CARD TANNE"),
+                (f"'{bad_var}' KO SATTA REAL NAAM LEKHNE", "KI 25 CARDS TANERA BHEDA CHARNA JANE")
+            ]
+        },
+        "left_exit_12_off_ramp.jpg": {
+            "en": [
+                ("STRAIGHT: WRITE CLEAN MODULAR CODE", f"EXIT: {loc} LINES OF UNTESTED SPAGHETTI AT 3 AM"),
+                ("STRAIGHT: PROPER LOGGING", f"EXIT: PRINT('{bad_var}') ON EVERY SINGLE LINE"),
+                ("STRAIGHT: FLAT CONTROL FLOW", f"EXIT: INDENTATION LEVEL {nesting} STRAIGHT INTO OBLIVION")
+            ],
+            "np": [
+                ("SIDHA: CLEAN ARCHITECTURE RA TESTS", f"EXIT: KATHMANDU KO TRAFFIC JASTO {nesting}-LEVEL NESTING")
+            ]
+        },
+        "trade_offer.jpg": {
+            "en": [
+                (f"TRADE OFFER: I RECEIVE YOUR {func_name}()", f"YOU RECEIVE: OUT OF MEMORY CRASH & GRADE {grade_str}"),
+                ("TRADE OFFER: I RECEIVE ZERO COMMENTS", "YOU RECEIVE: PAGERDUTY ALARM AT 3:15 AM")
+            ],
+            "np": [
+                (f"TRADE OFFER: TERO YESTO {func_name}()", "RESULT: COMPILER KO INSTANT HEART ATTACK")
+            ]
+        },
+        "woman_yelling_at_cat.jpg": {
+            "en": [
+                (f"SENIOR DEV: 'WHY IS COMPLEXITY {complexity}?!'", "ME: 'I ADDED A COMMENT IN MY HEART'"),
+                (f"LEAD: 'DID YOU NAME A VARIABLE {bad_var}?!'", "ME: 'HE HAS A VERY NICE PERSONALITY'"),
+                (f"REVIEWER: 'WHO WROTE THIS {loc}-LINE MONSTROSITY?!'", "ME: 'IT COMPILES ONCE EVERY FULL MOON'")
+            ],
+            "np": [
+                (f"SENIOR: 'COMPLEXITY {complexity} KINA BHO?!'", "ME: 'MAILE TA SARKARI EXAM KO LAXAN DEKHEKO CHHU'"),
+                (f"LEAD: '{bad_var} KASLE LEKHEKO HO?!'", "ME: 'PASSION LE LEKHEKO BRO'")
+            ]
+        },
+        "disaster_girl.jpg": {
+            "en": [
+                (f"MY GRADE {grade_str} CODE CURRENTLY BURNING PRODUCTION", "ME: 'NOT MY PROBLEM, WORKED ON LOCALHOST'"),
+                (f"DEPLOYED '{func_name}' WITH {nesting} NESTED LOOPS", "ME HEADING TO THE WEEKEND ON AIRPLANE MODE")
+            ],
+            "np": [
+                ("PRODUCTION SERVER MA AAGO LAGDAI CHHA", "ME: 'MERI BASSAI HERDAI CHIYA KHANA GAYEKO'")
+            ]
+        },
+        "flex_tape.jpg": {
+            "en": [
+                (f"MASSIVE MEMORY CRASH & COMPLEXITY {complexity}", "SLAPPING 'TRY: ... EXCEPT: PASS' ON TOP"),
+                (f"MEMORY LEAK IN {loc}-LINE GOD FUNCTION", "SLAPPING TIME.SLEEP(5) AND PRAYING TO GOD")
+            ],
+            "np": [
+                ("PRODUCTION SERVER KO LOGIC PURAI DUBYO", "CHUPCHAP EXCEPT EXCEPTION: PASS HALERA BASNE")
+            ]
+        },
+        "change_my_mind.jpg": {
+            "en": [
+                (f"NAMING VARIABLES '{bad_var}' IS A CRY FOR HELP", "CHANGE MY MIND"),
+                (f"NESTING DEPTH {nesting} IS A WAR CRIME", "CHANGE MY MIND"),
+                (f"GRADE {grade_str} MEANS YOU SHOULD RETIRE YOUR KEYBOARD", "CHANGE MY MIND")
+            ],
+            "np": [
+                ("TERO CODING BHANDA BHEDA CHARAUNA JANE RAMRO", "CHANGE MY MIND")
+            ]
+        },
+        "roll_safe.jpg": {
+            "en": [
+                ("YOU CANNOT HAVE BUGS IN YOUR UNIT TESTS", "IF YOU NEVER WRITE ANY UNIT TESTS AT ALL"),
+                ("NO ONE CAN CRITICIZE YOUR COMMENTS", "IF YOU NEVER WRITE A SINGLE COMMENT")
+            ],
+            "np": [
+                ("TEST FAIL HUNE DAR NAI HUDAINA", "YADI TEST NAI LEKHIYENA BHANE")
+            ]
+        },
+        "gus_fring_we_are_not_the_same.jpg": {
+            "en": [
+                ("YOU WROTE ZERO COMMENTS BECAUSE YOU ARE LAZY", "I WROTE ZERO COMMENTS TO CONFUSE THE ENEMY. WE ARE NOT THE SAME."),
+                (f"YOU WROTE {loc} LINES BECAUSE YOU CANNOT MODULARIZE", "I WROTE IT TO BREAK THE REVIEWER'S WILL. WE ARE NOT THE SAME.")
+            ],
+            "np": [
+                ("TAILE ZERO COMMENT HAWAL LE GARDHA LEKHIS", "MAILE SENIOR LAI RUAUNA LEKHE. WE ARE NOT THE SAME.")
+            ]
+        },
+        "buff_doge_vs._cheems.jpg": {
+            "en": [
+                ("1969: 'WE CODED APOLLO 11 IN ASSEMBLY'", f"YOU: 'MY {loc}-LINE {func_name}() NEEDS A THERAPIST'"),
+                ("VETERAN DEV: 'MEMORY MANAGEMENT IN C'", f"YOU: 'CANNOT INVERT BINARY TREE WITHOUT {bad_var}'")
+            ],
+            "np": [
+                ("1969 MA APOLLO GUIDANCE COMPUTER CHALAYO", f"TERO 10 LINE CODE MA CYCLOMATIC SCORE {complexity}")
+            ]
+        },
+        "distracted_boyfriend.jpg": {
+            "en": [
+                (f"ME LOOKING AT: {nesting}-LEVEL DEEP NESTED LOOPS", "MY UNATTENDED CLEAN PEP8 CODE CRYING"),
+                (f"ME: NAMING EVERYTHING '{bad_var}' AT 3 AM", "MEANINGFUL VARIABLE NAMES CRYING IN THE CORNER")
+            ],
+            "np": [
+                (f"CHITRA: KATHMANDU TRAFFIC JASTO {nesting}-LEVEL INDENTATION", "CLEAN DOCUMENTATION LAI BAAL CHHAINA")
+            ]
+        },
+        "surprised_pikachu.jpg": {
+            "en": [
+                (f"*COMMITS {loc} LINES WITH 0 COMMENTS & MAGIC NUM {magic_num}*", f"*COMPILER THROWS GRADE {grade_str}* PIKACHU FACE"),
+                (f"*USES '{bad_var}' FOR 5 DIFFERENT UNRELATED PURPOSES*", "*OUTPUT IS NAN* PIKACHU FACE")
+            ],
+            "np": [
+                ("*ZERO COMMENT HALERA MAIN BRANCH MA PUSH GARCHHA*", "*SERVER CRASH BHAYERA BOSS LE GALI GAREKO HERDAI*")
+            ]
+        },
+        "this_is_fine.jpg": {
+            "en": [
+                (f"COMPLEXITY: {complexity} | GRADE: {grade_str} | ZERO TESTS", "THIS IS FINE. EVERYTHING IS TOTALLY NORMAL."),
+                (f"ALL {loc} LINES CURRENTLY CORRUPTING DATABASE", "THIS IS FINE. SLOWLY SIPS COFFEE.")
+            ],
+            "np": [
+                ("SERVER PURAI DHWANGSTA BHAISAKYO", "THIS IS FINE. CHUPCHAP CHIYA KHANA GAYEKO.")
+            ]
+        },
+        "anakin_padme_4_panel.jpg": {
+            "en": [
+                (f"ME: 'I JUST DEPLOYED {func_name}() TO PRODUCTION'", "PADME: 'YOU TESTED WITH REAL DATA RIGHT? ...RIGHT?!'")
+            ],
+            "np": [
+                ("ME: 'MAILE PRODUCTION BRANCH MA MERGE HANI DEYE'", "PADME: 'TEST TA GARYAU HOLA NI? ...HOINA?!'")
+            ]
+        },
+        "bernie_sanders_once_again_asking.jpg": {
+            "en": [
+                ("I AM ONCE AGAIN ASKING YOU", "TO WRITE AT LEAST ONE GODDAMN COMMENT"),
+                ("I AM ONCE AGAIN ASKING YOU", f"TO STOP USING '{bad_var}' AS A VARIABLE NAME")
+            ],
+            "np": [
+                ("MA PHERI EKDAM BINAMRA ANURODH GARCHHU", "KRPAYA EUTA MATRAI COMMENT LEKHI DEU")
+            ]
+        },
+        "clown_applying_makeup.jpg": {
+            "en": [
+                ("'IT IS JUST A QUICK 5-MINUTE SCRIPT'", f"'IT IS NOW {loc} LINES OF UNMAINTAINABLE HORROR'")
+            ],
+            "np": [
+                ("'2 MINUTE KO KAM HO, TURUNTAI SAKCHHU'", f"'AHILE LEVEL {nesting} PYRAMID BANERA RATI KO 3 BAJYO'")
+            ]
+        },
+        "boardroom_meeting_suggestion.jpg": {
+            "en": [
+                ("BOSS: 'HOW DO WE REDUCE PRODUCTION BUGS?'", f"DEV: 'DELETE {func_name}() BEFORE SENIORS SEE IT'")
+            ],
+            "np": [
+                ("BOSS: 'SERVER PERFORMANCE KINA DOWN BHO?'", f"DEV: 'TYO TERO {bad_var} WALA CODE LE GARDHA'")
+            ]
+        },
+        "a_train_hitting_a_school_bus.jpg": {
+            "en": [
+                (f"BUS: YOUR DELICATE {func_name}() LOGIC", "A-TRAIN: REAL-WORLD PRODUCTION TRAFFIC")
+            ],
+            "np": [
+                ("BUS: TERO CHOTTO FUNCTION", "A-TRAIN: KATHMANDU KO KHALASI SPEED")
+            ]
+        },
+        "theyre_the_same_picture.jpg": {
+            "en": [
+                ("PAM: FIND THE DIFFERENCE BETWEEN THESE TWO", "PICTURE 1: YOUR CODE | PICTURE 2: DIGITAL SEWAGE")
+            ],
+            "np": [
+                ("PAM: DUI WATA CHITRA MA DIFFERENCE K CHHA?", "PHOTO 1: TERO CODE | PHOTO 2: TUKUCHA KHOLA KO DHAL")
+            ]
+        },
+        "is_this_a_pigeon.jpg": {
+            "en": [
+                (f"*PASTES {loc} LINES OF SPAGHETTI WITH NO COMMENTS*", "'IS THIS SENIOR SOFTWARE ARCHITECTURE?'")
+            ],
+            "np": [
+                (f"*{nesting} LEVEL KO NESTED LOOP LEKHERA*", "'YO K ARTIFICIAL INTELLIGENCE HO?'")
+            ]
+        },
+        "one_does_not_simply.jpg": {
+            "en": [
+                ("ONE DOES NOT SIMPLY MERGE", f"A FUNCTION WITH CYCLOMATIC COMPLEXITY {complexity}")
+            ],
+            "np": [
+                ("ONE DOES NOT SIMPLY RUN", "A FUNCTION WITH ZERO COMMENTS RA ZERO LOGIC")
+            ]
+        },
+        "panik_kalm_panik.jpg": {
+            "en": [
+                ("CODE CRASHES IN DEMO (PANIK)", "EXCEPT: PASS (KALM) -> DATABASE CORRUPTED (PANIK!)")
+            ],
+            "np": [
+                ("DEMO MA CODE CRASH BHO (PANIK)", "RESTART GAREKO CHALYO (KALM) -> DATA SAB GAYO (PANIK!)")
+            ]
+        },
+        "grim_reaper_knocking_door.jpg": {
+            "en": [
+                ("MEMORY LEAK -> CPU MELTDOWN -> SERVER FIRE", "NEXT DOOR: YOUR ENTIRE PROGRAMMING CAREER")
+            ],
+            "np": [
+                ("FUNCTION CRASH -> SERVER DOWN -> DATABASE DUBYO", "ABO NEXT NUMBER: TERO PROGRAMMING CAREER")
+            ]
+        },
+        "all_my_homies_hate.jpg": {
+            "en": [
+                (f"FUCK CYCLOMATIC COMPLEXITY {complexity}", f"ALL MY HOMIES HATE INDENTATION LEVEL {nesting}")
+            ],
+            "np": [
+                ("TERO YESTO HAWAL LOGIC LAI BYCOT", "SABAI SATHI MILERA LAPTOP BAGMATI MA FALNE")
+            ]
+        },
+        "types_of_headaches_meme.jpg": {
+            "en": [
+                ("MIGRAINE, HYPERTENSION, STRESS...", f"READING YOUR {loc} LINES OF CODE WITH ZERO COMMENTS")
+            ],
+            "np": [
+                ("MIGRAINE, HIGH BP, STRESS...", "TERO YESTO KANDAL CODE HERERA AAKHA FUTNU")
+            ]
+        },
+        "pawn_stars_best_i_can_do.jpg": {
+            "en": [
+                ("YOU: 'I WORKED 40 HOURS ON THIS CODE'", f"RICK: 'BEST I CAN DO IS GRADE {grade_str} & A RECYCLE BIN'")
+            ],
+            "np": [
+                ("DEV: '40 GHANTA LAGAYERA LEKHEKO FUNCTION HO DAI'", f"RICK: 'BEST I CAN DO IS GRADE {grade_str} ANI BHEDA CHARNA JA'")
+            ]
+        },
+        "who_killed_hannibal.jpg": {
+            "en": [
+                (f"*COMMITS {loc} LINES WITH 0 TESTS DIRECTLY TO MAIN*", "'WHY WOULD CI/CD PIPELINE DO THIS TO US?'")
+            ],
+            "np": [
+                ("*TEST NAI NAGARI MAIN MA MERGE HANDEKO*", "'SERVER KINA DOWN BHAYO KHOI KASLE HERNE?'")
+            ]
+        },
+        "bike_fall.jpg": {
+            "en": [
+                (f"*SHOVES '{bad_var}' AND {nesting} LOOPS INTO FRONT SPOKES*", "'FUCKING RUNTIME ALWAYS RUINING MY LIFE'")
+            ],
+            "np": [
+                ("*HAWA LOGIC LEKHERA FRONT TYRE MA DANDA HALYO*", "'BAGMATI MA DHAL CHHA, CODE MA KASKO DOSH'")
+            ]
+        },
+        "mother_ignoring_kid_drowning_in_a_pool.jpg": {
+            "en": [
+                ("MOM: NEW FRONTEND BUTTON ANIMATION", "SKELETON AT BOTTOM: YOUR ZERO WRITTEN COMMENTS")
+            ],
+            "np": [
+                ("MOM: UI RA CSS COLORS", "SKELETON: CODE KO COMMENTS RA DOCUMENTATION")
+            ]
+        },
+        "epic_handshake.jpg": {
+            "en": [
+                (f"YOUR VARIABLE '{bad_var}' 🤝 A DRUNK TODDLER'S SCRAWL", "MUTUAL DISREGARD FOR THE ENGLISH ALPHABET")
+            ],
+            "np": [
+                ("TERO CODE 🤝 TUKUCHA KHOLA KO DHAL", "DONO MA EUTAI GANDHA CHHA")
+            ]
+        },
+        "leonardo_dicaprio_cheers.jpg": {
+            "en": [
+                (f"CHEERS TO PUSHING GRADE {grade_str} CODE DIRECTLY TO PROD", "MAY THE ON-CALL ENGINEER REST IN PEACE")
+            ],
+            "np": [
+                ("CHEERS TO YESTO KANDAL CODE IN PRODUCTION", "BHOLI BIHANA DISASTER HERNA JANE")
+            ]
+        },
+        "cmon_do_something.jpg": {
+            "en": [
+                (f"*POKES {func_name}() WITH A STICK*", "'C'MON, RETURN SOMETHING OTHER THAN NULL'")
+            ],
+            "np": [
+                (f"*DANDA LE TERO {func_name} LAI CHUDAI*", "'C'MON, ZERO DIVISION BHANDA ARU KEI RETURN GAR'")
+            ]
+        },
+        "grus_plan.jpg": {
+            "en": [
+                (f"1. WRITE {func_name}() | 2. SKIP ALL UNIT TESTS", "3. PRODUCTION CRASHES | 4. PRODUCTION CRASHES?!")
+            ],
+            "np": [
+                ("1. FUNCTION LEKHNE | 2. ZERO COMMENTS HALNE", "3. SERVER AAGO LAGYO | 4. SERVER AAGO LAGYO?!")
+            ]
+        }
+    }
+
+    # Alias synonyms for closely related templates
+    TEMPLATE_JOKES["drake.jpg"] = TEMPLATE_JOKES["drake_hotline_bling.jpg"]
+    TEMPLATE_JOKES["drake_blank.jpg"] = TEMPLATE_JOKES["drake_hotline_bling.jpg"]
+    TEMPLATE_JOKES["roll_safe_think_about_it.jpg"] = TEMPLATE_JOKES["roll_safe.jpg"]
+    TEMPLATE_JOKES["is_this_butterfly.jpg"] = TEMPLATE_JOKES["is_this_a_pigeon.jpg"]
+    TEMPLATE_JOKES["spider_man_triple.jpg"] = TEMPLATE_JOKES.get("spiderman_pointing_at_spiderman.jpg", TEMPLATE_JOKES["batman_slapping_robin.jpg"])
+    TEMPLATE_JOKES["bernie_i_am_once_again_asking_for_your_support.jpg"] = TEMPLATE_JOKES["bernie_sanders_once_again_asking.jpg"]
+
+    # Check if selected template has a dedicated joke pool
+    lang_key = "np" if is_nepali else "en"
+    if template_name in TEMPLATE_JOKES:
+        joke_candidates = TEMPLATE_JOKES[template_name].get(lang_key) or TEMPLATE_JOKES[template_name].get("en")
+        top_text, bottom_text = random.choice(joke_candidates)
     else:
-        top_pool = [
-            f"ME PUSHING UNTESTED CODE TO MAIN",
-            f"WRITING WORKING BUG-FREE CODE",
-            f"JUST ONE MORE QUICK FIX BEFORE DEMO",
-            f"SMILE AND PRETEND IT WORKS PERFECTLY",
-            f"THE COMPILER LOOKING AT THIS FILE",
-            f"CLIENT: DID YOU TEST THIS IN STAGING?"
-        ]
-        bot_pool = [
-            f"GRADE {grade_str}: ENTIRE SERVER ON FIRE!",
-            f"PASTING SYNTAX ERRORS & PRAYING TO GOD!",
-            f"FINAL GRADE {grade_str}: EVERYTHING IS BROKEN!",
-            f"COMPILER VERDICT: GRADE {grade_str} DISASTER!",
-            f"500 INTERNAL SERVER ERROR UNLOCKED!",
-            f"GRADE {grade_str}: SURPRISED IT EVEN RUNS!"
-        ]
-        
-    top_text = random.choice(top_pool)
-    bottom_text = random.choice(bot_pool)
+        # ── 4. Dynamic Code-Specific Fallback Engine ────────────────────
+        if is_mismatch:
+            if is_nepali:
+                top_text = f"DROPDOWN MA {sel_lang} SELECT GAREKO THIYO"
+                bottom_text = f"PASTE GAREKO CODE CHAI {det_lang} SPAGHETTI!"
+            else:
+                top_text = f"UI DROPDOWN SAYS {sel_lang}"
+                bottom_text = f"PASTED {det_lang} SPAGHETTI LIKE A CHAD!"
+        elif nesting >= 3:
+            if is_nepali:
+                top_text = f"KATHMANDU TRAFFIC JASTO {nesting}-LEVEL INDENTATION"
+                bottom_text = f"GOOD LUCK READING {func_name}() AFTER 2 BEERS"
+            else:
+                top_text = f"NESTING DEPTH LEVEL {nesting} (INCEPTION HORROR)"
+                bottom_text = f"COMPILER CRYING WHILE PARSING {func_name}()"
+        elif complexity >= 5:
+            if is_nepali:
+                top_text = f"CYCLOMATIC COMPLEXITY {complexity} BHAYO BRO"
+                bottom_text = "MERO AAKHA MA AASHU AAYO YO DEKHERA"
+            else:
+                top_text = f"CYCLOMATIC COMPLEXITY {complexity} IS DANGEROUS"
+                bottom_text = f"YOUR LOGIC LOOKS LIKE A BOWL OF WET NOODLES"
+        elif loc > 30:
+            if is_nepali:
+                top_text = f"EUTAI FILE MA {loc} LINE KO SPAGHETTI"
+                bottom_text = "REFACTOR NAGARE KO BHEDA CHARNA JA"
+            else:
+                top_text = f"ONE {loc}-LINE MONOLITHIC CRIME SCENE"
+                bottom_text = f"RENAME '{func_name}' TO 'ENTERPRISE_DISASTER()'"
+        elif grade_str in ["S", "A"]:
+            if is_nepali:
+                top_text = f"SENIOR DEV LOOKING AT GRADE {grade_str} LOGIC"
+                bottom_text = "ABSOLUTE CINEMA ARCHITECTURE BRO!"
+            else:
+                top_text = f"YOUR CODE (GRADE {grade_str} GIGACHAD)"
+                bottom_text = "CLEAN PEP8 LOGIC WORTHY OF A SALARY RAISE"
+        else:
+            if is_nepali:
+                top_text = f"ME: 'MERO {func_name}() CHALCHHA TRUST ME'"
+                bottom_text = f"COMPILER: GRADE {grade_str} DISASTER IN PROD!"
+            else:
+                top_text = f"DEV: 'IT RUNS ON LOCALHOST TRUST ME'"
+                bottom_text = f"LINTER: GRADE {grade_str} CATASTROPHE IN PROD"
     
     template_path = os.path.join(meme_dir, template_name)
     if template_path and os.path.exists(template_path):
@@ -938,17 +1266,24 @@ with col2:
         meme_img_bytes = generate_code_meme(
             metrics=metrics,
             grade=scores["grade"],
-            language=language
+            language=language,
+            code=code_sub,
+            target_lang=target_lang
         )
         st.image(meme_img_bytes, use_container_width=True)
-        
-        st.download_button(
-            label="📥 Download Custom Meme (PNG)",
-            data=meme_img_bytes,
-            file_name=f"coderoast_meme_{scores['grade'].split()[0]}.png",
-            mime="image/png",
-            use_container_width=True
-        )
+
+        meme_btn_col1, meme_btn_col2 = st.columns([1, 1])
+        with meme_btn_col1:
+            if st.button("🎲 Roll Another Meme", use_container_width=True):
+                st.rerun()
+        with meme_btn_col2:
+            st.download_button(
+                label="📥 Download Custom Meme (PNG)",
+                data=meme_img_bytes,
+                file_name=f"coderoast_meme_{scores['grade'].split()[0]}.png",
+                mime="image/png",
+                use_container_width=True
+            )
 
 
 
