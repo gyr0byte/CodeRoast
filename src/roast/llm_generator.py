@@ -523,15 +523,15 @@ class LLMRoastGenerator:
                 }).encode("utf-8"),
                 headers={"Content-Type": "application/json"}
             )
-            with urllib.request.urlopen(req, timeout=60) as resp:
+            with urllib.request.urlopen(req, timeout=90) as resp:
                 if resp.status == 200:
                     res_data = json.loads(resp.read().decode("utf-8"))
                     if "message" in res_data and "content" in res_data["message"]:
                         response_text = res_data["message"]["content"].strip()
                         if not is_refusal(response_text):
                             return self._ensure_profane_unhinged_roast(response_text, metrics, is_nepali=is_nepali)
-        except Exception:
-            pass  # Ollama not running locally or refused, proceed to HF cloud
+        except Exception as e:
+            print(f"[Ollama Call Error]: {type(e)} {e}")
 
         # ── Step B: Iterate through Hugging Face Qwen Models ────────────────
         client = InferenceClient(token=token if token else None)

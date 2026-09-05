@@ -35,15 +35,15 @@ importlib.reload(src.roast.llm_generator)
 from src.roast.generator import RoastGenerator
 
 
-def generate_roast_audio(text: str, lang_code: str = "en") -> Optional[bytes]:
+def clean_roast_tags(text: str) -> str:
+    """Universally strip AI model prefixes like '🤖 [Llama 3.2 AI Roast]: ' from roast text."""
+    import re
+    return re.sub(r"^🤖\s*(\[[^\]]+\]:)?\s*", "", text).strip()
 
+
+def generate_roast_audio(text: str, lang_code: str = "en") -> Optional[bytes]:
     """Generate Text-to-Speech MP3 audio bytes using gTTS."""
-    clean_text = (
-        text.replace("🤖 [Gemini Flash AI Roast]: ", "")
-        .replace("🤖 [Qwen2.5-Coder AI Roast]: ", "")
-        .replace("🤖 AI Roast: ", "")
-        .replace("🤖 ", "")
-    )
+    clean_text = clean_roast_tags(text)
     try:
         from gtts import gTTS
         import io
@@ -544,7 +544,7 @@ with st.sidebar:
     use_ai_llm = st.checkbox("🤖 Enable Dynamic AI Roast", value=True)
     
     st.markdown("---")
-    st.caption("🤖 Model: Qwen2.5-Coder (Local GPU) / Gemini Flash (Nepali API)")
+    st.caption("🤖 Model: Llama 3.2 3B (Local GPU) / Gemini Flash (Nepali API)")
 
 # ─── Split Screen Layout (Option 1) ──────────────────────────────────────────
 
@@ -764,13 +764,7 @@ with col2:
             accumulated_text = ""
             for chunk in roast_stream:
                 accumulated_text += chunk
-                clean_accum = (
-                    accumulated_text
-                    .replace("🤖 [Gemini Flash AI Roast]: ", "")
-                    .replace("🤖 [Qwen2.5-Coder AI Roast]: ", "")
-                    .replace("🤖 AI Roast: ", "")
-                    .replace("🤖 ", "")
-                )
+                clean_accum = clean_roast_tags(accumulated_text)
 
                 roast_box_placeholder.markdown(f"""
                 <div class="{card_class}">
@@ -788,22 +782,10 @@ with col2:
 
             st.session_state["roast_text"] = accumulated_text
             roast_text = accumulated_text
-            clean_roast_text = (
-                roast_text
-                .replace("🤖 [Gemini Flash AI Roast]: ", "")
-                .replace("🤖 [Qwen2.5-Coder AI Roast]: ", "")
-                .replace("🤖 AI Roast: ", "")
-                .replace("🤖 ", "")
-            )
+            clean_roast_text = clean_roast_tags(roast_text)
         else:
             roast_text = st.session_state.get("roast_text", "")
-            clean_roast_text = (
-                roast_text
-                .replace("🤖 [Gemini Flash AI Roast]: ", "")
-                .replace("🤖 [Qwen2.5-Coder AI Roast]: ", "")
-                .replace("🤖 AI Roast: ", "")
-                .replace("🤖 ", "")
-            )
+            clean_roast_text = clean_roast_tags(roast_text)
             roast_box_placeholder.markdown(f"""
             <div class="{card_class}">
                 <div style="font-size: 1.05rem; font-weight: bold; color: #a78bfa; margin-bottom: 10px;">

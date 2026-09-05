@@ -22,9 +22,9 @@ Behind the humorous facade lies a complex, multi-model AI pipeline. CodeRoast is
 2.  A **Hybrid NLP Classifier (Random Forest)** combining character-level TF-IDF representations with AST metrics to predict quality tiers.
 3.  A **PyTorch Sequence LSTM Scorer** that tokenizes code text and projects sequential complexity into a continuous severity score.
 4.  A fine-tuned **microsoft/codebert-base** model for deep semantic understanding.
-5.  A serverless **Qwen2.5-Coder LLM** endpoint with dynamic system prompts and few-shot examples.
+5.  A local GPU **Meta Llama 3.2 3B** engine (via Ollama) paired with a 4-tier cloud **Google Gemini Flash** fallback chain.
 
-This tiered system ensures robust, sub-second generation times, failing back gracefully from cloud models to local models down to static templates if network connectivity or compute limits are reached.
+This tiered system ensures robust, sub-second generation times, failing back gracefully from local GPU models to cloud APIs down to static templates if network connectivity or compute limits are reached.
 
 ```
 +------------------------------------------------------------+
@@ -50,7 +50,7 @@ This tiered system ensures robust, sub-second generation times, failing back gra
                               |
                               v
                 +----------------------------+
-                |   Qwen2.5-Coder API        |
+                |   Llama 3.2 3B / Gemini    |
                 |   (With Fallback Chains)   |
                 +----------------------------+
                               |
@@ -195,12 +195,12 @@ To eliminate prompt repetition and deliver maximum variety, every Nepali request
 *   **7 Signature Closers & Clean Authentic Nepali Slangs:** Rotates natural developer slangs (`kukur`, `gadha`, `dimag navako`, `harami`, `khate`, `pakhe`, `bheda`, `hawa`, `lafada`, `pasa`, `kaathe`, `jhyaap`, `boka`, `gidi`, `chappar`, `tori`, `baal xaina`, `hait`). Strictly excludes explicit sexual profanities.
 *   **Resulting Variety:** **15,000+ unique Romanized Nepali roast combinations**.
 
-#### 2. 🇬🇧 English Engine: Local Qwen2.5-Coder & Multi-Dimensional Theme System
+#### 2. 🇬🇧 English Engine: Local Meta Llama 3.2 3B & Multi-Dimensional Theme System
 For English roasts, the engine applies the same multi-dimensional theme picker architecture:
 *   **12 English Cultural Theme Pools:** Silicon Valley failures (Theranos/Juicero/WeWork), Stack Overflow elitism, r/programminghorror cursed code, FAANG interview disasters, Cyberpunk 2077 bugs, Fyre Festival/Season 8 betrayals, enterprise Jira hell, ChatGPT hallucinations, Startup hustle delusion, Linus Torvalds PR flames, Friday deploy apocalypses, and Y2K/Ariane 5 rocket crashes.
 *   **10 Persona Tones:** Burnt-out FAANG Staff Engineer, Gordon Ramsay in a server room, Reddit Moderator, VC Evaluator, Drunk CS Professor at 2am, LeetCode Hard ELITE, Paged DevOps Engineer, Sarcastic British Tech Journalist, Open Source Maintainer, Sentient AI.
 *   **6 Roast Structures & 6 Signature Closers:** Yielding **15,000+ unique English roast variations**.
-*   **Local Ollama Auto-Detection:** Queries `http://localhost:11434/api/generate` running `qwen2.5-coder:1.5b`.
+*   **Local Ollama Auto-Detection:** Queries `http://localhost:11434/api/chat` running **Llama 3.2 3B** (with 100% GPU VRAM offload on NVIDIA GTX 1060 6GB).
 *   **Multi-Tier Cloud Fallback:** If Ollama is offline, queries Hugging Face Serverless API (`Qwen2.5-Coder-32B` $\rightarrow$ `7B` $\rightarrow$ `1.5B` $\rightarrow$ `0.5B`).
 
 #### 3. 🎁 Easter Egg Engine
@@ -268,8 +268,8 @@ Each letter grade triggers one of **8 randomized unhinged reaction messages**:
 ### 2.7 Streamlit Frontend
 The UI uses custom dark CSS stylesheets to create a premium, gamified developer dashboard.
 *   **Radar Chart:** Built using `plotly.graph_objects.Scatterpolar`. It displays the 4 dimensional scores (Readability, Efficiency, Structure, Creativity), allowing developers to visually diagnose the weak points of their code structure.
-*   **Interactive Components:** A slider changes roast severity, while a checkbox enables Qwen AI generation.
-*   **UI Badges:** Visual feedback tags identify the source of the roast—displaying a purple **`🤖 Qwen2.5-Coder AI`** badge for AI-generated roasts and a gold **`⚡ Rule-Based Template Engine`** badge for fallbacks.
+*   **Interactive Components:** A slider changes roast severity, while a checkbox enables local/cloud AI generation.
+*   **UI Badges:** Visual feedback tags identify the source of the roast—displaying an **`🤖 Senior Dev AI Verdict`** card for AI-generated roasts and fallback reaction metadata.
 
 ---
 
@@ -472,8 +472,8 @@ This section serves as a technical interview preparation guide.
 #### Q3: Why did you use `char_wb` as the analyzer in TF-IDF?
 *   **Answer:** `char_wb` creates character n-grams only within word boundaries. This ensures we don't merge operators from one statement with keywords from another, preserving identifier roots.
 
-#### Q4: Why is there an LSTM in the pipeline if you have Qwen?
-*   **Answer:** Qwen runs in the cloud. If the API fails or is offline, the local LSTM model runs on CPU instantly to compute a severity score (0.0 to 1.0) and select static templates.
+#### Q4: Why is there an LSTM in the pipeline if you have Llama 3.2 / Gemini?
+*   **Answer:** While LLMs generate rich text, the local PyTorch LSTM model runs instantly on CPU/GPU without prompt generation overhead to compute an objective mathematical severity score (0.0 to 1.0) and select static templates if AI endpoints are offline.
 
 #### Q5: What is the purpose of the Sigmoid activation at the end of the LSTM?
 *   **Answer:** Sigmoid squeezes the final linear output between 0.0 and 1.0, mapping perfectly to a normalized percentage representing the roast intensity.
@@ -529,7 +529,7 @@ If asked to whiteboard, sketch the **Three-Tiered Roasting Pipeline**:
 2.  **Analysis Branch:**
     *   *Static:* AST Parser $\rightarrow$ 8 Metrics.
     *   *Dynamic:* Vectorizer + RF Classifier / PyTorch LSTM Scorer $\rightarrow$ Quality (0-3) & Severity (0-1).
-3.  **Synthesis:** Quality + Severity + Code $\rightarrow$ Prompt Engine $\rightarrow$ Qwen-32B Cloud GPU $\rightarrow$ Humorous UI output.
+3.  **Synthesis:** Quality + Severity + Code $\rightarrow$ Prompt Engine $\rightarrow$ Llama 3.2 3B (Local GPU) / Gemini Flash $\rightarrow$ Humorous UI output.
 
 ### 🎯 Key Numbers to Cite
 *   **Dataset Size:** ~600 curated code snippets.

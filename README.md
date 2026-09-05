@@ -3,7 +3,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Framework](https://img.shields.io/badge/Streamlit-1.61.1-FF4B4B.svg)](https://streamlit.io/)
 [![Deep Learning](https://img.shields.io/badge/PyTorch-Sequence%20LSTM-EE4C2C.svg)](https://pytorch.org/)
-[![Transformers](https://img.shields.io/badge/Hugging%20Face-CodeBERT%20%26%20Qwen2.5--Coder-yellow.svg)](https://huggingface.co/)
+[![Transformers](https://img.shields.io/badge/Hugging%20Face-CodeBERT%20%26%20Llama%203.2-yellow.svg)](https://huggingface.co/)
 [![Gemini Engine](https://img.shields.io/badge/Google%20Gemini-Flash%20Multi--Model%20Fallback-4285F4.svg)](https://ai.google.dev/)
 [![Live App](https://img.shields.io/badge/Streamlit%20Cloud-Live%20Demo-brightgreen.svg)](https://coderoast.streamlit.app)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -12,7 +12,7 @@
 
 **CodeRoast** is an end-to-end Machine Learning, NLP, and Deep Learning powered web application that performs real-time static code quality analysis and generates brutally honest — and hilariously savage — code roasts in both **English** and **Romanized Nepali**.
 
-It combines real static analysis metrics (lines of code, cyclomatic complexity, nesting depth, duplication, naming scores) with machine learning classification models, local GPU LLMs (Qwen2.5-Coder via Ollama), and Google Gemini multi-model API chains to deliver code reviews that are technically accurate, culturally rich, and entertainingly savage.
+It combines real static analysis metrics (lines of code, cyclomatic complexity, nesting depth, duplication, naming scores) with machine learning classification models, local GPU LLMs (Meta Llama 3.2 3B via Ollama), and Google Gemini multi-model API chains to deliver code reviews that are technically accurate, culturally rich, and entertainingly savage.
 
 ---
 
@@ -32,8 +32,8 @@ It combines real static analysis metrics (lines of code, cyclomatic complexity, 
   - **Sub-4-Second Speed**: Lite model optimization delivers fast (~3.7s) 800+ character Romanized Nepali roasts.
   - **Massive Combinatorial Theme System**: Combines 20 cultural theme pools (Balen Shah dozers, TU exam delays, Nagdhunga jam, Selroti, Wide body scam, etc.), 8 slang sets, 12 persona tones, 8 roast structures, and 7 signature closers for **15,000+ unique roast permutations**.
   - **Strict Content Moderation**: Zero sexual vulgarity policy with hard-coded boundaries.
-- **🤖 English AI Engine (Local Qwen2.5-Coder via Ollama & Dynamic Theme Engine):**
-  - Powered by local `qwen2.5-coder:1.5b` with dynamic theme sampling.
+- **🤖 English AI Engine (Local Meta Llama 3.2 3B via Ollama & Dynamic Theme Engine):**
+  - Powered by local `llama3.2:3b` with dynamic theme sampling and 100% GPU VRAM offload.
   - **12 Dynamic Cultural Themes**: Silicon Valley failures, Stack Overflow elitism, r/programminghorror, FAANG interview disasters, Cyberpunk 2077 bugs, Fyre Festival, Enterprise Jira hell, ChatGPT hallucination, Startup delusion, Linus Torvalds PR flames, Friday deploy apocalypses, and Y2K.
   - **10 Tones, 6 Structures, 6 Signature Closers** yielding another **15,000+ unique roast variations**.
 - **🖼️ Authentic Classic Impact Font Meme Generator:**
@@ -77,7 +77,7 @@ It combines real static analysis metrics (lines of code, cyclomatic complexity, 
                                │ Hybrid AI Roast Engine   │
                                ├──────────────────────────┤
                                │ 🇳🇵 Nepali: Gemini Chain  │
-                               │ 🇬🇧 English: Local Qwen  │
+                               │ 🇬🇧 English: Local Llama  │
                                └────────────┬─────────────┘
                                             │
                                             ▼
@@ -128,7 +128,7 @@ CodeRoast/
     │   └── train.py            # Training pipeline orchestrator
     ├── roast/
     │   ├── generator.py        # Hybrid Roast Generator
-    │   ├── llm_generator.py    # Multi-model Gemini & Local Qwen LLM generator
+    │   ├── llm_generator.py    # Multi-model Gemini & Local Llama/Qwen LLM generator
     │   └── templates.py        # Curated template roasts (English & Nepali)
     └── scoring/
         └── scorer.py           # Multi-dimensional scoring engine
