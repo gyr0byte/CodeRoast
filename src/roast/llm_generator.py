@@ -49,6 +49,7 @@ class LLMRoastGenerator:
         self.api_token = api_token
         self.gemini_api_key = gemini_api_key
         self._is_loaded = True
+        self._cached_ollama_model = None
 
     def _get_hf_token(self) -> Optional[str]:
         if self.api_token:
@@ -87,7 +88,11 @@ class LLMRoastGenerator:
         return None
 
     def _get_ollama_model(self) -> str:
-        """Detect installed model from local Ollama instance, prioritizing llama3.2:3b."""
+        """Detect installed model from local Ollama instance, prioritizing llama3.2:3b, with caching."""
+        if self._cached_ollama_model is not None:
+            return self._cached_ollama_model
+
+        model_name = "llama3.2:3b"
         try:
             req = urllib.request.Request("http://localhost:11434/api/tags", headers={"Content-Type": "application/json"})
             with urllib.request.urlopen(req, timeout=1.5) as resp:
@@ -97,12 +102,16 @@ class LLMRoastGenerator:
                     for pref in ["llama3.2:3b", "llama3.2", "llama3.2:latest", "llama3.2:1b", "qwen2.5-coder:1.5b", "qwen2.5-coder"]:
                         for inst in installed:
                             if inst == pref or inst.startswith(pref):
-                                return inst
+                                model_name = inst
+                                self._cached_ollama_model = model_name
+                                return model_name
                     if installed:
-                        return installed[0]
+                        model_name = installed[0]
         except Exception:
             pass
-        return "llama3.2:3b"
+
+        self._cached_ollama_model = model_name
+        return model_name
 
     def _call_gemini_api(self, prompt: str, gemini_key: str) -> Optional[str]:
         """Calls Google Gemini Flash REST API with automatic model fallback."""
@@ -174,22 +183,77 @@ class LLMRoastGenerator:
         print("[WARNING] Gemini API call failed across all model variants.")
         return None
 
-    def generate_roast(
+    def _extract_code_smells(self, code: str, metrics: dict) -> list:
+        """
+        Analyze AST metrics and code text to extract specific, named code smells
+        for the LLM to roast explicitly by name.
+        """
+        import re
+        smells = []
+
+        # 1. Terrible/lazy variable names
+        generic_names = {'temp', 'tmp', 'data', 'val', 'value', 'res', 'result', 'obj', 'foo', 'bar', 'baz', 'stuff', 'thing', 'item', 'x', 'y', 'z', 'a', 'b', 'c', 'n'}
+        words = set(re.findall(r'\b[a-zA-Z_]\w*\b', code))
+        bad_found = words.intersection(generic_names)
+        if bad_found:
+            smells.append(f"Lazy generic variable names: {', '.join(sorted(bad_found)[:5])}")
+
+        # 2. Hardcoded / Magic numbers
+        magic_numbers = [m for m in re.findall(r'(?<![a-zA-Z0-9_])([0-9]{2,})(?![a-zA-Z0-9_])', code) if m not in ('100', '0')]
+        if len(magic_numbers) >= 2:
+            smells.append(f"Unexplained magic numbers: {', '.join(magic_numbers[:4])}")
+
+        # 3. Nesting depth
+        nesting = metrics.get("nesting_depth", 0)
+        if nesting >= 4:
+            smells.append(f"Catastrophic indentation ({nesting} nesting levels) — pyramid of doom")
+        elif nesting >= 2:
+            smells.append(f"Deeply nested logic ({nesting} levels)")
+
+        # 4. Comments / Documentation
+        comment_ratio = metrics.get("comment_ratio", 0.0)
+        if comment_ratio == 0.0:
+            smells.append("Zero comments or docstrings (completely undocumented mystery meat)")
+        elif comment_ratio < 0.05:
+            smells.append(f"Practically zero documentation ({comment_ratio:.1%} comments)")
+
+        # 5. Cyclomatic Complexity
+        cc = metrics.get("cyclomatic_complexity", 1.0)
+        if cc >= 8:
+            smells.append(f"Dangerously high cyclomatic complexity ({cc})")
+        elif cc >= 4:
+            smells.append(f"High branching complexity ({cc})")
+
+        # 6. Silent error swallowing or print debugging
+        if "except:" in code or "except Exception:" in code:
+            if "pass" in code:
+                smells.append("Silent exception swallowing (`except ...: pass`)")
+        if re.search(r'\bprint\s*\(', code) and metrics.get('language', '').lower() == 'python':
+            smells.append("Using raw `print()` statements for debugging instead of proper logging")
+
+        # 7. Function length
+        avg_fn_len = metrics.get("avg_function_length", 0)
+        if avg_fn_len > 30:
+            smells.append(f"Bloated monolithic function ({avg_fn_len} lines avg)")
+
+        if not smells:
+            smells.append("Questionable architectural structure and questionable naming")
+
+        return smells
+
+    def _prepare_prompt_and_messages(
         self,
         code: str,
         metrics: dict,
         quality_level: int,
         severity: int = 2,
         language: str = "english",
-        gemini_key: Optional[str] = None
-    ) -> Optional[str]:
+        grade: Optional[str] = None
+    ):
         """
-        Generates a dynamic roast text response using Gemini Flash or Qwen AI.
-        Supports language='english' or language='nepali' / 'roman_nepali'.
+        Builds the system prompt, few-shot examples, and user content for LLM generation.
         """
         is_nepali = language.lower() in ["nepali", "roman_nepali", "roman nepali"]
-        g_key = self._get_gemini_key(gemini_key)
-        token = self._get_hf_token()
 
         # 1. Direct Severity Mapping for System Instructions
         length_rule = (
@@ -210,7 +274,7 @@ class LLMRoastGenerator:
                 },
                 {
                     "role": "assistant",
-                    "content": "What the actual fuck is this code bro? Arey yaar, euta line ko simple addition function ko lagi yeti dherai natak kina gareko, you lazy dumbass? Function ko naam 'add' ra parameters 'a' ra 'b' dekhera mero dimag nai chakkar aayo. Cyclomatic complexity 1 bhaye pani tero code ma zero comment chha, jassle garda saano bacha le lekheko jasto dekhinchha. Yo piece of shit code delete gar, laptop bag ma halera bheda charna jaa, laptop dhobighat ma falera aayo bhane pani tero bhalai hunchha. Never touch Python again, you complete asshole! Mero aakha ma aashu nai aayo yo hawa code dekhera, format gar tero system right now!"
+                    "content": "What the actual fuck is this code bro? Euta line ko addition function ko lagi yeti dherai natak kina gareko, you lazy dumbass? Function ko naam 'add' ra parameters 'a' ra 'b' dekhera dimag nai chakkar aayo. Zero comments, hawa logic! Yo piece of shit code delete gar, laptop bag ma halera bheda charna jaa, ani format gar tero system right now, you complete asshole!"
                 }
             ]
         elif severity == 1:
@@ -229,7 +293,7 @@ class LLMRoastGenerator:
                 },
                 {
                     "role": "assistant",
-                    "content": "What the actual fucking hell is this piece of shit? A one-line addition function that looks like it was typed out by a blind jackass after a heavy night of drinking? Did you write a whole goddamn wrapper method just to feel like a productive software engineer today, you dumbass? This atrocious bullshit is so completely useless it makes my brain melt through my skull. The total lack of comments tells me you treat basic math like a top-secret military secret, you lazy bastard. Your variable names 'a' and 'b' are so uninspired and lazy that even a toddler with a crayon could come up with a more descriptive identification scheme. Looking at this dipshit code makes me want to format your motherboard, throw your laptop into an active volcano, and wipe your GitHub repository off the internet. Delete this fucking trash immediately, apply for a job in goat herding, and never touch a keyboard again as long as you live, you complete asshole."
+                    "content": "What the actual fuck is this one-line addition function? Did you write a whole goddamn wrapper method just to pretend you're a real engineer today, you dumbass? Your variable names 'a' and 'b' look like a toddler scribbled them with broken crayons. Not a single goddamn comment anywhere, as if basic addition is a classified military secret. Delete this bullshit trash immediately, close your laptop, and go apply for goat herding before anyone on your team sees this."
                 }
             ]
         elif severity == 3:
@@ -248,7 +312,7 @@ class LLMRoastGenerator:
                 },
                 {
                     "role": "assistant",
-                    "content": "Holy motherfucking hell, this nesting depth is an absolute clusterfuck and a war crime under the Geneva Convention! What kind of unholy goddamn shit is this? Even James Cameron couldn't reach the bottom of these dipshit indentations. Your cyclomatic complexity score of 18 looks like a credit card number, you complete dumbass. Reading through these nested if-statements is giving me an instant optical migraine and a stroke at the same time. The fact that you have 1.5% comments is pure insult to injury. Delete this fucking trash, douse your laptop in holy water, throw your motherboard into a fiery pit, and get the fuck out of computer science forever, you lazy bastard!"
+                    "content": "Holy motherfucking shit, what biological hazard did you drag out of the digital sewer? Look at this goddamn nesting depth — an absolute clusterfuck and a war crime! Cyclomatic complexity 18 with 1.5% comments is pure insult to computer science, you dipshit. Your logic looks like a drunk raccoon smashed your keyboard during an earthquake. Delete this fucking garbage, smash your SSD with a sledgehammer, and never touch code again, you hopeless bastard!"
                 }
             ]
         else:  # Standard Severity (2)
@@ -432,12 +496,15 @@ class LLMRoastGenerator:
                 f"Write 8-12 sentences of pure savage Romanized Nepali. No bullets, no markdown, no code blocks. "
                 f"Be CREATIVE and ORIGINAL every time — never repeat the same jokes."
             )
+            detected_smells = self._extract_code_smells(code, metrics)
+            smells_str = ", ".join(detected_smells[:3])
             user_content = (
                 f"Lang: {metrics.get('_selected_lang', 'Python')}, "
                 f"Lines: {metrics.get('lines_of_code', 0)}, "
                 f"Complexity: {metrics.get('cyclomatic_complexity', 1.0)}, "
                 f"Nesting: {metrics.get('nesting_depth', 0)}, "
-                f"Comments: {metrics.get('comment_ratio', 0.0):.0%}\n\n"
+                f"Comments: {metrics.get('comment_ratio', 0.0):.0%}\n"
+                f"Flaws to Roast: {smells_str}\n\n"
                 f"Code:\n{code[:800]}\n\n"
                 f"ROAST THIS CODE IN ROMANIZED NEPALI ONLY."
             )
@@ -478,15 +545,165 @@ class LLMRoastGenerator:
                 f"Language is {actual_language} — do NOT mention other languages. "
                 f"No bullet points, no markdown, no helpful advice, no tool suggestions. Pure unhinged comedy roast only."
             )
+            detected_smells = self._extract_code_smells(code, metrics)
+            smells_str = "\n".join(f"- {s}" for s in detected_smells)
             user_content = (
                 f"Language: {actual_language}\n"
                 f"Lines of Code: {metrics.get('lines_of_code', 0)}\n"
                 f"Cyclomatic Complexity: {metrics.get('cyclomatic_complexity', 1.0)}\n"
                 f"Nesting Depth: {metrics.get('nesting_depth', 0)}\n"
-                f"Comment Ratio: {metrics.get('comment_ratio', 0.0):.1%}\n\n"
+                f"Comment Ratio: {metrics.get('comment_ratio', 0.0):.1%}\n"
+                f"Code Smells Detected to Specifically Target & Roast:\n{smells_str}\n\n"
                 f"Code Snippet:\n{code[:800]}"
             )
 
+        if grade and not metrics.get("_is_plain_text", False):
+            letter = grade[0] if grade else "F"
+            system_prompt += (
+                f"\nAt the very end of your roast on a new line, you MUST append: "
+                f"[VERDICT]: <one short, devastating one-liner reaction specifically to their Letter Grade of {letter}>"
+            )
+
+        return system_prompt, few_shot_examples, user_content, is_nepali
+
+    def generate_roast_stream(
+        self,
+        code: str,
+        metrics: dict,
+        quality_level: int = 2,
+        severity: int = 2,
+        language: str = "english",
+        gemini_key: Optional[str] = None,
+        grade: Optional[str] = None
+    ):
+        """
+        Yields real-time tokens from local Ollama for English roasts.
+        Falls back to generate_roast() if streaming is not available or for Nepali.
+        """
+        is_nepali = language.lower() in ["nepali", "roman_nepali", "roman nepali"]
+
+        if is_nepali:
+            full_roast = self.generate_roast(
+                code=code,
+                metrics=metrics,
+                quality_level=quality_level,
+                severity=severity,
+                language=language,
+                gemini_key=gemini_key,
+                grade=grade
+            )
+            if full_roast:
+                words = full_roast.split(" ")
+                for i, w in enumerate(words):
+                    yield w + (" " if i < len(words) - 1 else "")
+            return
+
+        system_prompt, few_shot_examples, user_content, _ = self._prepare_prompt_and_messages(
+            code=code,
+            metrics=metrics,
+            quality_level=quality_level,
+            severity=severity,
+            language=language,
+            grade=grade
+        )
+
+        messages = [{"role": "system", "content": system_prompt}]
+        messages.extend(few_shot_examples)
+        messages.append({"role": "user", "content": user_content})
+
+        # Try real Ollama streaming
+        try:
+            ollama_model = self._get_ollama_model()
+            payload = json.dumps({
+                "model": ollama_model,
+                "messages": messages,
+                "stream": True,
+                "options": {
+                    "temperature": 1.05,
+                    "top_p": 0.9,
+                    "top_k": 50,
+                    "repeat_penalty": 1.2,
+                    "num_predict": 800
+                }
+            }).encode("utf-8")
+            req = urllib.request.Request(
+                "http://localhost:11434/api/chat",
+                data=payload,
+                headers={"Content-Type": "application/json"}
+            )
+            with urllib.request.urlopen(req, timeout=90) as resp:
+                if resp.status == 200:
+                    buffer = ""
+                    checked_refusal = False
+                    streamed_any = False
+                    for line in resp:
+                        if not line:
+                            continue
+                        chunk = json.loads(line.decode("utf-8"))
+                        if "message" in chunk and "content" in chunk["message"]:
+                            token = chunk["message"]["content"]
+                            if not checked_refusal:
+                                buffer += token
+                                if len(buffer) >= 40:
+                                    if is_refusal(buffer):
+                                        print("[Ollama Stream Refusal Detected]: aborting stream")
+                                        break
+                                    checked_refusal = True
+                                    streamed_any = True
+                                    yield buffer
+                                    buffer = ""
+                            else:
+                                streamed_any = True
+                                yield token
+                        if chunk.get("done", False):
+                            break
+                    if not checked_refusal and buffer:
+                        if not is_refusal(buffer):
+                            streamed_any = True
+                            yield buffer
+                    if streamed_any:
+                        return
+        except Exception as e:
+            print(f"[Ollama Stream Error]: {type(e)} {e}")
+
+        # Fallback to non-streaming roast
+        full_roast = self.generate_roast(
+            code=code,
+            metrics=metrics,
+            quality_level=quality_level,
+            severity=severity,
+            language=language,
+            gemini_key=gemini_key
+        )
+        if full_roast:
+            words = full_roast.split(" ")
+            for i, w in enumerate(words):
+                yield w + (" " if i < len(words) - 1 else "")
+
+    def generate_roast(
+        self,
+        code: str,
+        metrics: dict,
+        quality_level: int,
+        severity: int = 2,
+        language: str = "english",
+        gemini_key: Optional[str] = None,
+        grade: Optional[str] = None
+    ) -> Optional[str]:
+        """
+        Generates a dynamic roast text response using Gemini Flash or Qwen AI.
+        Supports language='english' or language='nepali' / 'roman_nepali'.
+        """
+        system_prompt, few_shot_examples, user_content, is_nepali = self._prepare_prompt_and_messages(
+            code=code,
+            metrics=metrics,
+            quality_level=quality_level,
+            severity=severity,
+            language=language,
+            grade=grade
+        )
+        g_key = self._get_gemini_key(gemini_key)
+        token = self._get_hf_token()
 
         # ── Route Selection ─────────────────────────────────────────────────
         # Romanized Nepali -> Exclusively Gemini Flash API (Fallback to NEPALI_ROAST_TEMPLATES if API fails/absent)
@@ -516,9 +733,11 @@ class LLMRoastGenerator:
                     "messages": messages,
                     "stream": False,
                     "options": {
-                        "temperature": 0.95,
-                        "num_predict": 800,
-                        "repeat_penalty": 1.15
+                        "temperature": 1.05,
+                        "top_p": 0.9,
+                        "top_k": 50,
+                        "repeat_penalty": 1.2,
+                        "num_predict": 800
                     }
                 }).encode("utf-8"),
                 headers={"Content-Type": "application/json"}

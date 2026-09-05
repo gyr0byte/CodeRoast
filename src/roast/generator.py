@@ -198,13 +198,48 @@ class RoastGenerator:
         use_llm: bool = True,
         language: str = "english",
         gemini_key: Optional[str] = None,
+        grade: Optional[str] = None,
         **kwargs
     ):
         """
         Yields real-time text chunks of the generated roast for typewriter UI streaming.
+        Uses real Ollama token streaming when available.
         """
         import time
 
+        is_nepali = language.lower() in ["nepali", "roman_nepali", "roman nepali"]
+
+        # Easter Egg Detection
+        easter_egg = self._detect_easter_egg(code)
+        if easter_egg:
+            full_roast = self._finalize([random.choice(self.templates[easter_egg])], severity)
+            for word in full_roast.split(" "):
+                yield word + " "
+                time.sleep(0.03)
+            return
+
+        # Real LLM token streaming
+        if use_llm and self.llm_generator is not None and code:
+            has_yielded = False
+            try:
+                for token in self.llm_generator.generate_roast_stream(
+                    code=code,
+                    metrics=metrics,
+                    quality_level=quality_level,
+                    severity=severity,
+                    language=language,
+                    gemini_key=gemini_key,
+                    grade=grade
+                ):
+                    has_yielded = True
+                    yield token
+            except Exception as e:
+                print(f"[Roast Stream Error]: {e}")
+
+            if has_yielded:
+                return
+
+        # Fallback to standard template or non-streaming roast
         full_roast = self.generate_roast(
             metrics=metrics,
             quality_level=quality_level,
@@ -217,8 +252,7 @@ class RoastGenerator:
         )
 
         words = full_roast.split(" ")
-        is_english = language.lower() in ["english", "eng"]
-        delay = 0.04 if is_english else 0.012
+        delay = 0.04 if not is_nepali else 0.012
 
         for i, word in enumerate(words):
             yield word + (" " if i < len(words) - 1 else "")

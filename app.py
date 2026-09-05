@@ -546,6 +546,41 @@ with st.sidebar:
     st.markdown("---")
     st.caption("🤖 Model: Llama 3.2 3B (Local GPU) / Gemini Flash (Nepali API)")
 
+    # ─── Roast History / Session Memory Panel ─────────────────────────
+    if "roast_history" not in st.session_state:
+        st.session_state["roast_history"] = []
+
+    if st.session_state["roast_history"]:
+        st.markdown("---")
+        st.markdown(f"### 📜 Roast History ({len(st.session_state['roast_history'])})")
+        with st.expander("View Past Roasts", expanded=False):
+            for idx, item in enumerate(reversed(st.session_state["roast_history"])):
+                real_num = len(st.session_state["roast_history"]) - idx
+                grade = item.get("grade", "F")
+                ts = item.get("time", "")
+                preview = item.get("code_preview", "Code")
+                st.markdown(f"**#{real_num}: [{grade}]** `{ts}` — `{preview}`")
+                st.caption(f"_{item.get('roast', '')[:85]}..._")
+                col_h1, col_h2 = st.columns(2)
+                with col_h1:
+                    if st.button("Load Code", key=f"hist_load_{idx}", use_container_width=True):
+                        st.session_state["code_input"] = item.get("code", "")
+                        st.rerun()
+                with col_h2:
+                    if st.button("Replay", key=f"hist_replay_{idx}", use_container_width=True):
+                        st.session_state["code_input"] = item.get("code", "")
+                        st.session_state["roast_text"] = item.get("roast", "")
+                        st.session_state["grade_reaction"] = item.get("grade_reaction", "")
+                        st.session_state["metrics"] = item.get("metrics")
+                        st.session_state["scores"] = item.get("scores")
+                        st.session_state["has_results"] = True
+                        st.session_state["is_new_roast"] = False
+                        st.rerun()
+                st.markdown("---")
+            if st.button("🗑️ Clear History", key="clear_hist_btn", use_container_width=True):
+                st.session_state["roast_history"] = []
+                st.rerun()
+
 # ─── Split Screen Layout (Option 1) ──────────────────────────────────────────
 
 col1, col2 = st.columns([1.1, 1], gap="medium")
@@ -696,7 +731,7 @@ if roast_button:
 
         grade_reaction = roast_generator.get_grade_reaction(
             scores["grade"],
-            use_llm=use_ai_llm,
+            use_llm=False,
             code=code_input,
             metrics=metrics
         )
@@ -757,14 +792,23 @@ with col2:
                 severity=st.session_state.get("severity", 2),
                 code=code_sub,
                 use_llm=use_ai_llm,
-                language=target_lang
+                language=target_lang,
+                grade=scores.get("grade", "F") if scores else "F"
             )
-
 
             accumulated_text = ""
             for chunk in roast_stream:
                 accumulated_text += chunk
-                clean_accum = clean_roast_tags(accumulated_text)
+
+                # Live detection of [VERDICT]: tag
+                if "[VERDICT]:" in accumulated_text:
+                    display_roast, live_verdict = accumulated_text.split("[VERDICT]:", 1)
+                    clean_accum = clean_roast_tags(display_roast)
+                    if live_verdict.strip():
+                        grade_reaction = live_verdict.strip().strip('"').strip("'")
+                        st.session_state["grade_reaction"] = grade_reaction
+                else:
+                    clean_accum = clean_roast_tags(accumulated_text)
 
                 roast_box_placeholder.markdown(f"""
                 <div class="{card_class}">
@@ -779,10 +823,35 @@ with col2:
                 </div>
                 """, unsafe_allow_html=True)
 
+            if "[VERDICT]:" in accumulated_text:
+                final_roast, final_verdict = accumulated_text.split("[VERDICT]:", 1)
+                clean_roast_text = clean_roast_tags(final_roast)
+                if final_verdict.strip():
+                    grade_reaction = final_verdict.strip().strip('"').strip("'")
+                    st.session_state["grade_reaction"] = grade_reaction
+            else:
+                clean_roast_text = clean_roast_tags(accumulated_text)
 
-            st.session_state["roast_text"] = accumulated_text
-            roast_text = accumulated_text
-            clean_roast_text = clean_roast_tags(roast_text)
+            st.session_state["roast_text"] = clean_roast_text
+            roast_text = clean_roast_text
+
+            # Record in session history
+            import datetime
+            if "roast_history" not in st.session_state:
+                st.session_state["roast_history"] = []
+
+            history_entry = {
+                "time": datetime.datetime.now().strftime("%H:%M:%S"),
+                "grade": scores["grade"].split()[0] if scores else "F",
+                "code": code_sub,
+                "code_preview": (code_sub.strip().splitlines()[0][:30] if code_sub.strip() else "code"),
+                "roast": clean_roast_text,
+                "grade_reaction": grade_reaction,
+                "metrics": metrics,
+                "scores": scores
+            }
+            if not st.session_state["roast_history"] or st.session_state["roast_history"][-1].get("roast") != clean_roast_text:
+                st.session_state["roast_history"].append(history_entry)
         else:
             roast_text = st.session_state.get("roast_text", "")
             clean_roast_text = clean_roast_tags(roast_text)
