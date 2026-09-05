@@ -618,12 +618,14 @@ class LLMRoastGenerator:
                 "model": ollama_model,
                 "messages": messages,
                 "stream": True,
+                "keep_alive": -1,
                 "options": {
+                    "num_ctx": 2048,
                     "temperature": 1.05,
                     "top_p": 0.9,
                     "top_k": 50,
                     "repeat_penalty": 1.2,
-                    "num_predict": 800
+                    "num_predict": 500
                 }
             }).encode("utf-8")
             req = urllib.request.Request(
@@ -732,12 +734,14 @@ class LLMRoastGenerator:
                     "model": ollama_model,
                     "messages": messages,
                     "stream": False,
+                    "keep_alive": -1,
                     "options": {
+                        "num_ctx": 2048,
                         "temperature": 1.05,
                         "top_p": 0.9,
                         "top_k": 50,
                         "repeat_penalty": 1.2,
-                        "num_predict": 800
+                        "num_predict": 500
                     }
                 }).encode("utf-8"),
                 headers={"Content-Type": "application/json"}

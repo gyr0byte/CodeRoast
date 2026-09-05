@@ -900,20 +900,23 @@ st.markdown("""
     }
 
     /* Thinking / Cooking Pulse Animation */
-    @keyframes pulseText {
-        0% { opacity: 0.3; }
-        50% { opacity: 1; }
-        100% { opacity: 0.3; }
+    @keyframes pulseFlame {
+        0% { transform: scale(0.98); opacity: 0.7; filter: drop-shadow(0 0 4px rgba(244, 63, 94, 0.4)); }
+        50% { transform: scale(1.02); opacity: 1.0; filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.8)); }
+        100% { transform: scale(0.98); opacity: 0.7; filter: drop-shadow(0 0 4px rgba(244, 63, 94, 0.4)); }
     }
     .thinking-loader {
         display: flex;
         align-items: center;
-        gap: 8px;
-        color: #c084fc;
-        font-weight: 500;
+        gap: 10px;
+        color: #e9d5ff;
+        font-weight: 600;
         font-size: 1.05rem;
-        padding: 12px 0;
-        animation: pulseText 1.2s infinite ease-in-out;
+        padding: 14px 18px;
+        background: rgba(88, 28, 135, 0.25);
+        border: 1px dashed #a855f7;
+        border-radius: 8px;
+        animation: pulseFlame 1.4s infinite ease-in-out;
     }
 
     /* Smooth Fade-In for Roast Streaming Text */
@@ -1248,14 +1251,14 @@ with col2:
             st.session_state["is_new_roast"] = False
 
             # Instantly display purple glowing card with animated thinking/cooking state
-            thinking_msg = "⚡ Analyzing AST metrics... Cooking a brutal verdict..." if target_lang == "english" else "⚡ AST metrics हेर्दै... AI roast तयार पार्दै..."
+            thinking_msg = "🔥 Igniting the flame... Analyzing AST & prepping the roast..." if target_lang == "english" else "🔥 आगो बाल्दै... AST हेरेर कडा Roast तयार पार्दै..."
             roast_box_placeholder.markdown(f"""
             <div class="{card_class}">
                 <div style="font-size: 1.05rem; font-weight: bold; color: #a78bfa; margin-bottom: 10px;">
                     🤖 Senior Dev AI Verdict:
                 </div>
                 <div class="thinking-loader">
-                    {thinking_msg} 💭
+                    <span>⚡</span> <span>{thinking_msg}</span> <span>💭</span>
                 </div>
             </div>
             """, unsafe_allow_html=True)
