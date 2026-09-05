@@ -86,6 +86,24 @@ class LLMRoastGenerator:
             pass
         return None
 
+    def _get_ollama_model(self) -> str:
+        """Detect installed model from local Ollama instance, prioritizing llama3.2:3b."""
+        try:
+            req = urllib.request.Request("http://localhost:11434/api/tags", headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=1.5) as resp:
+                if resp.status == 200:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    installed = [m.get("name", "") for m in data.get("models", [])]
+                    for pref in ["llama3.2:3b", "llama3.2", "llama3.2:latest", "llama3.2:1b", "qwen2.5-coder:1.5b", "qwen2.5-coder"]:
+                        for inst in installed:
+                            if inst == pref or inst.startswith(pref):
+                                return inst
+                    if installed:
+                        return installed[0]
+        except Exception:
+            pass
+        return "llama3.2:3b"
+
     def _call_gemini_api(self, prompt: str, gemini_key: str) -> Optional[str]:
         """Calls Google Gemini Flash REST API with automatic model fallback."""
         import time as _time
@@ -490,10 +508,11 @@ class LLMRoastGenerator:
 
         # ── Step A: Check for Local Ollama Instance via /api/chat ChatML ───
         try:
+            ollama_model = self._get_ollama_model()
             req = urllib.request.Request(
                 "http://localhost:11434/api/chat",
                 data=json.dumps({
-                    "model": "qwen2.5-coder:1.5b",
+                    "model": ollama_model,
                     "messages": messages,
                     "stream": False,
                     "options": {
@@ -700,10 +719,11 @@ class LLMRoastGenerator:
 
         # Try Ollama /api/chat first
         try:
+            ollama_model = self._get_ollama_model()
             req = urllib.request.Request(
                 "http://localhost:11434/api/chat",
                 data=json.dumps({
-                    "model": "qwen2.5-coder:1.5b",
+                    "model": ollama_model,
                     "messages": messages,
                     "stream": False,
                     "options": {"temperature": 1.0}

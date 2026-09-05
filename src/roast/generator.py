@@ -86,7 +86,7 @@ class RoastGenerator:
                 gemini_key=gemini_key
             )
             if ai_roast and not is_refusal(ai_roast):
-                tag = "🤖 [Gemini Flash AI Roast]: " if gemini_key else "🤖 [Qwen2.5-Coder AI Roast]: "
+                tag = "🤖 [Gemini Flash AI Roast]: " if gemini_key else "🤖 [Llama 3.2 AI Roast]: "
                 return f"{tag}{ai_roast}"
 
         # ── Check for language mismatch ─────────────────────────────────
