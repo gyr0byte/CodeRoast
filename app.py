@@ -56,6 +56,42 @@ def generate_roast_audio(text: str, lang_code: str = "en") -> Optional[bytes]:
         return None
 
 
+def fit_text_in_box(draw, text: str, box_w: int, box_h: int, font_path: str, max_font_size: int = 34, min_font_size: int = 14):
+    """Fit text within a bounding box, automatically reducing font size and wrapping lines."""
+    import textwrap
+    text = text.upper()
+    
+    for size in range(max_font_size, min_font_size - 1, -2):
+        try:
+            font = ImageFont.truetype(font_path, size=size)
+        except Exception:
+            font = ImageFont.load_default()
+        
+        sample_bbox = draw.textbbox((0, 0), "W", font=font)
+        char_w = max(1, sample_bbox[2] - sample_bbox[0])
+        max_chars = max(6, int(box_w / (char_w * 0.92)))
+        
+        lines = textwrap.wrap(text, width=max_chars)
+        line_h = int(size * 1.15)
+        total_h = len(lines) * line_h
+        
+        fits = True
+        for l in lines:
+            bb = draw.textbbox((0, 0), l, font=font)
+            if (bb[2] - bb[0]) > box_w:
+                fits = False
+                break
+        if fits and total_h <= box_h:
+            return font, lines, size, line_h
+            
+    try:
+        font = ImageFont.truetype(font_path, size=min_font_size)
+    except Exception:
+        font = ImageFont.load_default()
+    lines = textwrap.wrap(text, width=12)
+    return font, lines, min_font_size, int(min_font_size * 1.15)
+
+
 def draw_impact_caption(draw, text: str, width: int, y_start: int, font, is_bottom: bool = False):
     """Draw classic white uppercase meme text with thick black outline centered at y_start."""
     import textwrap
@@ -145,59 +181,7 @@ def generate_code_meme(
         except Exception:
             template_name = random.choice(all_files)
 
-    # ── 2. Precise Visual Zone Coordinate Offsets ───────────────────────
-    COORD_MAP = {
-        "left_exit_12_off_ramp.jpg": (0.18, 0.76),
-        "drake_hotline_bling.jpg": (0.14, 0.65),
-        "drake.jpg": (0.14, 0.65),
-        "drake_blank.jpg": (0.14, 0.65),
-        "two_buttons.jpg": (0.10, 0.75),
-        "change_my_mind.jpg": (0.12, 0.75),
-        "batman_slapping_robin.jpg": (0.08, 0.75),
-        "theyre_the_same_picture.jpg": (0.08, 0.76),
-        "clown_applying_makeup.jpg": (0.08, 0.75),
-        "disaster_girl.jpg": (0.08, 0.75),
-        "a_train_hitting_a_school_bus.jpg": (0.10, 0.75),
-        "expanding_brain.jpg": (0.08, 0.78),
-        "panik_kalm_panik.jpg": (0.10, 0.75),
-        "trade_offer.jpg": (0.10, 0.75),
-        "buff_doge_vs._cheems.jpg": (0.10, 0.75),
-        "running_away_balloon.jpg": (0.10, 0.75),
-        "hide_the_pain_harold.jpg": (0.08, 0.75),
-        "roll_safe_think_about_it.jpg": (0.10, 0.75),
-        "roll_safe.jpg": (0.10, 0.75),
-        "epic_handshake.jpg": (0.10, 0.75),
-        "leonardo_dicaprio_cheers.jpg": (0.08, 0.75),
-        "uno_draw_25_cards.jpg": (0.10, 0.75),
-        "woman_yelling_at_cat.jpg": (0.08, 0.75),
-        "is_this_a_pigeon.jpg": (0.10, 0.75),
-        "is_this_butterfly.jpg": (0.10, 0.75),
-        "spiderman_pointing_at_spiderman.jpg": (0.10, 0.75),
-        "spider_man_triple.jpg": (0.10, 0.75),
-        "grus_plan.jpg": (0.08, 0.78),
-        "cmon_do_something.jpg": (0.10, 0.75),
-        "boardroom_meeting_suggestion.jpg": (0.08, 0.75),
-        "futurama_fry.jpg": (0.10, 0.75),
-        "flex_tape.jpg": (0.10, 0.75),
-        "gus_fring_we_are_not_the_same.jpg": (0.10, 0.75),
-        "distracted_boyfriend.jpg": (0.10, 0.75),
-        "surprised_pikachu.jpg": (0.10, 0.75),
-        "this_is_fine.jpg": (0.08, 0.75),
-        "anakin_padme_4_panel.jpg": (0.08, 0.75),
-        "bernie_sanders_once_again_asking.jpg": (0.10, 0.75),
-        "bernie_i_am_once_again_asking_for_your_support.jpg": (0.10, 0.75),
-        "all_my_homies_hate.jpg": (0.10, 0.75),
-        "types_of_headaches_meme.jpg": (0.08, 0.75),
-        "pawn_stars_best_i_can_do.jpg": (0.10, 0.75),
-        "yall_got_any_more_of_that.jpg": (0.10, 0.75),
-        "you_know,_im_something_of_a_scientist_myself.jpg": (0.08, 0.75),
-        "who_killed_hannibal.jpg": (0.08, 0.75),
-        "bike_fall.jpg": (0.08, 0.75),
-        "mother_ignoring_kid_drowning_in_a_pool.jpg": (0.08, 0.75)
-    }
-    top_y_pct, bottom_y_pct = COORD_MAP.get(template_name, (0.08, 0.76))
-
-    # ── 3. Template-Specific Hilarious Joke Engine ──────────────────────
+    # ── 2. Template-Specific Hilarious Joke Engine ──────────────────────
     TEMPLATE_JOKES = {
         "batman_slapping_robin.jpg": {
             "en": [
@@ -581,6 +565,123 @@ def generate_code_meme(
                 top_text = f"DEV: 'IT RUNS ON LOCALHOST TRUST ME'"
                 bottom_text = f"LINTER: GRADE {grade_str} CATASTROPHE IN PROD"
     
+    # ── 4. Solution 3 Hybrid Template Engine ────────────────────────
+    # Top 20 Iconic Memes with precise bounded zones [x_min, y_min, x_max, y_max] (fractional 0.0-1.0)
+    ICONIC_BOUNDS = {
+        # 1. Woman Yelling at Cat (Left side screaming woman, Right side cat)
+        "woman_yelling_at_cat.jpg": [
+            (0.04, 0.04, 0.47, 0.38),
+            (0.53, 0.04, 0.96, 0.38)
+        ],
+        # 2. Drake Hotline Bling (Top slot, Bottom slot)
+        "drake_hotline_bling.jpg": [
+            (0.50, 0.05, 0.96, 0.45),
+            (0.50, 0.55, 0.96, 0.95)
+        ],
+        "drake.jpg": [
+            (0.50, 0.05, 0.96, 0.45),
+            (0.50, 0.55, 0.96, 0.95)
+        ],
+        "drake_blank.jpg": [
+            (0.50, 0.05, 0.96, 0.45),
+            (0.50, 0.55, 0.96, 0.95)
+        ],
+        # 3. Batman Slapping Robin (Robin top left/center, Batman top right)
+        "batman_slapping_robin.jpg": [
+            (0.04, 0.04, 0.52, 0.32),
+            (0.54, 0.04, 0.96, 0.34)
+        ],
+        # 4. Two Buttons (Top left button, Top right button)
+        "two_buttons.jpg": [
+            (0.10, 0.12, 0.45, 0.28),
+            (0.52, 0.08, 0.85, 0.24)
+        ],
+        # 5. Uno Draw 25 Cards (Challenge on white card, reaction bottom)
+        "uno_draw_25_cards.jpg": [
+            (0.10, 0.42, 0.40, 0.78),
+            (0.50, 0.82, 0.95, 0.97)
+        ],
+        # 6. Distracted Boyfriend (Red dress girl on left, Girlfriend on right)
+        "distracted_boyfriend.jpg": [
+            (0.05, 0.60, 0.38, 0.90),
+            (0.62, 0.60, 0.95, 0.90)
+        ],
+        # 7. Spiderman Pointing at Spiderman (Left Spiderman, Right Spiderman)
+        "spiderman_pointing_at_spiderman.jpg": [
+            (0.08, 0.48, 0.45, 0.78),
+            (0.55, 0.48, 0.92, 0.78)
+        ],
+        # 8. Trade Offer (Left 'I receive', Right 'You receive')
+        "trade_offer.jpg": [
+            (0.10, 0.26, 0.45, 0.45),
+            (0.55, 0.26, 0.90, 0.45)
+        ],
+        # 9. They're The Same Picture (Left picture label, Right picture label)
+        "theyre_the_same_picture.jpg": [
+            (0.12, 0.22, 0.45, 0.40),
+            (0.55, 0.22, 0.88, 0.40)
+        ],
+        # 10. Buff Doge vs. Cheems (Buff Doge left, Cheems crying right)
+        "buff_doge_vs._cheems.jpg": [
+            (0.08, 0.68, 0.45, 0.94),
+            (0.55, 0.68, 0.92, 0.94)
+        ],
+        # 11. Left Exit 12 Off Ramp (Straight sign, Off-ramp sign)
+        "left_exit_12_off_ramp.jpg": [
+            (0.15, 0.12, 0.48, 0.32),
+            (0.52, 0.12, 0.85, 0.32)
+        ],
+        # 12. Panik Kalm Panik (Top panel panik, Bottom panel panik)
+        "panik_kalm_panik.jpg": [
+            (0.45, 0.05, 0.95, 0.30),
+            (0.45, 0.70, 0.95, 0.95)
+        ],
+        # 13. Epic Handshake (Left arm text, Right arm text)
+        "epic_handshake.jpg": [
+            (0.05, 0.35, 0.45, 0.60),
+            (0.55, 0.35, 0.95, 0.60)
+        ],
+        # 14. Is This a Pigeon (Butterfly item, Guy questioning at bottom)
+        "is_this_a_pigeon.jpg": [
+            (0.58, 0.28, 0.92, 0.52),
+            (0.15, 0.82, 0.85, 0.96)
+        ],
+        "is_this_butterfly.jpg": [
+            (0.58, 0.28, 0.92, 0.52),
+            (0.15, 0.82, 0.85, 0.96)
+        ],
+        # 15. Change My Mind (Table sign text, Bottom quote)
+        "change_my_mind.jpg": [
+            (0.28, 0.58, 0.75, 0.84),
+            (0.10, 0.88, 0.90, 0.98)
+        ],
+        # 16. Anakin Padme 4 Panel (Top right Anakin, Bottom right Padme)
+        "anakin_padme_4_panel.jpg": [
+            (0.52, 0.04, 0.96, 0.46),
+            (0.52, 0.54, 0.96, 0.96)
+        ],
+        # 17. Clown Applying Makeup (Top stage, Bottom full clown)
+        "clown_applying_makeup.jpg": [
+            (0.35, 0.04, 0.95, 0.24),
+            (0.35, 0.75, 0.95, 0.96)
+        ],
+        # 18. Expanding Brain (Normal brain slot, Galaxy brain slot)
+        "expanding_brain.jpg": [
+            (0.04, 0.04, 0.48, 0.24),
+            (0.04, 0.75, 0.48, 0.96)
+        ],
+        # 19. A Train Hitting a School Bus (Bus label, Train label)
+        "a_train_hitting_a_school_bus.jpg": [
+            (0.05, 0.65, 0.48, 0.90),
+            (0.52, 0.45, 0.95, 0.75)
+        ],
+        # 20. Flex Tape (Phil Swift tape, Water tank leaking)
+        "flex_tape.jpg": [
+            (0.05, 0.15, 0.55, 0.45),
+            (0.45, 0.65, 0.95, 0.95)
+        ]
+    }
+
     template_path = os.path.join(meme_dir, template_name)
     if template_path and os.path.exists(template_path):
         img = Image.open(template_path).convert("RGB")
@@ -592,27 +693,76 @@ def generate_code_meme(
     h_size = int((float(img.size[1]) * float(w_percent)))
     img = img.resize((target_w, h_size), Image.Resampling.LANCZOS)
     
-    draw = ImageDraw.Draw(img)
-    
     # Load Impact font (bundled or system)
     font_path = os.path.join("assets", "fonts", "impact.ttf")
     if not os.path.exists(font_path) and os.path.exists(r"C:\Windows\Fonts\impact.ttf"):
         font_path = r"C:\Windows\Fonts\impact.ttf"
+
+    # Branch 1: Top 20 Iconic Templates -> Bounded box rendering
+    if template_name in ICONIC_BOUNDS:
+        boxes = ICONIC_BOUNDS[template_name]
+        draw = ImageDraw.Draw(img)
+        texts = [top_text, bottom_text]
         
-    try:
-        font = ImageFont.truetype(font_path, size=36)
-    except Exception:
-        font = ImageFont.load_default()
-        
-    # Render Classic Impact Font Meme Text with exact template visual zone alignment
-    top_y_pos = int(h_size * top_y_pct)
-    bottom_y_pos = int(h_size * bottom_y_pct)
-    
-    draw_impact_caption(draw, top_text, target_w, top_y_pos, font, is_bottom=False)
-    draw_impact_caption(draw, bottom_text, target_w, bottom_y_pos, font, is_bottom=False)
-    
+        for idx in range(min(len(boxes), len(texts))):
+            box = boxes[idx]
+            x1 = int(box[0] * target_w)
+            y1 = int(box[1] * h_size)
+            x2 = int(box[2] * target_w)
+            y2 = int(box[3] * h_size)
+            bw = max(10, x2 - x1)
+            bh = max(10, y2 - y1)
+            
+            font, lines, sz, lh = fit_text_in_box(draw, texts[idx], bw, bh, font_path)
+            tot_h = len(lines) * lh
+            y_curr = y1 + max(0, (bh - tot_h) // 2)
+            
+            for line in lines:
+                bb = draw.textbbox((0, 0), line, font=font)
+                lw = bb[2] - bb[0]
+                lx = x1 + max(0, (bw - lw) // 2)
+                draw.text((lx, y_curr), line, font=font, fill=(255, 255, 255), stroke_width=3, stroke_fill=(0, 0, 0))
+                y_curr += lh
+
+        final_img = img
+
+    # Branch 2: All Other Templates -> Clean Modern Banner Canvas
+    else:
+        banner_font_size = 24
+        try:
+            banner_font = ImageFont.truetype(font_path, size=banner_font_size)
+        except Exception:
+            banner_font = ImageFont.load_default()
+            
+        import textwrap
+        top_lines = textwrap.wrap(top_text.upper(), width=38)
+        bot_lines = textwrap.wrap(bottom_text.upper(), width=38)
+        line_h = int(banner_font_size * 1.3)
+        padding = 16
+        banner_h = padding * 2 + (len(top_lines) + len(bot_lines)) * line_h + 8
+
+        canvas = Image.new("RGB", (target_w, h_size + banner_h), color=(255, 255, 255))
+        draw = ImageDraw.Draw(canvas)
+
+        cur_y = padding
+        for l in top_lines:
+            bb = draw.textbbox((0, 0), l, font=banner_font)
+            lw = bb[2] - bb[0]
+            draw.text(((target_w - lw) // 2, cur_y), l, font=banner_font, fill=(15, 23, 42))
+            cur_y += line_h
+
+        cur_y += 6
+        for l in bot_lines:
+            bb = draw.textbbox((0, 0), l, font=banner_font)
+            lw = bb[2] - bb[0]
+            draw.text(((target_w - lw) // 2, cur_y), l, font=banner_font, fill=(220, 38, 38))
+            cur_y += line_h
+
+        canvas.paste(img, (0, banner_h))
+        final_img = canvas
+
     buf = io.BytesIO()
-    img.save(buf, format="PNG")
+    final_img.save(buf, format="PNG")
     return buf.getvalue()
 
 
